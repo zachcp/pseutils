@@ -117,7 +117,7 @@ struct SessionName {
 #[serde(untagged)]
 enum PymolSessionObjectData {
     Molecue(PyObjectMolecule),
-    Selection(SessionSelector),
+    // Selection(SessionSelector),
     // MolVariant(PyObjectMolecule),
     // SessionVariant(SessionSelector),
 }
