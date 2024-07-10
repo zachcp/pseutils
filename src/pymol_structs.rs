@@ -31,7 +31,6 @@
 // - Selection
 //
 use serde::{Deserialize, Serialize};
-use serde_path_to_error;
 use serde_pickle::{
     de::{from_reader, DeOptions},
     Value,
@@ -40,8 +39,9 @@ use std::io::Read;
 use std::{collections::HashMap, fs::File};
 
 #[derive(Debug, Deserialize, Serialize)]
-struct PSEData {
-    version: i32,
+
+pub struct PSEData {
+    pub version: i32,
     main: Vec<i64>,
     colors: Vec<i32>,
     color_ext: Vec<i32>,
@@ -69,6 +69,21 @@ struct PSEData {
     cache: Vec<usize>,
     // name is the trickiest bit
     names: Vec<Option<SessionName>>,
+}
+
+impl PSEData {
+    pub fn load(file_path: &str) -> Result<Self, Box<dyn std::error::Error>> {
+        let mut file = File::open(file_path)?;
+        let mut buffer = Vec::new();
+        file.read_to_end(&mut buffer)?;
+
+        let options = DeOptions::new()
+            .replace_unresolved_globals()
+            .decode_strings();
+
+        let pse_data: PSEData = from_reader(&buffer[..], options)?;
+        Ok(pse_data)
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -231,17 +246,6 @@ struct PyObjectMolecule {
     dcs: Option<Vec<i32>>,
 }
 
-struct PyObjectDist {}
-struct PyObjectMap {}
-struct PyObjectMesh {}
-struct PyObjectSurface {}
-struct PyObjectCGO {}
-struct PyObjectAlignment {}
-struct PyObjectGroup {}
-struct PyObjectVolume {}
-struct PyObjectCallback {}
-struct PyObjectCurve {}
-
 #[derive(Debug, Deserialize, Serialize)]
 struct SessionSelector {
     name: String,
@@ -268,3 +272,15 @@ struct SessionName {
     data: PyObjectMolecule,
     group: String,
 }
+
+// Todo:
+// struct PyObjectDist {}
+// struct PyObjectMap {}
+// struct PyObjectMesh {}
+// struct PyObjectSurface {}
+// struct PyObjectCGO {}
+// struct PyObjectAlignment {}
+// struct PyObjectGroup {}
+// struct PyObjectVolume {}
+// struct PyObjectCallback {}
+// struct PyObjectCurve {}
