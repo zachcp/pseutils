@@ -11,28 +11,30 @@
 //!
 //!
 //! /// PyObject Serialization
-///
-/// https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/PyMOLObject.cpp#L681
-///
-// - Object:
-//     - Gadget
-//     - Molecule
-//     - Dist
-//     - Map
-//     - Mesh
-//     - Slice
-//     - Surface
-//     - CGO
-//     - Alignment
-//     - Group
-//     - Volume
-//     - Callback
-//     - Curve
-// - Selection
-//
-use serde::{Deserialize, Serialize};
+//!  https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/PyMOLObject.cpp#L681
+//!
+//! // - Object:
+//!      - Gadget
+//!      - Molecule
+//!      - Dist
+//!      - Map
+//!      - Mesh
+//!      - Slice
+//!      - Surface
+//!      - CGO
+//!      - Alignment
+//!      - Group
+//!      - Volume
+//!      - Callback
+//!      - Curve
+//!  - Selection
+//!
+use serde::de::{self, SeqAccess, Visitor};
+use serde::{Deserialize, Deserializer, Serialize};
 use serde_pickle::de::{from_reader, DeOptions};
-use std::io::Read;
+use serde_pickle::Value;
+use std::fmt;
+use std::io::{self, Read};
 use std::{collections::HashMap, fs::File};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -106,20 +108,67 @@ struct SessionName {
     // Vec1: Index Object ( from VLA list )
     // Vec2: Tag Object ( from VLA list )
     // selector: Vec<(String, Vec<i32>, Vec<i32>)>, // this is there the selection bits are
-    // data: PymolSessionObjectData,
-    data: PyObjectMolecule,
+    data: PymolSessionObjectData,
+    // data: PyObjectMolecule,
     group: String,
 }
 
-///
-
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Serialize)]
 #[serde(untagged)]
 enum PymolSessionObjectData {
-    Molecue(PyObjectMolecule),
-    // Selection(SessionSelector),
+    PyObjectMolecule(PyObjectMolecule),
+    SessionSelector(SessionSelector),
     // MolVariant(PyObjectMolecule),
     // SessionVariant(SessionSelector),
+}
+
+// Custom Deserializer needed to handle the tricky bits
+impl<'de> Deserialize<'de> for PymolSessionObjectData {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct PymolSessionObjectDataVisitor;
+
+        impl<'de> Visitor<'de> for PymolSessionObjectDataVisitor {
+            type Value = PymolSessionObjectData;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a PyObjectMolecule or SessionSelector")
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                let value: Value = seq
+                    .next_element()?
+                    .ok_or_else(|| de::Error::invalid_length(0, &self))?;
+
+                match value {
+                    Value::List(list) => {
+                        if list.len() > 0 && matches!(list[0], Value::String(_)) {
+                            // Assume it's a SessionSelector if the first element is a string
+                            let selector: SessionSelector =
+                                serde_pickle::from_value(Value::List(list))
+                                    .map_err(de::Error::custom)?;
+                            Ok(PymolSessionObjectData::SessionSelector(selector))
+                        } else {
+                            // Otherwise, assume it's a PyObjectMolecule
+                            let molecule: PyObjectMolecule =
+                                serde_pickle::from_value(Value::List(list))
+                                    .map_err(de::Error::custom)?;
+                            Ok(PymolSessionObjectData::PyObjectMolecule(molecule))
+                        }
+                    }
+                    _ => Err(de::Error::custom(
+                        "Expected a list for PymolSessionObjectData",
+                    )),
+                }
+            }
+        }
+        deserializer.deserialize_seq(PymolSessionObjectDataVisitor)
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
