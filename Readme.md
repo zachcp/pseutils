@@ -2,6 +2,13 @@
 
 **WIP: Currently not working**
 
+## Testing
+
+```sh
+cargo test
+```
+
+
 ## Goal
 
 Binary serializaton from `.pse` to `X` using RUST. Where I want `X` to be [mol-view-spec](https://github.com/molstar/mol-view-spec)

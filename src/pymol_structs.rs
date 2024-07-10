@@ -77,7 +77,11 @@ impl PSEData {
             .replace_unresolved_globals()
             .decode_strings();
 
-        let pse_data: PSEData = from_reader(&buffer[..], options)?;
+        // https://github.com/birkenfeld/serde-pickle/issues/12#issuecomment-771974607
+        // let v: serde_pickle::Value = serde_pickle::from_reader(file).unwrap();
+        // let d: Message = serde_pickle::from_value(v).unwrap();
+        let pse_data_vals: serde_pickle::Value = from_reader(&buffer[..], options).unwrap();
+        let pse_data: PSEData = serde_pickle::from_value(pse_data_vals).unwrap();
         Ok(pse_data)
     }
 
@@ -89,29 +93,12 @@ impl PSEData {
 }
 
 ///
-#[derive(Debug, Deserialize, Serialize)]
-struct SessionName {
-    name: String,
-    object: i32,
-    visible: i32,
-    unused: Option<bool>,
-    unused2: i32,
-    // SelectorAsPyList
-    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer3/Selector.cpp#L2926
-    // list of lists
-    // String: Name of the Object
-    // Vec1: Index Object ( from VLA list )
-    // Vec2: Tag Object ( from VLA list )
-    // selector: Vec<(String, Vec<i32>, Vec<i32>)>, // this is there the selection bits are
-    // data: Option<PymolSessionObjectData>,
-    data: PyObjectMolecule,
-    group: String,
-}
 
 #[derive(Debug, Deserialize, Serialize)]
+#[serde(untagged)]
 enum PymolSessionObjectData {
-    PyObjectMolecule(PyObjectMolecule),
-    // SessionSelector,
+    Molecue(PyObjectMolecule),
+    Selection(SessionSelector),
     // MolVariant(PyObjectMolecule),
     // SessionVariant(SessionSelector),
 }
