@@ -36,7 +36,6 @@ use std::io::Read;
 use std::{collections::HashMap, fs::File};
 
 #[derive(Debug, Deserialize, Serialize)]
-
 pub struct PSEData {
     pub version: i32,
     main: Vec<i64>,
@@ -81,6 +80,12 @@ impl PSEData {
         let pse_data: PSEData = from_reader(&buffer[..], options)?;
         Ok(pse_data)
     }
+
+    pub fn to_json(&self, file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let json = serde_json::to_string_pretty(self)?;
+        std::fs::write(file_path, json)?;
+        Ok(())
+    }
 }
 
 ///
@@ -98,9 +103,17 @@ struct SessionName {
     // Vec1: Index Object ( from VLA list )
     // Vec2: Tag Object ( from VLA list )
     // selector: Vec<(String, Vec<i32>, Vec<i32>)>, // this is there the selection bits are
-    // data: PymolSessionObjectData,
+    // data: Option<PymolSessionObjectData>,
     data: PyObjectMolecule,
     group: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+enum PymolSessionObjectData {
+    PyObjectMolecule(PyObjectMolecule),
+    // SessionSelector,
+    // MolVariant(PyObjectMolecule),
+    // SessionVariant(SessionSelector),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -111,14 +124,6 @@ enum CustomValue {
     String(String),
     Boolean(bool),
     // Add more variants if needed, e.g., None for Python's None
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-// #[serde(tag = "type")]
-#[serde(untagged)]
-enum PymolSessionObjectData {
-    PyObjectMolecule,
-    SessionSelector,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
