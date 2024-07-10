@@ -106,8 +106,8 @@ struct SessionName {
     // Vec1: Index Object ( from VLA list )
     // Vec2: Tag Object ( from VLA list )
     // selector: Vec<(String, Vec<i32>, Vec<i32>)>, // this is there the selection bits are
-    data: PymolSessionObjectData,
-    // data: PyObjectMolecule,
+    // data: PymolSessionObjectData,
+    data: PyObjectMolecule,
     group: String,
 }
 
