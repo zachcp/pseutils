@@ -1,5 +1,6 @@
+use chrono::{DateTime, Local, Utc};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap, default};
 
 #[derive(PartialEq, Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "snake_case")]
@@ -61,7 +62,7 @@ pub enum DescriptionFormatT {
     Plaintext,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Metadata {
     pub version: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -77,6 +78,31 @@ pub struct Metadata {
 pub struct State {
     pub root: Node,
     pub metadata: Metadata,
+}
+impl State {
+    fn new(name: String, age: u32) -> Self {
+        State {
+            root: Node {
+                kind: KindT::Root,
+                ..Default::default()
+            },
+            metadata: Metadata {
+                version: "1.0".to_string(), // todo: update this
+                timestamp: Local::now().to_string(),
+                ..Default::default()
+            },
+            // pub struct Metadata {
+            //     pub version: String,
+            //     #[serde(skip_serializing_if = "Option::is_none")]
+            //     pub title: Option<String>,
+            //     #[serde(skip_serializing_if = "Option::is_none")]
+            //     pub description: Option<String>,
+            //     #[serde(skip_serializing_if = "Option::is_none")]
+            //     pub description_format: Option<DescriptionFormatT>,
+            //     pub timestamp: String,
+            // }
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]

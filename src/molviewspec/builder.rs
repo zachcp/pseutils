@@ -11,8 +11,7 @@ use std::io::Write;
 pub fn create_builder() -> Node {
     return Node {
         kind: KindT::Root,
-        ..Default::default() // params: None(),
-                             // children: None()
+        ..Default::default()
     };
 }
 
