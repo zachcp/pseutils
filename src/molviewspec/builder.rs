@@ -1,18 +1,15 @@
 // Use this builder to navigate the creating of MolViewSpec files. Chain operations together as needed and invoke
 //`get_state` or `save_state` to export the corresponding JSON needed to recreate that scene.
 
-use crate::molviewspec::nodes::{DescriptionFormatT, KindT, Node};
+use crate::molviewspec::nodes::{DescriptionFormatT, KindT, Node, State};
 use chrono::{DateTime, Utc};
 use serde_json;
 use std::cell::RefCell;
 use std::fs::File;
 use std::io::Write;
 
-pub fn create_builder() -> Node {
-    return Node {
-        kind: KindT::Root,
-        ..Default::default()
-    };
+pub fn create_builder() -> State {
+    return State::new();
 }
 
 // struct Base {

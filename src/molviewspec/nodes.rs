@@ -1,4 +1,4 @@
-use chrono::{DateTime, Local, Utc};
+use chrono::Local;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, default};
 
@@ -40,13 +40,7 @@ pub struct Node {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub children: Option<Vec<Node>>,
 }
-
 impl Node {
-    // // Method to change the name
-    // fn add_child(&mut self, new_name: String) {
-    //     self.name = new_name;
-    // }
-
     pub fn add_child(&mut self, node: Node) {
         match &mut self.children {
             Some(children) => children.push(node),
@@ -80,7 +74,7 @@ pub struct State {
     pub metadata: Metadata,
 }
 impl State {
-    fn new(name: String, age: u32) -> Self {
+    pub fn new() -> Self {
         State {
             root: Node {
                 kind: KindT::Root,
@@ -91,16 +85,6 @@ impl State {
                 timestamp: Local::now().to_string(),
                 ..Default::default()
             },
-            // pub struct Metadata {
-            //     pub version: String,
-            //     #[serde(skip_serializing_if = "Option::is_none")]
-            //     pub title: Option<String>,
-            //     #[serde(skip_serializing_if = "Option::is_none")]
-            //     pub description: Option<String>,
-            //     #[serde(skip_serializing_if = "Option::is_none")]
-            //     pub description_format: Option<DescriptionFormatT>,
-            //     pub timestamp: String,
-            // }
         }
     }
 }
