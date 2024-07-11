@@ -1,14 +1,7 @@
-//! This module provides data structures and utilities for working with PyMOL session files (PSE).
+//! PSEData is a struct for loading and serializing pymol PSE data.
 //!
-//! It includes definitions for various PyMOL objects, such as molecules, selectors, and other
-//! session-related data. The main structure, `PSEData`, represents the overall content of a
-//! PSE file, while other structures like `PyObjectMolecule`, `CoordSet`, `AtomInfo`, and `Bond`
-//! represent specific components within the session.
-//!
-//! This module is designed to facilitate the deserialization of PSE files using the serde and
-//! serde_pickle libraries, allowing for easy parsing and manipulation of PyMOL session data
-//! in Rust applications.
-//!
+//! Currently the parsers are working for small test cases of molecules and selections. Additional parser structs would be required for
+//! other PSE data types which include the folloing:
 //!
 //! /// PyObject Serialization
 //!  https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/PyMOLObject.cpp#L681
@@ -29,7 +22,6 @@
 //!      - Curve
 //!  - Selection
 //!
-
 use crate::pymolparsing::parsing::{CustomValue, SessionName};
 use serde::{Deserialize, Serialize};
 use serde_pickle::de::{from_reader, DeOptions};

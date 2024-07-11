@@ -1,8 +1,5 @@
 use serde::{Deserialize, Deserializer, Serialize};
-use serde_pickle::de::{from_reader, DeOptions};
 use serde_pickle::{from_value, Value};
-use std::io::Read;
-use std::{collections::HashMap, fs::File};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SessionName {

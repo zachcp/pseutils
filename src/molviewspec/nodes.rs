@@ -127,7 +127,7 @@ enum ComponentSelectorT {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct ComponentExpression {
+pub struct ComponentExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
     label_entity_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -519,9 +519,4 @@ struct LineParams {
     label: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tooltip: Option<String>,
-}
-
-fn validate_state_tree(json: &str) -> Result<(), serde_json::Error> {
-    serde_json::from_str::<State>(json)?;
-    Ok(())
 }
