@@ -47,15 +47,15 @@ enum DescriptionFormatT {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Metadata {
-    version: String,
+pub struct Metadata {
+    pub version: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    title: Option<String>,
+    pub title: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    description: Option<String>,
+    pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    description_format: Option<DescriptionFormatT>,
-    timestamp: String,
+    pub description_format: Option<DescriptionFormatT>,
+    pub timestamp: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
