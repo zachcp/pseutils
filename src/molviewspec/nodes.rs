@@ -1,8 +1,8 @@
-use chrono::Local;
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, default};
 
-#[derive(PartialEq, Serialize, Deserialize, Debug, Default)]
+#[derive(PartialEq, Serialize, Deserialize, Debug, Default, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum KindT {
     #[default]
@@ -32,7 +32,7 @@ pub enum KindT {
     Transform,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct Node {
     pub kind: KindT,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -82,17 +82,45 @@ impl State {
             },
             metadata: Metadata {
                 version: "1.0".to_string(), // todo: update this
-                timestamp: Local::now().to_string(),
+                timestamp: Utc::now().to_rfc3339().to_string(),
                 ..Default::default()
             },
         }
     }
+    pub fn download(&mut self, url: String) -> Node {
+        // let params = HashMap::new().insert( ("url".to_string(), serde_json::Value::String(url)));
+
+        let params = Some(HashMap::from([(
+            "url".to_string(),
+            serde_json::Value::String(url),
+        )]));
+
+        let download = Node {
+            kind: KindT::Download,
+            params: params,
+            ..Default::default()
+        };
+
+        self.root.add_child(download.clone());
+        return download;
+    }
+
+    // def download(self, *, url: str) -> Download:
+    //      """
+    //      Add a new structure to the builder by downloading structure data from a URL.
+    //      :param url: source of structure data
+    //      :return: a builder that handles operations on the downloaded resource
+    //      """
+    //      params = make_params(DownloadParams, locals())
+    //      node = Node(kind="download", params=params)
+    //      self._add_child(node)
+    //      return Download(node=node, root=self._root)
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct DownloadParams {
-    url: String,
-}
+// #[derive(Serialize, Deserialize, Debug)]
+// pub struct DownloadParams {
+//     url: String,
+// }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]

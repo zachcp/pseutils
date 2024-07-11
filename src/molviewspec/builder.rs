@@ -4,9 +4,6 @@
 use crate::molviewspec::nodes::{DescriptionFormatT, KindT, Node, State};
 use chrono::{DateTime, Utc};
 use serde_json;
-use std::cell::RefCell;
-use std::fs::File;
-use std::io::Write;
 
 pub fn create_builder() -> State {
     return State::new();
@@ -33,107 +30,51 @@ pub fn create_builder() -> State {
 //     }
 // }
 
-pub struct Root {
-    node: Node,
-}
-
-impl Root {
-    // pub fn new() -> Self {
-    //     Self {
-    //         node: Node{
-    //             kind: KindT::Root,
-    //             children: null,
-    //             params: null}
-    //         }
-    //     }
-
-    // Emits JSON representation of the current state. Can be enriched with metadata.
-    // pub fn get_state(
-    //     &self,
-    //     title: Option<String>,
-    //     description: Option<String>,
-    //     description_format: Option<DescriptionFormatT>,
-    //     indent: Option<usize>,
-    // ) -> String {
-    //     let metadata = Metadata {
-    //         version: get_major_version_tag(),
-    //         timestamp: Utc::now().to_rfc3339(),
-    //         title,
-    //         description,
-    //         description_format,
-    //     };
-
-    //     let state = State {
-    //         root: &self.node,
-    //         metadata,
-    //     };
-
-    //     serde_json::to_string_pretty(&state).unwrap()
-    // }
-
-    // // Saves the JSON representation of the current state to a file. Can be enriched with metadata.
-    // pub fn save_state(
-    //     &self,
-    //     destination: &Path,
-    //     indent: Option<usize>,
-    //     title: Option<String>,
-    //     description: Option<String>,
-    //     description_format: Option<DescriptionFormatT>,
-    // ) -> std::io::Result<()> {
-    //     let state = self.get_state(title, description, description_format, indent);
-    //     let mut file = File::create(destination)?;
-    //     file.write_all(state.as_bytes())?;
-    //     Ok(())
-    // }
-
-    // // Manually position the camera.
-    // pub fn camera(
-    //     &mut self,
-    //     target: (f32, f32, f32),
-    //     position: (f32, f32, f32),
-    //     up: Option<(f32, f32, f32)>,
-    // ) -> &mut Self {
-    //     let params = CameraParams {
-    //         target,
-    //         position,
-    //         up: up.unwrap_or((0.0, 1.0, 0.0)),
-    //     };
-    //     let node = Node::new_with_params("camera", params);
-    //     self.add_child(node);
-    //     self
-    // }
-
-    // // Customize canvas properties such as background color.
-    // pub fn canvas(&mut self, background_color: Option<ColorT>) -> &mut Self {
-    //     let params = CanvasParams { background_color };
-    //     let node = Node::new_with_params("canvas", params);
-    //     self.add_child(node);
-    //     self
-    // }
-
-    // // Add a new structure to the builder by downloading structure data from a URL.
-    // pub fn download(&mut self, url: String) -> Download {
-    //     let params = DownloadParams { url };
-    //     let node = Node::new_with_params("download", params);
-    //     self.add_child(node.clone());
-    //     Download::new(node, self)
-    // }
-
-    // /// Experimental: Allows the definition of generic visuals such as spheres and lines.
-    // pub fn generic_visuals(&mut self) -> GenericVisuals {
-    //     let node = Node::new("generic_visuals");
-    //     self.add_child(node.clone());
-    //     GenericVisuals::new(node, self)
-    // }
-
-    // fn add_child(&mut self, node: Node) {
-    //     self.node.add_child(node);
-    // }
-}
-
-// pub struct Download {
-//     base: Base,
+// // Manually position the camera.
+// pub fn camera(
+//     &mut self,
+//     target: (f32, f32, f32),
+//     position: (f32, f32, f32),
+//     up: Option<(f32, f32, f32)>,
+// ) -> &mut Self {
+//     let params = CameraParams {
+//         target,
+//         position,
+//         up: up.unwrap_or((0.0, 1.0, 0.0)),
+//     };
+//     let node = Node::new_with_params("camera", params);
+//     self.add_child(node);
+//     self
 // }
+
+// // Customize canvas properties such as background color.
+// pub fn canvas(&mut self, background_color: Option<ColorT>) -> &mut Self {
+//     let params = CanvasParams { background_color };
+//     let node = Node::new_with_params("canvas", params);
+//     self.add_child(node);
+//     self
+// }
+
+// // Add a new structure to the builder by downloading structure data from a URL.
+// pub fn download(&mut self, url: String) -> Download {
+//     let params = DownloadParams { url };
+//     let node = Node::new_with_params("download", params);
+//     self.add_child(node.clone());
+//     Download::new(node, self)
+// }
+
+// /// Experimental: Allows the definition of generic visuals such as spheres and lines.
+// pub fn generic_visuals(&mut self) -> GenericVisuals {
+//     let node = Node::new("generic_visuals");
+//     self.add_child(node.clone());
+//     GenericVisuals::new(node, self)
+// }
+
+// fn add_child(&mut self, node: Node) {
+//     self.node.add_child(node);
+// }
+// }
+//
 // impl Download {
 //     /// Builder step with operations needed after downloading structure data.
 //     pub fn new(node: Node, root: Rc<RefCell<Root>>) -> Self {
@@ -149,10 +90,6 @@ impl Root {
 //         self.base.add_child(node.clone());
 //         Parse::new(node, self.base.root.clone())
 //     }
-// }
-
-// pub struct Parse {
-//     base: Base,
 // }
 
 // impl Parse {
