@@ -59,7 +59,7 @@ struct Metadata {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct State {
+pub struct State {
     root: Node,
     metadata: Metadata,
 }
@@ -129,37 +129,37 @@ enum ComponentSelectorT {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ComponentExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
-    label_entity_id: Option<String>,
+    pub label_entity_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    label_asym_id: Option<String>,
+    pub label_asym_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    auth_asym_id: Option<String>,
+    pub auth_asym_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    label_seq_id: Option<i32>,
+    pub label_seq_id: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    auth_seq_id: Option<i32>,
+    pub auth_seq_id: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pdbx_pdb_ins_code: Option<String>,
+    pub pdbx_pdb_ins_code: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    beg_label_seq_id: Option<i32>,
+    pub beg_label_seq_id: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    end_label_seq_id: Option<i32>,
+    pub end_label_seq_id: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    beg_auth_seq_id: Option<i32>,
+    pub beg_auth_seq_id: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    end_auth_seq_id: Option<i32>,
+    pub end_auth_seq_id: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    residue_index: Option<i32>,
+    pub residue_index: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    label_atom_id: Option<String>,
+    pub label_atom_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    auth_atom_id: Option<String>,
+    pub auth_atom_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    type_symbol: Option<String>,
+    pub type_symbol: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    atom_id: Option<i32>,
+    pub atom_id: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    atom_index: Option<i32>,
+    pub atom_index: Option<i32>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
