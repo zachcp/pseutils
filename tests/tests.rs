@@ -1,3 +1,4 @@
+use pymol_session_utils::molviewspec::builder::create_builder;
 use pymol_session_utils::molviewspec::nodes::{ComponentExpression, KindT, Metadata, Node, State};
 use pymol_session_utils::psedata::PSEData;
 use serde_json::from_reader;
@@ -125,7 +126,7 @@ fn test_molspecview_json_full_examples_annotations() {
 fn test_molspecview_json_full_examples_basic() {
     let file = File::open("tests/mol-spec-examples/basic/state.mvsj").expect("Failed to open file");
     let reader = BufReader::new(file);
-    let msvj: State = from_reader(reader).expect("Failed to parse JSON as ComponentExpression");
+    let msvj: State = from_reader(reader).expect("Failed to parse JSON as an MVSJ State Object");
 
     // test metadata
     assert_eq!(msvj.metadata.version, "0.1");
@@ -146,4 +147,21 @@ fn test_molspecview_json_full_examples_basic() {
             serde_json::Value::String("https://files.wwpdb.org/download/1cbs.cif".to_string())
         )])),
     );
+}
+
+#[test]
+fn test_builder() {
+    let builder = create_builder();
+
+    // builder = create_builder()
+    // structure = (builder
+    //     .download(url="https://www.ebi.ac.uk/pdbe/entry-files/download/1cbs_updated.cif")
+    //     .parse(format="mmcif")
+    //     .model_structure()
+    //     .component()
+    //     .representation()
+    //     .color(color="blue")
+    // )
+
+    // return builder.get_state()
 }

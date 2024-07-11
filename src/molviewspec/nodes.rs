@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(PartialEq, Serialize, Deserialize, Debug)]
+#[derive(PartialEq, Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "snake_case")]
 pub enum KindT {
+    #[default]
     Root,
     Camera,
     Canvas,
@@ -30,7 +31,7 @@ pub enum KindT {
     Transform,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Node {
     pub kind: KindT,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -39,9 +40,23 @@ pub struct Node {
     pub children: Option<Vec<Node>>,
 }
 
+impl Node {
+    // // Method to change the name
+    // fn add_child(&mut self, new_name: String) {
+    //     self.name = new_name;
+    // }
+
+    pub fn add_child(&mut self, node: Node) {
+        match &mut self.children {
+            Some(children) => children.push(node),
+            None => self.children = Some(vec![node]),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
-enum DescriptionFormatT {
+pub enum DescriptionFormatT {
     Markdown,
     Plaintext,
 }
@@ -65,26 +80,26 @@ pub struct State {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct DownloadParams {
+pub struct DownloadParams {
     url: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
-enum ParseFormatT {
+pub enum ParseFormatT {
     Mmcif,
     Bcif,
     Pdb,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct ParseParams {
+pub struct ParseParams {
     format: ParseFormatT,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
-enum StructureTypeT {
+pub enum StructureTypeT {
     Model,
     Assembly,
     Symmetry,
@@ -92,7 +107,7 @@ enum StructureTypeT {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct StructureParams {
+pub struct StructureParams {
     #[serde(rename = "type")]
     structure_type: StructureTypeT,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -115,7 +130,7 @@ struct StructureParams {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
-enum ComponentSelectorT {
+pub enum ComponentSelectorT {
     All,
     Polymer,
     Protein,
@@ -164,7 +179,7 @@ pub struct ComponentExpression {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
-enum RepresentationTypeT {
+pub enum RepresentationTypeT {
     BallAndStick,
     Cartoon,
     Surface,
@@ -172,7 +187,7 @@ enum RepresentationTypeT {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
-enum ColorNamesT {
+pub enum ColorNamesT {
     Aliceblue,
     Antiquewhite,
     Aqua,
@@ -324,20 +339,20 @@ enum ColorNamesT {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(untagged)]
-enum ColorT {
+pub enum ColorT {
     Named(ColorNamesT),
     Hex(String),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct RepresentationParams {
+pub struct RepresentationParams {
     #[serde(rename = "type")]
     representation_type: RepresentationTypeT,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
-enum SchemaT {
+pub enum SchemaT {
     WholeStructure,
     Entity,
     Chain,
@@ -353,14 +368,14 @@ enum SchemaT {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
-enum SchemaFormatT {
+pub enum SchemaFormatT {
     Cif,
     Bcif,
     Json,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct DataFromUriParams {
+pub struct DataFromUriParams {
     uri: String,
     format: SchemaFormatT,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -376,7 +391,7 @@ struct DataFromUriParams {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct DataFromSourceParams {
+pub struct DataFromSourceParams {
     category_name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     field_name: Option<String>,
@@ -389,20 +404,20 @@ struct DataFromSourceParams {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct ComponentInlineParams {
+pub struct ComponentInlineParams {
     selector: ComponentSelector,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(untagged)]
-enum ComponentSelector {
+pub enum ComponentSelector {
     Selector(ComponentSelectorT),
     Expression(ComponentExpression),
     ExpressionList(Vec<ComponentExpression>),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct ComponentFromUriParams {
+pub struct ComponentFromUriParams {
     #[serde(flatten)]
     base: DataFromUriParams,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -410,7 +425,7 @@ struct ComponentFromUriParams {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct ComponentFromSourceParams {
+pub struct ComponentFromSourceParams {
     #[serde(flatten)]
     base: DataFromSourceParams,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -418,60 +433,60 @@ struct ComponentFromSourceParams {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct ColorInlineParams {
+pub struct ColorInlineParams {
     #[serde(flatten)]
     base: ComponentInlineParams,
     color: ColorT,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct ColorFromUriParams {
+pub struct ColorFromUriParams {
     #[serde(flatten)]
     base: DataFromUriParams,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct ColorFromSourceParams {
+pub struct ColorFromSourceParams {
     #[serde(flatten)]
     base: DataFromSourceParams,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct LabelInlineParams {
+pub struct LabelInlineParams {
     text: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct LabelFromUriParams {
+pub struct LabelFromUriParams {
     #[serde(flatten)]
     base: DataFromUriParams,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct LabelFromSourceParams {
+pub struct LabelFromSourceParams {
     #[serde(flatten)]
     base: DataFromSourceParams,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct TooltipInlineParams {
+pub struct TooltipInlineParams {
     text: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct TooltipFromUriParams {
+pub struct TooltipFromUriParams {
     #[serde(flatten)]
     base: DataFromUriParams,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct TooltipFromSourceParams {
+pub struct TooltipFromSourceParams {
     #[serde(flatten)]
     base: DataFromSourceParams,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct FocusInlineParams {
+pub struct FocusInlineParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     direction: Option<(f32, f32, f32)>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -479,7 +494,7 @@ struct FocusInlineParams {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct TransformParams {
+pub struct TransformParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     rotation: Option<Vec<f32>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -487,19 +502,19 @@ struct TransformParams {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct CameraParams {
+pub struct CameraParams {
     target: (f32, f32, f32),
     position: (f32, f32, f32),
     up: (f32, f32, f32),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct CanvasParams {
+pub struct CanvasParams {
     background_color: ColorT,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct SphereParams {
+pub struct SphereParams {
     position: (f32, f32, f32),
     radius: f32,
     color: ColorT,
@@ -510,7 +525,7 @@ struct SphereParams {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct LineParams {
+pub struct LineParams {
     position1: (f32, f32, f32),
     position2: (f32, f32, f32),
     radius: f32,
