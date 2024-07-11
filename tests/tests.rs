@@ -1,4 +1,4 @@
-use pymol_session_utils::PSEData;
+use pymol_session_utils::psedata::PSEData;
 
 #[test]
 fn test_load_pse_data_molecule_only() {
