@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(PartialEq, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
-enum KindT {
+pub enum KindT {
     Root,
     Camera,
     Canvas,
@@ -31,12 +31,12 @@ enum KindT {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Node {
-    kind: KindT,
+pub struct Node {
+    pub kind: KindT,
     #[serde(skip_serializing_if = "Option::is_none")]
-    params: Option<HashMap<String, serde_json::Value>>,
+    pub params: Option<HashMap<String, serde_json::Value>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    children: Option<Vec<Node>>,
+    pub children: Option<Vec<Node>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -60,8 +60,8 @@ struct Metadata {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct State {
-    root: Node,
-    metadata: Metadata,
+    pub root: Node,
+    pub metadata: Metadata,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

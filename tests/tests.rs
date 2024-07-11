@@ -1,4 +1,4 @@
-use pymol_session_utils::molviewspec::nodes::{ComponentExpression, State};
+use pymol_session_utils::molviewspec::nodes::{ComponentExpression, KindT, State};
 use pymol_session_utils::psedata::PSEData;
 use serde_json::from_reader;
 use std::fs::File;
@@ -93,7 +93,7 @@ fn test_molspecview_json_full_examples_annotations() {
     let reader = BufReader::new(file);
     let msvj: State = from_reader(reader).expect("Failed to parse JSON as ComponentExpression");
 
-    // assert_eq!(testvec[0].atom_index?, 0);
+    assert_eq!(msvj.root.kind, KindT::Root);
     // // Todo : Fix color type on Component Expression
     // assert_eq!(testvec[0].color, "#ffdd88");
     // // Todo : Fix tooltip type on Component Expression
