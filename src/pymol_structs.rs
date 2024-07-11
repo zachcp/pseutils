@@ -51,7 +51,6 @@ pub struct PSEData {
     wizard: Vec<u8>,
     moviescenes: Vec<Vec<i32>>,
     settings: Vec<(i32, i32, CustomValue)>,
-    // movie: (i32, i32, Vec<f32>, i32, None, None, None),
     movie: (
         i32,
         i32,
@@ -78,9 +77,6 @@ impl PSEData {
             .replace_unresolved_globals()
             .decode_strings();
 
-        // https://github.com/birkenfeld/serde-pickle/issues/12#issuecomment-771974607
-        // let v: serde_pickle::Value = serde_pickle::from_reader(file).unwrap();
-        // let d: Message = serde_pickle::from_value(v).unwrap();
         let pse_data_vals: serde_pickle::Value = from_reader(&buffer[..], options).unwrap();
         let pse_data: PSEData = serde_pickle::from_value(pse_data_vals).unwrap();
         Ok(pse_data)
@@ -116,7 +112,7 @@ struct SessionName {
 #[serde(untagged)]
 enum PymolSessionObjectData {
     PyObjectMolecule(PyObjectMolecule),
-    SessionSelector(SessionSelector),
+    SessionSelectorList(SessionSelectorList),
     // MolVariant(PyObjectMolecule),
     // SessionVariant(SessionSelector),
 }
@@ -129,7 +125,7 @@ impl<'de> Deserialize<'de> for PymolSessionObjectData {
         let value = Value::deserialize(deserializer)?;
 
         // Debug print
-        println!("Deserialized value: {:?}", value);
+        // println!("Deserialized value: {:?}", value);
 
         // Try to deserialize as PyObjectMolecule
         match from_value::<PyObjectMolecule>(value.clone()) {
@@ -137,9 +133,14 @@ impl<'de> Deserialize<'de> for PymolSessionObjectData {
             Err(_) => {} // If it fails, we'll try the next option
         }
 
+        println!(
+            "Did not serialize as a molecule. Not trying as a session: {:?}",
+            value
+        );
+
         // If that fails, try to deserialize as SessionSelector
-        match from_value::<SessionSelector>(value.clone()) {
-            Ok(selection) => return Ok(PymolSessionObjectData::SessionSelector(selection)),
+        match from_value::<SessionSelectorList>(value.clone()) {
+            Ok(selection) => return Ok(PymolSessionObjectData::SessionSelectorList(selection)),
             Err(_) => {} // If it fails, we'll return an error
         }
 
@@ -296,11 +297,47 @@ struct PyObjectMolecule {
     dcs: Option<Vec<i32>>,
 }
 
+// this one works!
+// #[derive(Debug, Deserialize, Serialize)]
+// struct SessionSelectorList(Vec<(String, Vec<i64>, Vec<i64>)>);
+
+// #[derive(Debug, Deserialize, Serialize)]
+// struct SessionSelectorList {
+//     // sessions: Vec<SessionSelector>,
+//     #[serde(rename = "0")]
+//     sessions: Vec<(String, Vec<i64>, Vec<i64>)>,
+// }
+
+// #[derive(Debug, Deserialize, Serialize)]
+// struct SessionSelector {
+//     name: String,
+//     data1: Vec<i64>,
+//     data2: Vec<i64>,
+// }
+
 #[derive(Debug, Deserialize, Serialize)]
+struct SessionSelectorList(Vec<SessionSelector>);
+
+#[derive(Debug, Serialize)]
 struct SessionSelector {
-    name: String,
-    data1: Vec<i32>,
-    data2: Vec<i32>,
+    id: String,
+    values1: Vec<i64>,
+    values2: Vec<i64>,
+}
+
+// You might need a custom Deserialize implementation for SessionSelector
+impl<'de> Deserialize<'de> for SessionSelector {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let (id, values1, values2) = Deserialize::deserialize(deserializer)?;
+        Ok(SessionSelector {
+            id,
+            values1,
+            values2,
+        })
+    }
 }
 
 // Todo:
