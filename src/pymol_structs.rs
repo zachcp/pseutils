@@ -32,7 +32,7 @@
 
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_pickle::de::{from_reader, DeOptions};
-use serde_pickle::Value;
+use serde_pickle::{de, from_value, Value};
 use std::io::{self, Read};
 use std::{collections::HashMap, fs::File};
 
@@ -120,8 +120,6 @@ enum PymolSessionObjectData {
     // MolVariant(PyObjectMolecule),
     // SessionVariant(SessionSelector),
 }
-
-use serde_pickle::{de, from_value};
 
 impl<'de> Deserialize<'de> for PymolSessionObjectData {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
