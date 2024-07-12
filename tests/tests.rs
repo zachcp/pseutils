@@ -1,6 +1,6 @@
 use pymol_session_utils::molviewspec::builder::create_builder;
 use pymol_session_utils::molviewspec::nodes::{ComponentExpression, KindT, Metadata, Node, State};
-use pymol_session_utils::psedata::PSEData;
+use pymol_session_utils::PSEData;
 use serde_json::from_reader;
 use std::collections::HashMap;
 use std::fs::File;
