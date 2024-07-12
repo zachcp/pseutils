@@ -22,7 +22,9 @@
 //!      - Curve
 //!  - Selection
 //!
-use crate::pymolparsing::parsing::{CustomValue, SessionName};
+use crate::pymolparsing::parsing::{
+    CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName,
+};
 use pdbtbx::PDB;
 use serde::{Deserialize, Serialize};
 use serde_pickle::de::{from_reader, DeOptions};
@@ -79,6 +81,43 @@ impl PSEData {
         let json = serde_json::to_string_pretty(self)?;
         std::fs::write(file_path, json)?;
         Ok(())
+    }
+
+    /// session is where all the action happens
+    pub fn get_session_names(&self) -> Vec<String> {
+        self.names
+            .iter()
+            .filter_map(|session_name| {
+                session_name
+                    .as_ref()
+                    .map(|session| session.name.to_string())
+            })
+            .collect()
+    }
+
+    /// session is where all the action happens
+    // pub fn get_molecule_data(&self) -> Vec<PyObjectMolecule> {
+    //     self.names
+    //         .iter()
+    //         .filter_map(|session_name| session_name.as_ref().map(|session| &session.data))
+    //         .filter_map(|data| {
+    //             if let CustomValue::PyObjectMolecule(molecule) = data {
+    //                 Some(molecule.clone())
+    //             } else {
+    //                 None
+    //             }
+    //         })
+    //         .collect()
+    // }
+    pub fn get_molecule_data(&self) -> Vec<&PyObjectMolecule> {
+        self.names
+            .iter()
+            .filter_map(|session_name| session_name.as_ref())
+            .filter_map(|session| match &session.data {
+                PymolSessionObjectData::PyObjectMolecule(a) => Some(a),
+                _ => None,
+            })
+            .collect()
     }
 
     pub fn create_pdb(&self) -> PDB {

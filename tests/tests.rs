@@ -1,5 +1,4 @@
-use pymol_session_utils::molviewspec::builder::create_builder;
-use pymol_session_utils::molviewspec::nodes::{ComponentExpression, KindT, Metadata, Node, State};
+use pymol_session_utils::molviewspec::nodes::{ComponentExpression, KindT, State};
 use pymol_session_utils::PSEData;
 use serde_json::from_reader;
 use std::collections::HashMap;
@@ -151,7 +150,16 @@ fn test_molspecview_json_full_examples_basic() {
 
 #[test]
 fn test_PDB() {
-    let psedata: PSEData = PSEData::load("tests/data/example_molecule_only.pse").unwrap();
+    let psedata: PSEData = PSEData::load("tests/data/example.pse").unwrap();
     let pdb = psedata.create_pdb();
-    assert_eq!(pdb, pdbtbx::PDB::new())
+    let names = psedata.get_session_names();
+    print!("{:?}", names);
+
+    // this has a Molecule and a selection
+    assert_eq!(names.len(), 2);
+
+    // PyObjectMolecule(PyObjectMolecule),
+    // SessionSelectorList(SessionSelectorList),
+
+    assert_eq!(pdb, pdbtbx::PDB::new());
 }

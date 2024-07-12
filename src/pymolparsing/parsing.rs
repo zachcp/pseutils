@@ -3,7 +3,7 @@ use serde_pickle::{from_value, Value};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SessionName {
-    name: String,
+    pub name: String,
     object: i32,
     visible: i32,
     unused: Option<bool>,
@@ -15,14 +15,13 @@ pub struct SessionName {
     // Vec1: Index Object ( from VLA list )
     // Vec2: Tag Object ( from VLA list )
     // selector: Vec<(String, Vec<i32>, Vec<i32>)>, // this is there the selection bits are
-    data: PymolSessionObjectData,
-    // data: PyObjectMolecule,
+    pub data: PymolSessionObjectData,
     group: String,
 }
 
 #[derive(Debug, Serialize)]
 #[serde(untagged)]
-enum PymolSessionObjectData {
+pub enum PymolSessionObjectData {
     PyObjectMolecule(PyObjectMolecule),
     SessionSelectorList(SessionSelectorList),
     // MolVariant(PyObjectMolecule),
@@ -45,10 +44,10 @@ impl<'de> Deserialize<'de> for PymolSessionObjectData {
             Err(_) => {} // If it fails, we'll try the next option
         }
 
-        println!(
-            "Did not serialize as a molecule. Not trying as a session: {:?}",
-            value
-        );
+        // println!(
+        //     "Did not serialize as a molecule. Not trying as a session: {:?}",
+        //     value
+        // );
 
         // If that fails, try to deserialize as SessionSelector
         match from_value::<SessionSelectorList>(value.clone()) {
@@ -187,7 +186,7 @@ struct Bond {
 /// https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/ObjectMolecule.h#L58
 ///
 #[derive(Debug, Deserialize, Serialize)]
-struct PyObjectMolecule {
+pub struct PyObjectMolecule {
     object: PyObject,
     n_cset: i32,
     n_bond: i32,
