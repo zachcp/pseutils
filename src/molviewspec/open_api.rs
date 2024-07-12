@@ -1,6 +1,5 @@
-use openapi::{Components, Info, OpenApi, Paths};
+// use openapi::{Components, Info, OpenApi, Paths};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use validator::{Validate, ValidationError};
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
@@ -72,73 +71,6 @@ pub struct ComponentExpression {
     pub atom_index: Option<i32>,
 }
 
-// Implement builder patterns for complex objects
-impl CameraParams {
-    pub fn builder() -> CameraParamsBuilder {
-        CameraParamsBuilder::default()
-    }
-}
-
-#[derive(Default)]
-pub struct CameraParamsBuilder {
-    target: Option<Vec<f64>>,
-    position: Option<Vec<f64>>,
-    up: Option<Vec<f64>>,
-}
-
-impl CameraParamsBuilder {
-    pub fn target(mut self, target: Vec<f64>) -> Self {
-        self.target = Some(target);
-        self
-    }
-
-    pub fn position(mut self, position: Vec<f64>) -> Self {
-        self.position = Some(position);
-        self
-    }
-
-    pub fn up(mut self, up: Vec<f64>) -> Self {
-        self.up = Some(up);
-        self
-    }
-
-    pub fn build(self) -> Result<CameraParams, String> {
-        let target = self.target.ok_or("target is required")?;
-        let position = self.position.ok_or("position is required")?;
-        let up = self.up.ok_or("up is required")?;
-
-        let params = CameraParams {
-            target,
-            position,
-            up,
-        };
-        params
-            .validate()
-            .map_err(|e| format!("Validation error: {:?}", e))?;
-        Ok(params)
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct ComponentExpression {
-    pub label_entity_id: Option<String>,
-    pub label_asym_id: Option<String>,
-    pub auth_asym_id: Option<String>,
-    pub label_seq_id: Option<i32>,
-    pub auth_seq_id: Option<i32>,
-    pub pdbx_PDB_ins_code: Option<String>,
-    pub beg_label_seq_id: Option<i32>,
-    pub end_label_seq_id: Option<i32>,
-    pub beg_auth_seq_id: Option<i32>,
-    pub end_auth_seq_id: Option<i32>,
-    pub residue_index: Option<i32>,
-    pub label_atom_id: Option<String>,
-    pub auth_atom_id: Option<String>,
-    pub type_symbol: Option<String>,
-    pub atom_id: Option<i32>,
-    pub atom_index: Option<i32>,
-}
-
 #[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct ComponentFromSourceParams {
     pub category_name: String,
@@ -147,69 +79,6 @@ pub struct ComponentFromSourceParams {
     pub block_index: Option<i32>,
     pub schema: String,
     pub field_values: Option<Vec<String>>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct ComponentFromUriParams {
-    pub uri: String,
-    pub format: String,
-    pub category_name: Option<String>,
-    pub field_name: Option<String>,
-    pub block_header: Option<String>,
-    pub block_index: Option<i32>,
-    pub schema: String,
-    pub field_values: Option<Vec<String>>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum Selector {
-    Predefined(String),
-    ComponentExpression(ComponentExpression),
-    MultipleComponentExpressions(Vec<ComponentExpression>),
-}
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct ComponentInlineParams {
-    pub selector: Selector,
-}
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct DownloadParams {
-    pub url: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct FocusInlineParams {
-    #[validate(length(min = 3, max = 3))]
-    pub direction: Option<Vec<f64>>,
-    #[validate(length(min = 3, max = 3))]
-    pub up: Option<Vec<f64>>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct LabelFromSourceParams {
-    pub category_name: String,
-    pub field_name: Option<String>,
-    pub block_header: Option<String>,
-    pub block_index: Option<i32>,
-    pub schema: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct LabelFromUriParams {
-    pub uri: String,
-    pub format: String,
-    pub category_name: Option<String>,
-    pub field_name: Option<String>,
-    pub block_header: Option<String>,
-    pub block_index: Option<i32>,
-    pub schema: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct LabelInlineParams {
-    pub text: String,
 }
 
 // Implement builder patterns for complex objects
@@ -280,6 +149,61 @@ impl ComponentFromSourceParamsBuilder {
 }
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct ComponentFromUriParams {
+    pub uri: String,
+    pub format: String,
+    pub category_name: Option<String>,
+    pub field_name: Option<String>,
+    pub block_header: Option<String>,
+    pub block_index: Option<i32>,
+    pub schema: String,
+    pub field_values: Option<Vec<String>>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct ComponentInlineParams {
+    pub selector: Selector,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct DownloadParams {
+    pub url: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct FocusInlineParams {
+    #[validate(length(min = 3, max = 3))]
+    pub direction: Option<Vec<f64>>,
+    #[validate(length(min = 3, max = 3))]
+    pub up: Option<Vec<f64>>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct LabelFromSourceParams {
+    pub category_name: String,
+    pub field_name: Option<String>,
+    pub block_header: Option<String>,
+    pub block_index: Option<i32>,
+    pub schema: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct LabelFromUriParams {
+    pub uri: String,
+    pub format: String,
+    pub category_name: Option<String>,
+    pub field_name: Option<String>,
+    pub block_header: Option<String>,
+    pub block_index: Option<i32>,
+    pub schema: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct LabelInlineParams {
+    pub text: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct LineParams {
     #[validate(length(min = 3, max = 3))]
     pub position1: Vec<f64>,
@@ -291,48 +215,9 @@ pub struct LineParams {
     pub tooltip: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct Metadata {
-    pub version: String,
-    pub title: Option<String>,
-    pub description: Option<String>,
-    pub description_format: Option<String>,
-    pub timestamp: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Node {
-    pub kind: String,
-    pub params: Option<serde_json::Value>,
-    pub children: Option<Vec<Node>>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct ParseParams {
-    pub format: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct RepresentationParams {
-    #[validate(custom = "validate_representation_type")]
-    #[serde(rename = "type")]
-    pub representation_type: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct SphereParams {
-    #[validate(length(min = 3, max = 3))]
-    pub position: Vec<f64>,
-    pub radius: f64,
-    pub color: String,
-    pub label: Option<String>,
-    pub tooltip: Option<String>,
-}
-
-fn validate_representation_type(representation_type: &str) -> Result<(), ValidationError> {
-    match representation_type {
-        "ball_and_stick" | "cartoon" | "surface" => Ok(()),
-        _ => Err(ValidationError::new("Invalid representation type")),
+impl LineParams {
+    pub fn builder() -> LineParamsBuilder {
+        LineParamsBuilder::default()
     }
 }
 
@@ -394,10 +279,43 @@ impl LineParamsBuilder {
     }
 }
 
-impl LineParams {
-    pub fn builder() -> LineParamsBuilder {
-        LineParamsBuilder::default()
-    }
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct Metadata {
+    pub version: String,
+    pub title: Option<String>,
+    pub description: Option<String>,
+    #[validate(custom(function = "validate_description_format"))]
+    pub description_format: Option<String>,
+    pub timestamp: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Node {
+    pub kind: String,
+    pub params: Option<serde_json::Value>,
+    pub children: Option<Vec<Node>>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct ParseParams {
+    pub format: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct RepresentationParams {
+    #[validate(custom(function = "validate_representation_type"))]
+    #[serde(rename = "type")]
+    pub representation_type: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct SphereParams {
+    #[validate(length(min = 3, max = 3))]
+    pub position: Vec<f64>,
+    pub radius: f64,
+    pub color: String,
+    pub label: Option<String>,
+    pub tooltip: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
@@ -407,25 +325,8 @@ pub struct State {
 }
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct Node {
-    pub kind: String,
-    pub params: Option<serde_json::Value>,
-    pub children: Option<Vec<Node>>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct Metadata {
-    pub version: String,
-    pub title: Option<String>,
-    pub description: Option<String>,
-    #[validate(custom = "validate_description_format")]
-    pub description_format: Option<String>,
-    pub timestamp: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct StructureParams {
-    #[validate(custom = "validate_structure_type")]
+    #[validate(custom(function = "validate_structure_type"))]
     #[serde(rename = "type")]
     pub structure_type: String,
     pub assembly_id: Option<String>,
@@ -440,72 +341,14 @@ pub struct StructureParams {
     pub ijk_max: Option<Vec<i32>>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct TooltipFromSourceParams {
-    pub category_name: String,
-    pub field_name: Option<String>,
-    pub block_header: Option<String>,
-    pub block_index: Option<i32>,
-    #[validate(custom = "validate_schema")]
-    pub schema: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct TooltipFromUriParams {
-    pub uri: String,
-    #[validate(custom = "validate_format")]
-    pub format: String,
-    pub category_name: Option<String>,
-    pub field_name: Option<String>,
-    pub block_header: Option<String>,
-    pub block_index: Option<i32>,
-    #[validate(custom = "validate_schema")]
-    pub schema: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct TooltipInlineParams {
-    pub text: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct TransformParams {
-    pub rotation: Option<Vec<f64>>,
-    #[validate(length(min = 3, max = 3))]
-    pub translation: Option<Vec<f64>>,
-}
-
-fn validate_description_format(format: &str) -> Result<(), ValidationError> {
-    match format {
-        "markdown" | "plaintext" => Ok(()),
-        _ => Err(ValidationError::new("Invalid description format")),
-    }
-}
-
-fn validate_structure_type(structure_type: &str) -> Result<(), ValidationError> {
-    match structure_type {
-        "model" | "assembly" | "symmetry" | "symmetry_mates" => Ok(()),
-        _ => Err(ValidationError::new("Invalid structure type")),
-    }
-}
-
-fn validate_schema(schema: &str) -> Result<(), ValidationError> {
-    match schema {
-        "whole_structure" | "entity" | "chain" | "auth_chain" | "residue" | "auth_residue"
-        | "residue_range" | "auth_residue_range" | "atom" | "auth_atom" | "all_atomic" => Ok(()),
-        _ => Err(ValidationError::new("Invalid schema")),
-    }
-}
-
-fn validate_format(format: &str) -> Result<(), ValidationError> {
-    match format {
-        "cif" | "bcif" | "json" => Ok(()),
-        _ => Err(ValidationError::new("Invalid format")),
+impl StructureParams {
+    pub fn builder() -> StructureParamsBuilder {
+        StructureParamsBuilder::default()
     }
 }
 
 // Builder pattern for StructureParams
-#[derive(Default)]
+#[derive(Default, Serialize, Deserialize)]
 pub struct StructureParamsBuilder {
     #[serde(rename = "type")]
     structure_type: Option<String>,
@@ -584,174 +427,252 @@ impl StructureParamsBuilder {
     }
 }
 
-impl StructureParams {
-    pub fn builder() -> StructureParamsBuilder {
-        StructureParamsBuilder::default()
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct TooltipFromSourceParams {
+    pub category_name: String,
+    pub field_name: Option<String>,
+    pub block_header: Option<String>,
+    pub block_index: Option<i32>,
+    #[validate(custom(function = "validate_schema"))]
+    pub schema: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct TooltipFromUriParams {
+    pub uri: String,
+    #[validate(custom(function = "validate_format"))]
+    pub format: String,
+    pub category_name: Option<String>,
+    pub field_name: Option<String>,
+    pub block_header: Option<String>,
+    pub block_index: Option<i32>,
+    #[validate(custom(function = "validate_schema"))]
+    pub schema: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct TooltipInlineParams {
+    pub text: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct TransformParams {
+    pub rotation: Option<Vec<f64>>,
+    #[validate(length(min = 3, max = 3))]
+    pub translation: Option<Vec<f64>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DataFromSourceParams {
+    pub category_name: String,
+    pub field_name: Option<String>,
+    pub block_header: Option<String>,
+    pub block_index: Option<i32>,
+    pub schema: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DataFromUriParams {
+    pub uri: String,
+    pub format: String,
+    pub category_name: Option<String>,
+    pub field_name: Option<String>,
+    pub block_header: Option<String>,
+    pub block_index: Option<i32>,
+    pub schema: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Component {}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Download {}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GenericVisuals {}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Parse {}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Representation {}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Root {}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Structure {}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Base {}
+
+//  Validation Function  -----------------------------------------------------------------------
+
+fn validate_description_format(format: &str) -> Result<(), ValidationError> {
+    match format {
+        "markdown" | "plaintext" => Ok(()),
+        _ => Err(ValidationError::new("Invalid description format")),
     }
 }
 
-// Function to generate OpenAPI spec
-pub fn generate_openapi_spec() -> OpenApi {
-    OpenApi {
-        openapi: "3.0.0".to_string(),
-        info: Info {
-            title: "MolViewSpec Node Schema OpenAPI".to_string(),
-            version: "0.1".to_string(),
-            ..Default::default()
-        },
-        paths: Paths::new(),
-        components: Some(Components {
-            schemas: {
-                let mut schemas = HashMap::new();
-                schemas.insert(
-                    "ComponentExpression".to_string(),
-                    serde_json::to_value(ComponentExpression::default()).unwrap(),
-                );
-                schemas.insert(
-                    "ComponentFromSourceParams".to_string(),
-                    serde_json::to_value(ComponentFromSourceParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "ComponentFromUriParams".to_string(),
-                    serde_json::to_value(ComponentFromUriParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "ComponentInlineParams".to_string(),
-                    serde_json::to_value(ComponentInlineParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "DownloadParams".to_string(),
-                    serde_json::to_value(DownloadParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "FocusInlineParams".to_string(),
-                    serde_json::to_value(FocusInlineParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "LabelFromSourceParams".to_string(),
-                    serde_json::to_value(LabelFromSourceParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "LabelFromUriParams".to_string(),
-                    serde_json::to_value(LabelFromUriParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "LabelInlineParams".to_string(),
-                    serde_json::to_value(LabelInlineParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "CameraParams".to_string(),
-                    serde_json::to_value(CameraParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "CanvasParams".to_string(),
-                    serde_json::to_value(CanvasParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "ColorFromSourceParams".to_string(),
-                    serde_json::to_value(ColorFromSourceParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "ColorFromUriParams".to_string(),
-                    serde_json::to_value(ColorFromUriParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "ColorInlineParams".to_string(),
-                    serde_json::to_value(ColorInlineParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "LineParams".to_string(),
-                    serde_json::to_value(LineParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "Metadata".to_string(),
-                    serde_json::to_value(Metadata::default()).unwrap(),
-                );
-                schemas.insert(
-                    "Node".to_string(),
-                    serde_json::to_value(Node::default()).unwrap(),
-                );
-                schemas.insert(
-                    "ParseParams".to_string(),
-                    serde_json::to_value(ParseParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "RepresentationParams".to_string(),
-                    serde_json::to_value(RepresentationParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "SphereParams".to_string(),
-                    serde_json::to_value(SphereParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "State".to_string(),
-                    serde_json::to_value(State::default()).unwrap(),
-                );
-                schemas.insert(
-                    "Node".to_string(),
-                    serde_json::to_value(Node::default()).unwrap(),
-                );
-                schemas.insert(
-                    "Metadata".to_string(),
-                    serde_json::to_value(Metadata::default()).unwrap(),
-                );
-                schemas.insert(
-                    "StructureParams".to_string(),
-                    serde_json::to_value(StructureParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "TooltipFromSourceParams".to_string(),
-                    serde_json::to_value(TooltipFromSourceParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "TooltipFromUriParams".to_string(),
-                    serde_json::to_value(TooltipFromUriParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "TooltipInlineParams".to_string(),
-                    serde_json::to_value(TooltipInlineParams::default()).unwrap(),
-                );
-                schemas.insert(
-                    "TransformParams".to_string(),
-                    serde_json::to_value(TransformParams::default()).unwrap(),
-                );
-                schemas
-            },
-            ..Default::default()
-        }),
-        ..Default::default()
+fn validate_structure_type(structure_type: &str) -> Result<(), ValidationError> {
+    match structure_type {
+        "model" | "assembly" | "symmetry" | "symmetry_mates" => Ok(()),
+        _ => Err(ValidationError::new("Invalid structure type")),
     }
 }
 
+fn validate_schema(schema: &str) -> Result<(), ValidationError> {
+    match schema {
+        "whole_structure" | "entity" | "chain" | "auth_chain" | "residue" | "auth_residue"
+        | "residue_range" | "auth_residue_range" | "atom" | "auth_atom" | "all_atomic" => Ok(()),
+        _ => Err(ValidationError::new("Invalid schema")),
+    }
+}
 
+fn validate_format(format: &str) -> Result<(), ValidationError> {
+    match format {
+        "cif" | "bcif" | "json" => Ok(()),
+        _ => Err(ValidationError::new("Invalid format")),
+    }
+}
 
-fn main() {
-    // Create StructureParams using the builder
-    let structure_params = StructureParams::builder()
-        .structure_type("model".to_string())
-        .assembly_id("1".to_string())
-        .model_index(0)
-        .build()
-        .unwrap();
+fn validate_representation_type(representation_type: &str) -> Result<(), ValidationError> {
+    match representation_type {
+        "ball_and_stick" | "cartoon" | "surface" => Ok(()),
+        _ => Err(ValidationError::new("Invalid representation type")),
+    }
+}
 
-    // Create a Node using the StructureParams
-    let node = Node {
-        kind: "structure".to_string(),
-        params: Some(serde_json::to_value(structure_params).unwrap()),
-        children: None,
-    };
-
-    // Create a simple Metadata
-    let metadata = Metadata {
-        version: "1.0".to_string(),
-        title: Some("Example Structure".to_string()),
-        description: None,
-        description_format: None,
-        timestamp: chrono::Utc::now().to_rfc3339(),
-    };
-
-    // Create a State
-    let state = State {
-        root: node,
-        metadata,
-    };
+// // Function to generate OpenAPI spec
+// pub fn generate_openapi_spec() -> OpenApi {
+//     OpenApi {
+//         openapi: "3.0.0".to_string(),
+//         info: Info {
+//             title: "MolViewSpec Node Schema OpenAPI".to_string(),
+//             version: "0.1".to_string(),
+//             ..Default::default()
+//         },
+//         paths: Paths::new(),
+//         components: Some(Components {
+//             schemas: {
+//                 let mut schemas = HashMap::new();
+//                 schemas.insert(
+//                     "ComponentExpression".to_string(),
+//                     serde_json::to_value(ComponentExpression::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "ComponentFromSourceParams".to_string(),
+//                     serde_json::to_value(ComponentFromSourceParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "ComponentFromUriParams".to_string(),
+//                     serde_json::to_value(ComponentFromUriParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "ComponentInlineParams".to_string(),
+//                     serde_json::to_value(ComponentInlineParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "DownloadParams".to_string(),
+//                     serde_json::to_value(DownloadParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "FocusInlineParams".to_string(),
+//                     serde_json::to_value(FocusInlineParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "LabelFromSourceParams".to_string(),
+//                     serde_json::to_value(LabelFromSourceParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "LabelFromUriParams".to_string(),
+//                     serde_json::to_value(LabelFromUriParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "LabelInlineParams".to_string(),
+//                     serde_json::to_value(LabelInlineParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "CameraParams".to_string(),
+//                     serde_json::to_value(CameraParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "CanvasParams".to_string(),
+//                     serde_json::to_value(CanvasParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "ColorFromSourceParams".to_string(),
+//                     serde_json::to_value(ColorFromSourceParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "ColorFromUriParams".to_string(),
+//                     serde_json::to_value(ColorFromUriParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "ColorInlineParams".to_string(),
+//                     serde_json::to_value(ColorInlineParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "LineParams".to_string(),
+//                     serde_json::to_value(LineParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "Metadata".to_string(),
+//                     serde_json::to_value(Metadata::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "Node".to_string(),
+//                     serde_json::to_value(Node::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "ParseParams".to_string(),
+//                     serde_json::to_value(ParseParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "RepresentationParams".to_string(),
+//                     serde_json::to_value(RepresentationParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "SphereParams".to_string(),
+//                     serde_json::to_value(SphereParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "State".to_string(),
+//                     serde_json::to_value(State::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "Node".to_string(),
+//                     serde_json::to_value(Node::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "Metadata".to_string(),
+//                     serde_json::to_value(Metadata::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "StructureParams".to_string(),
+//                     serde_json::to_value(StructureParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "TooltipFromSourceParams".to_string(),
+//                     serde_json::to_value(TooltipFromSourceParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "TooltipFromUriParams".to_string(),
+//                     serde_json::to_value(TooltipFromUriParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "TooltipInlineParams".to_string(),
+//                     serde_json::to_value(TooltipInlineParams::default()).unwrap(),
+//                 );
+//                 schemas.insert(
+//                     "TransformParams".to_string(),
+//                     serde_json::to_value(TransformParams::default()).unwrap(),
+//                 );
+//                 schemas
+//             },
+//             ..Default::default()
+//         }),
+//         ..Default::default()
+//     }
+// }
