@@ -23,6 +23,7 @@
 //!  - Selection
 //!
 use crate::pymolparsing::parsing::{CustomValue, SessionName};
+use pdbtbx::PDB;
 use serde::{Deserialize, Serialize};
 use serde_pickle::de::{from_reader, DeOptions};
 use std::io::Read;
@@ -78,5 +79,9 @@ impl PSEData {
         let json = serde_json::to_string_pretty(self)?;
         std::fs::write(file_path, json)?;
         Ok(())
+    }
+
+    pub fn create_pdb(&self) -> PDB {
+        PDB::new()
     }
 }

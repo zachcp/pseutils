@@ -150,23 +150,8 @@ fn test_molspecview_json_full_examples_basic() {
 }
 
 #[test]
-fn test_builder() {
-    // let builder = create_builder();
-
-    let builder = create_builder()
-        .download("https://www.ebi.ac.uk/pdbe/entry-files/download/1cbs_updated.cif".to_string());
-
-    // .parse(format="mmcif")
-
-    // builder = create_builder()
-    // structure = (builder
-    //     .download(url="https://www.ebi.ac.uk/pdbe/entry-files/download/1cbs_updated.cif")
-    //     .parse(format="mmcif")
-    //     .model_structure()
-    //     .component()
-    //     .representation()
-    //     .color(color="blue")
-    // )
-
-    // return builder.get_state()
+fn test_PDB() {
+    let psedata: PSEData = PSEData::load("tests/data/example_molecule_only.pse").unwrap();
+    let pdb = psedata.create_pdb();
+    assert_eq!(pdb, pdbtbx::PDB::new())
 }
