@@ -1,3 +1,3 @@
-pub mod pymol_structs;
-
-pub use pymol_structs::PSEData;
+pub mod molviewspec;
+pub mod psedata;
+mod pymolparsing;
