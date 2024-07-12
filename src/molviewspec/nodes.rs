@@ -1,6 +1,6 @@
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, default};
+use std::collections::HashMap;
 
 #[derive(PartialEq, Serialize, Deserialize, Debug, Default, Clone)]
 #[serde(rename_all = "snake_case")]
@@ -41,12 +41,54 @@ pub struct Node {
     pub children: Option<Vec<Node>>,
 }
 impl Node {
+    pub fn new(kind: KindT) -> Node {
+        Node {
+            kind: kind,
+            ..Default::default()
+        }
+    }
     pub fn add_child(&mut self, node: Node) {
         match &mut self.children {
             Some(children) => children.push(node),
             None => self.children = Some(vec![node]),
         }
     }
+    pub fn get_kind(&self) -> &KindT {
+        &self.kind
+    }
+    // Only Applicable to the Download Node
+    pub fn add_download_info(&mut self, url: String) -> Option<&Node> {
+        let params = Some(HashMap::from([(
+            "url".to_string(),
+            serde_json::Value::String(url),
+        )]));
+
+        match self.kind {
+            KindT::Download => {
+                self.params = params;
+                Some(self)
+            }
+            _ => None,
+        }
+    }
+    // //
+    // pub fn create_parser(&mut self, parseformat: String) -> Option<&Node> {
+    //     let params = Some(HashMap::from([(
+    //         "format".to_string(),
+    //         serde_json::Value::String(parseformat),
+    //     )]));
+
+    //     let mut parse = Node::new(KindT::Parse);
+    //     parse.params = params;
+
+    //     match self.kind {
+    //         KindT::Download => {
+    //             self.params = params;
+    //             Some(self)
+    //         }
+    //         _ => None,
+    //     }
+    // }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -76,10 +118,7 @@ pub struct State {
 impl State {
     pub fn new() -> Self {
         State {
-            root: Node {
-                kind: KindT::Root,
-                ..Default::default()
-            },
+            root: Node::new(KindT::Root),
             metadata: Metadata {
                 version: "1.0".to_string(), // todo: update this
                 timestamp: Utc::now().to_rfc3339().to_string(),
@@ -87,40 +126,20 @@ impl State {
             },
         }
     }
-    pub fn download(&mut self, url: String) -> Node {
-        // let params = HashMap::new().insert( ("url".to_string(), serde_json::Value::String(url)));
-
-        let params = Some(HashMap::from([(
-            "url".to_string(),
-            serde_json::Value::String(url),
-        )]));
-
-        let download = Node {
-            kind: KindT::Download,
-            params: params,
-            ..Default::default()
-        };
-
-        self.root.add_child(download.clone());
-        return download;
+    pub fn download(&mut self, url: String) -> Option<&Node> {
+        let mut download = Node::new(KindT::Download);
+        download.add_download_info(url);
+        self.root.add_child(download);
+        Some(
+            self.root
+                .children
+                .as_ref()
+                .expect("Children vector should exist")
+                .last()
+                .expect("At least one child should exist after adding"),
+        )
     }
-
-    // def download(self, *, url: str) -> Download:
-    //      """
-    //      Add a new structure to the builder by downloading structure data from a URL.
-    //      :param url: source of structure data
-    //      :return: a builder that handles operations on the downloaded resource
-    //      """
-    //      params = make_params(DownloadParams, locals())
-    //      node = Node(kind="download", params=params)
-    //      self._add_child(node)
-    //      return Download(node=node, root=self._root)
 }
-
-// #[derive(Serialize, Deserialize, Debug)]
-// pub struct DownloadParams {
-//     url: String,
-// }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
