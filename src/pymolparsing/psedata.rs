@@ -121,6 +121,8 @@ impl PSEData {
     }
 
     pub fn create_pdb(&self) -> PDB {
-        PDB::new()
+        let moldata = &self.get_molecule_data();
+        let first_mol = moldata[0];
+        first_mol.to_pdb()
     }
 }

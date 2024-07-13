@@ -90,7 +90,7 @@ pub struct PyObjectMolecule {
     dcs: Option<Vec<i32>>,
 }
 impl PyObjectMolecule {
-    fn to_pdb(&self) -> PDB {
+    pub fn to_pdb(&self) -> PDB {
         PDB::new()
     }
 }
