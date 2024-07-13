@@ -150,16 +150,14 @@ impl PyObjectMolecule {
         // }
         "test".to_string()
     }
-    pub fn get_atom(&self, atm_idx: i32) -> String {
+    pub fn get_atom(&self, atm_idx: i32) -> pdbtbx::Atom {
         // find atom ids and coordinates in the Coodrset
         // find the remaining atom info in the AtomInfo Vector
         //
 
-        // to get the the locaiton
-
         let cset = &self.coord_set;
         println!("{:?}", cset);
-        let atom_coords = &cset[0].coord; // note there may be more than one coord set....
+        let atom_coords = &cset[0].coord; // note there may be more than one coord set.... Todo.
         println!("{:?}", atom_coords);
         // coords are stored in a 1D vector of x,y,z,x,y,x,z,x,y,z
         let base_coord = (3 * atm_idx) as usize;
@@ -169,7 +167,26 @@ impl PyObjectMolecule {
         let z_coord = atom_coords[base_coord + 2];
         println!("{}, {}, {}", x_coord, y_coord, z_coord);
 
-        "get_atom".to_string()
+        let atom_info = &self.atom.iter().find(|atm| atm.id == atm_idx + 1).unwrap(); // note that the atom in the atom vector seem to be 1-indexed.
+        let formal_charge = atom_info.formal_charge as isize;
+        // let atom_info: Vec<&AtomInfo> = &self.atom.iter().filter(|atm| atm.id == atm_idx + 1).collect(); // note that the atom in the atom vecto seem to be 1-indexed.
+        // let formal_charge = atom_info.formal_charge as isize;
+
+        let atom = pdbtbx::Atom::new(
+            atom_info.is_hetero(),  // hetero
+            0,                      // serial_number
+            atom_info.name.clone(), // atom_name
+            x_coord.into(),         // x
+            y_coord.into(),         // y
+            z_coord.into(),         // z
+            0.0,                    // occupancy? Todo
+            atom_info.b,            // b-factor
+            atom_info.elem.clone(), // element
+            formal_charge,          // charge: todo: is this the right charge?
+        );
+        atom.unwrap()
+
+        // "get_atom".to_string()
     }
 }
 
