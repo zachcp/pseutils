@@ -1,4 +1,4 @@
-use pdbtbx::PDB;
+use pdbtbx::{self, PDB};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_pickle::{from_value, Value};
 
@@ -91,7 +91,23 @@ pub struct PyObjectMolecule {
 }
 impl PyObjectMolecule {
     pub fn to_pdb(&self) -> PDB {
-        PDB::new()
+        // add atoms
+        // add bonds
+        // add chains
+        // add models
+        //
+        let pdb = PDB::new();
+
+        println!("First Atom: {:?}", &self.atom[1]);
+        // let model = Model.new();
+        // let chain = Chain.new();
+        // let residue = Residue.new();
+        // let atom = Atom.new();
+        // let bond = Bond.new();
+        //
+        //
+        //
+        pdb
     }
 }
 
@@ -181,8 +197,8 @@ struct AtomInfo {
     resi: String,
     segi: String,
     resn: String,
-    name: String,
-    elem: String,
+    pub name: String,
+    pub elem: String,
     text_type: String,
     label: String,
     ss_type: String,
@@ -194,7 +210,7 @@ struct AtomInfo {
     vdw: f64,
     partial_charge: f64,
     formal_charge: i32,
-    hetatm: i8, // this is a boolean
+    pub hetatm: i8, // this is a boolean
     vis_rep: i32,
     color: i32,
     id: i32,
@@ -223,6 +239,32 @@ struct AtomInfo {
     anisou_5: f32,
     anisou_6: f32,
     custom: String,
+}
+impl AtomInfo {
+    pub fn is_hetero(&self) -> bool {
+        match self.hetatm {
+            1 => true,
+            0 => false,
+            _ => false,
+        }
+    }
+    pub fn to_pdbtbx_atom(&self) -> pdbtbx::Atom {
+        let formal_charge = self.formal_charge as isize;
+
+        let atom = pdbtbx::Atom::new(
+            self.is_hetero(), // hetero
+            0,                // serial_number
+            &self.name,       // atom_name
+            0.0,              // x Todo
+            0.0,              // y Todo
+            0.0,              // z Todo
+            0.0,              // occupancy? Todo
+            self.b,           // b-factor
+            &self.elem,       // element
+            formal_charge,    // charge: todo: is this the right charge?
+        );
+        atom.unwrap()
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
