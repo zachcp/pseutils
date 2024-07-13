@@ -85,13 +85,8 @@ pub struct PyObjectMolecule {
 }
 impl PyObjectMolecule {
     pub fn to_pdb(&self) -> PDB {
-        // add atoms
-        // add bonds
-        // add chains
-        // add models
+        // Create Atoms
         //
-        let mut pdb = PDB::new();
-
         // get the atom index and use it to extract all the atoms
         let all_idxs = &self.coord_set[0].idx_to_atm;
         let pdbtbx_atoms: Vec<pdbtbx::Atom> = all_idxs
@@ -99,15 +94,29 @@ impl PyObjectMolecule {
             .map(|atm_idx| self.get_atom(*atm_idx))
             .collect();
 
-        // println!("First Atom: {:?}", &self.atom[1]);
-        // let model = Model.new();
+        // Create Residues from Atoms
+        //
+        // Todo: Function to get all residues from AtomList
+        //
+        // Create Chains from Residues
+        //
         // let chain = Chain.new();
+        // Create Models from Residues
+        //
+        // let model = Model.new();
+
+        // Create PDB from Models
+        //
+        let mut pdb = PDB::new();
+
         // let residue = Residue.new();
         // let atom = Atom.new();
         // let bond = Bond.new();
         //
         //
-        //
+
+        // pdb add Model (e.g. strucutures)
+        // pdb add bonds accessible from the bond table
         pdb
     }
     pub fn get_str(&self) -> String {
@@ -194,6 +203,7 @@ impl PyObjectMolecule {
         );
         atom.unwrap()
     }
+    pub fn get_residues() {}
 }
 
 #[derive(Debug, Deserialize, Serialize)]
