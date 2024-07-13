@@ -90,9 +90,16 @@ impl PyObjectMolecule {
         // add chains
         // add models
         //
-        let pdb = PDB::new();
+        let mut pdb = PDB::new();
 
-        println!("First Atom: {:?}", &self.atom[1]);
+        // get the atom index and use it to extract all the atoms
+        let all_idxs = &self.coord_set[0].idx_to_atm;
+        let pdbtbx_atoms: Vec<pdbtbx::Atom> = all_idxs
+            .into_iter()
+            .map(|atm_idx| self.get_atom(*atm_idx))
+            .collect();
+
+        // println!("First Atom: {:?}", &self.atom[1]);
         // let model = Model.new();
         // let chain = Chain.new();
         // let residue = Residue.new();
@@ -150,6 +157,7 @@ impl PyObjectMolecule {
         // }
         "test".to_string()
     }
+    /// Create a PDBTBX::Atom from the pymol object datastructure
     pub fn get_atom(&self, atm_idx: i32) -> pdbtbx::Atom {
         // find atom ids and coordinates in the Coodrset
         // find the remaining atom info in the AtomInfo Vector
@@ -170,9 +178,7 @@ impl PyObjectMolecule {
         let atom_info = &self.atom.iter().find(|atm| atm.id == atm_idx + 1).unwrap(); // note that the atom in the atom vector seem to be 1-indexed.
 
         let formal_charge = atom_info.formal_charge as isize;
-        let serial_number = atom_info.x_coord as isize;
-        // let atom_info: Vec<&AtomInfo> = &self.atom.iter().filter(|atm| atm.id == atm_idx + 1).collect(); // note that the atom in the atom vecto seem to be 1-indexed.
-        // let formal_charge = atom_info.formal_charge as isize;
+        let serial_number = atom_info.id as usize;
 
         let atom = pdbtbx::Atom::new(
             atom_info.is_hetero(),  // hetero
@@ -187,8 +193,6 @@ impl PyObjectMolecule {
             formal_charge,          // charge: todo: is this the right charge?
         );
         atom.unwrap()
-
-        // "get_atom".to_string()
     }
 }
 
