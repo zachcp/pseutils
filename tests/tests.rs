@@ -149,7 +149,7 @@ fn test_molspecview_json_full_examples_basic() {
 }
 
 #[test]
-fn test_PDB() {
+fn test_pdb() {
     let psedata: PSEData = PSEData::load("tests/data/example.pse").unwrap();
     let pdb = psedata.create_pdb();
     assert_eq!(pdb, pdbtbx::PDB::new());
@@ -161,4 +161,7 @@ fn test_PDB() {
 
     let mols = psedata.get_molecule_data();
     assert_eq!(mols.len(), 1);
+    let s1 = mols[0].get_atom(0);
+    // let coordstring = mols[1].get_str();
+    // println!("{:?}", coordstring)
 }

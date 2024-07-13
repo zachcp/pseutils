@@ -9,13 +9,6 @@ pub struct SessionName {
     visible: i32,
     unused: Option<bool>,
     unused2: i32,
-    // SelectorAsPyList
-    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer3/Selector.cpp#L2926
-    // list of lists
-    // String: Name of the Object
-    // Vec1: Index Object ( from VLA list )
-    // Vec2: Tag Object ( from VLA list )
-    // selector: Vec<(String, Vec<i32>, Vec<i32>)>, // this is there the selection bits are
     pub data: PymolSessionObjectData,
     group: String,
 }
@@ -73,6 +66,7 @@ pub struct PyObjectMolecule {
     n_cset: i32,
     n_bond: i32,
     n_atom: i32,
+    /// Vector of Coordinates
     coord_set: Vec<CoordSet>,
     cs_tmpl: Option<Vec<CoordSet>>,
     // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3037
@@ -109,6 +103,74 @@ impl PyObjectMolecule {
         //
         pdb
     }
+    pub fn get_str(&self) -> String {
+        // get_str
+        // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer4/Cmd.cpp#L3877
+        // PymolMoleculeExporter
+        // https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L1627
+        // PDB Exporter
+        // MoleculeExporterPDB
+        // https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L439
+        //
+        //
+        // exporter->init(G);
+        //
+        // exporter->setMulti(multi);
+        // exporter->setRefObject(ref_object, ref_state);
+        // exporter->execute(sele, state);
+        //
+        // CoordSetAtomToPDBStrVLA
+        //
+        // Variables:
+        //  - m_iter: SeleCoordIterator m_iter;
+        //
+        // // Atoms:
+        //     // how do we check for multiple objects?
+        //     // m_iter.obj defines the object. By number? by name?
+        //     - iterate through the coordinates
+        //     - check for multi
+
+        // update transformation matrices
+        // updateMatrix(m_mat_full, true);
+        // updateMatrix(m_mat_move, false);
+
+        // beginCoordSet();
+        // m_last_cs = m_iter.cs;
+
+        // for bonds
+        // if (!m_tmpids[m_iter.getAtm()]) {
+        //   m_id = m_retain_ids ? m_iter.getAtomInfo()->id : (m_id + 1);
+        //   m_tmpids[m_iter.getAtm()] = m_id;
+        // }
+
+        //
+
+        // for coord in &self.coord_set {
+        //     println!("{:?}", coord);
+        // }
+        "test".to_string()
+    }
+    pub fn get_atom(&self, atm_idx: i32) -> String {
+        // find atom ids and coordinates in the Coodrset
+        // find the remaining atom info in the AtomInfo Vector
+        //
+
+        // to get the the locaiton
+
+        let cset = &self.coord_set;
+        println!("{:?}", cset);
+        let atom_coords = &cset[0].coord; // note there may be more than one coord set....
+        println!("{:?}", atom_coords);
+        // coords are stored in a 1D vector of x,y,z,x,y,x,z,x,y,z
+        let base_coord = (3 * atm_idx) as usize;
+        println!("{}", base_coord);
+        let x_coord = atom_coords[base_coord];
+        let y_coord = atom_coords[base_coord + 1];
+        let z_coord = atom_coords[base_coord + 2];
+        println!("{}, {}, {}", x_coord, y_coord, z_coord);
+
+        "get_atom".to_string()
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -116,6 +178,13 @@ struct SessionSelectorList(Vec<SessionSelector>);
 
 #[derive(Debug, Serialize)]
 struct SessionSelector {
+    // SelectorAsPyList
+    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer3/Selector.cpp#L2926
+    // list of lists
+    // String: Name of the Object
+    // Vec1: Index Object ( from VLA list )
+    // Vec2: Tag Object ( from VLA list )
+    // selector: Vec<(String, Vec<i32>, Vec<i32>)>, // this is there the selection bits are
     id: String,
     values1: Vec<i64>,
     values2: Vec<i64>,
@@ -165,28 +234,24 @@ struct PyObject {
 }
 
 /// Coord Set
-/// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/CoordSet.cpp#L363
+/// [pymol_coordset](https://github.com/schrodinger/pymol-open-source/blob/master/layer2/CoordSet.cpp#L363)
+/// [pymol_coordset_settings]( https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Setting.cpp#L962)
 #[derive(Debug, Deserialize, Serialize)]
-struct CoordSet {
-    n_index: i32,
-    n_at_index: i32,
-    coord: Vec<f32>,
-    idx_to_atm: Vec<i32>,
-    atm_to_idx: Option<Vec<i32>>,
+pub struct CoordSet {
+    pub n_index: i32,         // 1519
+    n_at_index: i32,          // 1519
+    pub coord: Vec<f32>,      // len -== 4556 ( 1519 *3 )
+    pub idx_to_atm: Vec<i32>, // 1 - 1518
+    pub atm_to_idx: Option<Vec<i32>>,
     name: String,
-    // PyObject *ObjectStateAsPyList(CObjectState * I)
-    // https://github.com/schrodinger/pymol-open-source/blob/master/layer1/PyMOLObject.cpp#L1391
-    // object_state: Vec<Option<Vec<f64>>>, //
-    // *SettingAsPyList
-    // https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Setting.cpp#L962
     setting: Vec<Option<bool>>, // punting on this
     lab_pos: Option<bool>,      // might be wrong
     field_9: Option<bool>,      // probably wrong...
     // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer1/CGO.cpp#L220
     sculpt_cgo: Option<(i32, Vec<f32>)>,           //
     atom_state_settings: Option<Vec<Option<i32>>>, //
-    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Symmetry.cpp#L30
-    symmetry: Option<Vec<(((i32, i32, i32), (i32, i32, i32)), String)>>, //
+    /// [symettry_settings](https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Symmetry.cpp#L30)
+    symmetry: Option<Vec<(((i32, i32, i32), (i32, i32, i32)), String)>>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
