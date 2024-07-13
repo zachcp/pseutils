@@ -153,13 +153,13 @@ impl PyObjectMolecule {
     pub fn get_atom(&self, atm_idx: i32) -> pdbtbx::Atom {
         // find atom ids and coordinates in the Coodrset
         // find the remaining atom info in the AtomInfo Vector
-        //
 
         let cset = &self.coord_set;
         // println!("{:?}", cset);
         let atom_coords = &cset[0].coord; // note there may be more than one coord set.... Todo.
-                                          // println!("{:?}", atom_coords);
-                                          // coords are stored in a 1D vector of x,y,z,x,y,x,z,x,y,z
+
+        // println!("{:?}", atom_coords);
+        // coords are stored in a 1D vector of x,y,z,x,y,x,z,x,y,z
         let base_coord = (3 * atm_idx) as usize;
         println!("{}", base_coord);
         let x_coord = atom_coords[base_coord];
@@ -168,13 +168,15 @@ impl PyObjectMolecule {
         println!("{}, {}, {}", x_coord, y_coord, z_coord);
 
         let atom_info = &self.atom.iter().find(|atm| atm.id == atm_idx + 1).unwrap(); // note that the atom in the atom vector seem to be 1-indexed.
+
         let formal_charge = atom_info.formal_charge as isize;
+        let serial_number = atom_info.x_coord as isize;
         // let atom_info: Vec<&AtomInfo> = &self.atom.iter().filter(|atm| atm.id == atm_idx + 1).collect(); // note that the atom in the atom vecto seem to be 1-indexed.
         // let formal_charge = atom_info.formal_charge as isize;
 
         let atom = pdbtbx::Atom::new(
             atom_info.is_hetero(),  // hetero
-            0,                      // serial_number
+            serial_number,          // serial_number: Note: I am not sure this is correct just yet.
             atom_info.name.clone(), // atom_name
             x_coord.into(),         // x
             y_coord.into(),         // y
