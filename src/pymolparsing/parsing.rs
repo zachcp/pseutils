@@ -1,3 +1,4 @@
+use pdbtbx::PDB;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_pickle::{from_value, Value};
 
@@ -58,6 +59,64 @@ impl<'de> Deserialize<'de> for PymolSessionObjectData {
         // If both fail, return a generic error
         // Err(String::from("We are unable to serialize this Value"));
         Err(panic!("Problem opening the file"))
+    }
+}
+
+/// PyObjectMolecule
+/// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3524
+/// ObjectMolecule
+/// https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/ObjectMolecule.h#L58
+///
+#[derive(Debug, Deserialize, Serialize)]
+pub struct PyObjectMolecule {
+    object: PyObject,
+    n_cset: i32,
+    n_bond: i32,
+    n_atom: i32,
+    coord_set: Vec<CoordSet>,
+    cs_tmpl: Option<Vec<CoordSet>>,
+    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3037
+    bond: Vec<Bond>,
+    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3248
+    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/AtomInfo.cpp#L792
+    atom: Vec<AtomInfo>,
+    discrete_flag: i32,
+    n_discrete: i32,
+    symmetry: Option<(([f32; 3], [f32; 3]), String)>, // crystal space group and name
+    cur_cset: i32,
+    bond_counter: i32,
+    atom_counter: i32,
+    discrete_atm_to_idx: Option<Vec<i32>>,
+    dcs: Option<Vec<i32>>,
+}
+impl PyObjectMolecule {
+    fn to_pdb(&self) -> PDB {
+        PDB::new()
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct SessionSelectorList(Vec<SessionSelector>);
+
+#[derive(Debug, Serialize)]
+struct SessionSelector {
+    id: String,
+    values1: Vec<i64>,
+    values2: Vec<i64>,
+}
+
+// You might need a custom Deserialize implementation for SessionSelector
+impl<'de> Deserialize<'de> for SessionSelector {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let (id, values1, values2) = Deserialize::deserialize(deserializer)?;
+        Ok(SessionSelector {
+            id,
+            values1,
+            values2,
+        })
     }
 }
 
@@ -178,77 +237,6 @@ struct Bond {
     // todo hhandle arrity 7 or arrity 8 with specific symmetry info
     // Symmetry operation of the second atom.
     // symop_2: Option<String>,
-}
-
-/// PyObjectMolecule
-/// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3524
-/// ObjectMolecule
-/// https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/ObjectMolecule.h#L58
-///
-#[derive(Debug, Deserialize, Serialize)]
-pub struct PyObjectMolecule {
-    object: PyObject,
-    n_cset: i32,
-    n_bond: i32,
-    n_atom: i32,
-    coord_set: Vec<CoordSet>,
-    cs_tmpl: Option<Vec<CoordSet>>,
-    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3037
-    bond: Vec<Bond>,
-    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3248
-    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/AtomInfo.cpp#L792
-    atom: Vec<AtomInfo>,
-    discrete_flag: i32,
-    n_discrete: i32,
-    symmetry: Option<(([f32; 3], [f32; 3]), String)>, // crystal space group and name
-    cur_cset: i32,
-    bond_counter: i32,
-    atom_counter: i32,
-    discrete_atm_to_idx: Option<Vec<i32>>,
-    dcs: Option<Vec<i32>>,
-}
-
-// this one works!
-// #[derive(Debug, Deserialize, Serialize)]
-// struct SessionSelectorList(Vec<(String, Vec<i64>, Vec<i64>)>);
-
-// #[derive(Debug, Deserialize, Serialize)]
-// struct SessionSelectorList {
-//     // sessions: Vec<SessionSelector>,
-//     #[serde(rename = "0")]
-//     sessions: Vec<(String, Vec<i64>, Vec<i64>)>,
-// }
-
-// #[derive(Debug, Deserialize, Serialize)]
-// struct SessionSelector {
-//     name: String,
-//     data1: Vec<i64>,
-//     data2: Vec<i64>,
-// }
-
-#[derive(Debug, Deserialize, Serialize)]
-struct SessionSelectorList(Vec<SessionSelector>);
-
-#[derive(Debug, Serialize)]
-struct SessionSelector {
-    id: String,
-    values1: Vec<i64>,
-    values2: Vec<i64>,
-}
-
-// You might need a custom Deserialize implementation for SessionSelector
-impl<'de> Deserialize<'de> for SessionSelector {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let (id, values1, values2) = Deserialize::deserialize(deserializer)?;
-        Ok(SessionSelector {
-            id,
-            values1,
-            values2,
-        })
-    }
 }
 
 // Todo:
