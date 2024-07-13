@@ -94,7 +94,9 @@ impl PyObjectMolecule {
             .map(|atm_idx| self.get_atom(*atm_idx))
             .collect();
 
-        // Create Residues from Atoms
+        // Create Conformer from Atoms
+        //
+        // Create Residues from Conformer
         //
         // Todo: Function to get all residues from AtomList
         //
@@ -203,7 +205,9 @@ impl PyObjectMolecule {
         );
         atom.unwrap()
     }
-    pub fn get_residues() {}
+    pub fn get_chains(&self) -> Vec<String> {
+        &self.atom.iter().filter_map(|atm| atm.chain).collect()
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -289,17 +293,17 @@ pub struct CoordSet {
 
 #[derive(Debug, Deserialize, Serialize)]
 struct AtomInfo {
-    resv: i32,
-    chain: String,
+    pub resv: i32,
+    pub chain: String,
     alt: String,
     resi: String,
     segi: String,
-    resn: String,
+    pub resn: String,
     pub name: String,
     pub elem: String,
     text_type: String,
     label: String,
-    ss_type: String,
+    pub ss_type: String,
     is_hydrogen: i8, // this is a boolean
     custom_type: i32,
     priority: i32,
