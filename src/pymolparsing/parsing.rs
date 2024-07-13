@@ -156,10 +156,10 @@ impl PyObjectMolecule {
         //
 
         let cset = &self.coord_set;
-        println!("{:?}", cset);
+        // println!("{:?}", cset);
         let atom_coords = &cset[0].coord; // note there may be more than one coord set.... Todo.
-        println!("{:?}", atom_coords);
-        // coords are stored in a 1D vector of x,y,z,x,y,x,z,x,y,z
+                                          // println!("{:?}", atom_coords);
+                                          // coords are stored in a 1D vector of x,y,z,x,y,x,z,x,y,z
         let base_coord = (3 * atm_idx) as usize;
         println!("{}", base_coord);
         let x_coord = atom_coords[base_coord];

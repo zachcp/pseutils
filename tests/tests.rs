@@ -161,7 +161,10 @@ fn test_pdb() {
 
     let mols = psedata.get_molecule_data();
     assert_eq!(mols.len(), 1);
-    let s1 = mols[0].get_atom(0);
+    let atom01 = mols[0].get_atom(0);
+    assert!(atom01.x() == 50.87300109863281);
+    assert!(atom01.y() == 32.97800064086914);
+    assert!(atom01.z() == 2.38700008392334);
     // let coordstring = mols[1].get_str();
     // println!("{:?}", coordstring)
 }
