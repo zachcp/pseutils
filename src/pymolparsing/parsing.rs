@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use pdbtbx::{self, PDB};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_pickle::{from_value, Value};
@@ -180,11 +181,11 @@ impl PyObjectMolecule {
         // println!("{:?}", atom_coords);
         // coords are stored in a 1D vector of x,y,z,x,y,x,z,x,y,z
         let base_coord = (3 * atm_idx) as usize;
-        println!("{}", base_coord);
+        // println!("{}", base_coord);
         let x_coord = atom_coords[base_coord];
         let y_coord = atom_coords[base_coord + 1];
         let z_coord = atom_coords[base_coord + 2];
-        println!("{}, {}, {}", x_coord, y_coord, z_coord);
+        // println!("{}, {}, {}", x_coord, y_coord, z_coord);
 
         let atom_info = &self.atom.iter().find(|atm| atm.id == atm_idx + 1).unwrap(); // note that the atom in the atom vector seem to be 1-indexed.
 
@@ -206,10 +207,22 @@ impl PyObjectMolecule {
         atom.unwrap()
     }
 
+    /// Get unique chain names
     pub fn get_chains(&self) -> Vec<String> {
         self.atom
             .iter()
             .filter_map(|atm| Some(atm.chain.clone()))
+            .unique() // from itertools
+            .collect()
+    }
+
+    /// Get unique chain names
+    pub fn get_residues_by_chain(&self, chain: String) -> Vec<i32> {
+        self.atom
+            .iter()
+            .filter(|atm| atm.chain == chain)
+            .map(|atm| atm.resv)
+            .unique()
             .collect()
     }
 }

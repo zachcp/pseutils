@@ -166,5 +166,10 @@ fn test_pdb() {
     assert!(atom01.y() == 32.97800064086914);
     assert!(atom01.z() == 2.38700008392334);
 
+    let chains = mols[0].get_chains();
+    println!("Chains: {:?}", chains);
+    let residues = mols[0].get_residues_by_chain(chains[0].clone());
+    println!("Residues: {:?}", residues);
+
     let pdb = mols[0].to_pdb();
 }
