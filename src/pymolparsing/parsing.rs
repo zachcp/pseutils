@@ -109,7 +109,7 @@ impl PyObjectMolecule {
 
         // Create PDB from Models
         //
-        let mut pdb = PDB::new();
+        let pdb = PDB::new();
 
         // let residue = Residue.new();
         // let atom = Atom.new();
@@ -205,8 +205,12 @@ impl PyObjectMolecule {
         );
         atom.unwrap()
     }
+
     pub fn get_chains(&self) -> Vec<String> {
-        &self.atom.iter().filter_map(|atm| atm.chain).collect()
+        self.atom
+            .iter()
+            .filter_map(|atm| Some(atm.chain.clone()))
+            .collect()
     }
 }
 
