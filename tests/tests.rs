@@ -175,4 +175,11 @@ fn test_pdb() {
     println!("Chain: {:?}", chain);
 
     let pdb = mols[0].to_pdb();
+
+    let _ = pdbtbx::save_pdb(
+        &pdb,
+        "/Users/zcpowers/Desktop/PSE/pickletest/test_01.pdb",
+        pdbtbx::StrictnessLevel::Strict,
+    )
+    .expect("PDB output");
 }
