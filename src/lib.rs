@@ -1,3 +1,4 @@
 pub mod molviewspec;
-pub mod psedata;
 mod pymolparsing;
+
+pub use pymolparsing::psedata::PSEData;

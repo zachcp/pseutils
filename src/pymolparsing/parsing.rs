@@ -1,28 +1,22 @@
+use itertools::Itertools;
+use pdbtbx::{self, Residue, PDB};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_pickle::{from_value, Value};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SessionName {
-    name: String,
+    pub name: String,
     object: i32,
     visible: i32,
     unused: Option<bool>,
     unused2: i32,
-    // SelectorAsPyList
-    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer3/Selector.cpp#L2926
-    // list of lists
-    // String: Name of the Object
-    // Vec1: Index Object ( from VLA list )
-    // Vec2: Tag Object ( from VLA list )
-    // selector: Vec<(String, Vec<i32>, Vec<i32>)>, // this is there the selection bits are
-    data: PymolSessionObjectData,
-    // data: PyObjectMolecule,
+    pub data: PymolSessionObjectData,
     group: String,
 }
 
 #[derive(Debug, Serialize)]
 #[serde(untagged)]
-enum PymolSessionObjectData {
+pub enum PymolSessionObjectData {
     PyObjectMolecule(PyObjectMolecule),
     SessionSelectorList(SessionSelectorList),
     // MolVariant(PyObjectMolecule),
@@ -45,10 +39,10 @@ impl<'de> Deserialize<'de> for PymolSessionObjectData {
             Err(_) => {} // If it fails, we'll try the next option
         }
 
-        println!(
-            "Did not serialize as a molecule. Not trying as a session: {:?}",
-            value
-        );
+        // println!(
+        //     "Did not serialize as a molecule. Not trying as a session: {:?}",
+        //     value
+        // );
 
         // If that fails, try to deserialize as SessionSelector
         match from_value::<SessionSelectorList>(value.clone()) {
@@ -59,6 +53,255 @@ impl<'de> Deserialize<'de> for PymolSessionObjectData {
         // If both fail, return a generic error
         // Err(String::from("We are unable to serialize this Value"));
         Err(panic!("Problem opening the file"))
+    }
+}
+
+/// PyObjectMolecule
+/// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3524
+/// ObjectMolecule
+/// https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/ObjectMolecule.h#L58
+///
+#[derive(Debug, Deserialize, Serialize)]
+pub struct PyObjectMolecule {
+    object: PyObject,
+    n_cset: i32,
+    n_bond: i32,
+    n_atom: i32,
+    /// Vector of Coordinates
+    coord_set: Vec<CoordSet>,
+    cs_tmpl: Option<Vec<CoordSet>>,
+    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3037
+    bond: Vec<Bond>,
+    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3248
+    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/AtomInfo.cpp#L792
+    atom: Vec<AtomInfo>,
+    discrete_flag: i32,
+    n_discrete: i32,
+    symmetry: Option<(([f32; 3], [f32; 3]), String)>, // crystal space group and name
+    cur_cset: i32,
+    bond_counter: i32,
+    atom_counter: i32,
+    discrete_atm_to_idx: Option<Vec<i32>>,
+    dcs: Option<Vec<i32>>,
+}
+impl PyObjectMolecule {
+    pub fn get_str(&self) -> String {
+        // get_str
+        // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer4/Cmd.cpp#L3877
+        // PymolMoleculeExporter
+        // https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L1627
+        // PDB Exporter
+        // MoleculeExporterPDB
+        // https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L439
+        //
+        //
+        // exporter->init(G);
+        //
+        // exporter->setMulti(multi);
+        // exporter->setRefObject(ref_object, ref_state);
+        // exporter->execute(sele, state);
+        //
+        // CoordSetAtomToPDBStrVLA
+        //
+        // Variables:
+        //  - m_iter: SeleCoordIterator m_iter;
+        //
+        // // Atoms:
+        //     // how do we check for multiple objects?
+        //     // m_iter.obj defines the object. By number? by name?
+        //     - iterate through the coordinates
+        //     - check for multi
+
+        // update transformation matrices
+        // updateMatrix(m_mat_full, true);
+        // updateMatrix(m_mat_move, false);
+
+        // beginCoordSet();
+        // m_last_cs = m_iter.cs;
+
+        // for bonds
+        // if (!m_tmpids[m_iter.getAtm()]) {
+        //   m_id = m_retain_ids ? m_iter.getAtomInfo()->id : (m_id + 1);
+        //   m_tmpids[m_iter.getAtm()] = m_id;
+        // }
+
+        //
+
+        // for coord in &self.coord_set {
+        //     println!("{:?}", coord);
+        // }
+        "test".to_string()
+    }
+    /// Create a PDBTBX::Atom from the pymol object datastructure
+    pub fn get_atom(&self, atm_idx: i32) -> pdbtbx::Atom {
+        // find atom ids and coordinates in the CoordSet
+        // find the remaining atom info in the AtomInfo Vector
+        let cset = &self.coord_set;
+        // println!("{:?}", cset);
+        let atom_coords = &cset[0].coord; // note there may be more than one coord set.... Todo.
+
+        // println!("{:?}", atom_coords);
+        // coords are stored in a 1D vector of x,y,z,x,y,x,z,x,y,z
+        let base_coord = (3 * atm_idx) as usize;
+        println!("{}", atm_idx);
+        println!("{}", base_coord);
+        let x_coord = atom_coords[base_coord];
+        println!("{}", x_coord);
+        let y_coord = atom_coords[base_coord + 1];
+        println!("{}", y_coord);
+        let z_coord = atom_coords[base_coord + 2];
+        println!("{}", z_coord);
+        // println!("{}, {}, {}", x_coord, y_coord, z_coord);
+
+        let atom_info = &self.atom.iter().find(|atm| atm.id == atm_idx + 1).unwrap(); // note that the atom in the atom vector seem to be 1-indexed.
+        let formal_charge = atom_info.formal_charge as isize;
+        let serial_number = atom_info.id as usize;
+
+        let atom = pdbtbx::Atom::new(
+            atom_info.is_hetero(),  // hetero
+            serial_number,          // serial_number: Note: I am not sure this is correct just yet.
+            atom_info.name.clone(), // atom_name
+            x_coord.into(),         // x
+            y_coord.into(),         // y
+            z_coord.into(),         // z
+            0.0,                    // occupancy? Todo
+            atom_info.b,            // b-factor
+            atom_info.elem.clone(), // element
+            formal_charge,          // charge: todo: is this the right charge?
+        );
+        atom.unwrap()
+    }
+
+    /// Get unique chain names
+    pub fn get_chains(&self) -> Vec<String> {
+        self.atom
+            .iter()
+            .filter_map(|atm| Some(atm.chain.clone()))
+            .unique() // from itertools
+            .collect()
+    }
+
+    /// Get each residue by chain.
+    pub fn get_residues_by_chain(&self, chain: String) -> Vec<i32> {
+        self.atom
+            .iter()
+            .filter(|atm| atm.chain == chain)
+            .map(|atm| atm.resv)
+            .unique()
+            .collect()
+    }
+    /// Get each residue by chain.
+    ///
+    pub fn create_residue(&self, chain: String, residue_number: i32) -> pdbtbx::Residue {
+        let atoms: Vec<&AtomInfo> = self
+            .atom
+            .iter()
+            .filter(|atm| atm.chain == chain && atm.resv == residue_number)
+            .collect();
+
+        let resv = residue_number as isize;
+        let res_name = atoms[0].name.clone();
+        let mut residue = pdbtbx::Residue::new(resv, None, None).expect("Couldn't create residue");
+        let mut conformer =
+            pdbtbx::Conformer::new(res_name, None, None).expect("Couldn't create Conformer");
+
+        for atom in atoms {
+            // coordinate vector is zero-indexed so we need to subtract 1
+            let atom = &self.get_atom(atom.id - 1);
+            conformer.add_atom(atom.clone());
+        }
+
+        residue.add_conformer(conformer);
+        residue
+    }
+
+    pub fn create_chain(&self, chain: String) -> pdbtbx::Chain {
+        let mut new_chain = pdbtbx::Chain::new(chain.clone()).unwrap();
+
+        let residues: Vec<Residue> = self
+            .get_residues_by_chain(chain.clone())
+            .iter()
+            .map(|res_num| self.create_residue(chain.clone(), *res_num))
+            .collect();
+
+        // index out of bounds: the len is 4557 but the index is 4557
+        for res in residues {
+            new_chain.add_residue(res.clone())
+        }
+
+        new_chain
+    }
+    pub fn to_pdb(&self) -> PDB {
+        // Create a Model. Need to fix this later if theres multiple models
+        let mut model = pdbtbx::Model::new(1);
+        let chains: Vec<pdbtbx::Chain> = self
+            .get_chains()
+            .iter()
+            .map(|chainid| self.create_chain(chainid.to_string()))
+            .collect();
+
+        for chain in chains {
+            model.add_chain(chain);
+        }
+        println!("{:?}", model);
+
+        // Create PDB from Models
+        let mut pdb = PDB::new();
+        pdb.add_model(model);
+
+        // Add Bonds Here
+        for bond in &self.bond {
+            println!("{:?}", bond);
+            // Todo: proper pymol bond--> pdbtbx bond
+            pdb.add_bond(
+                (bond.index_1 as usize, None),
+                (bond.index_2 as usize, None),
+                pdbtbx::Bond::Covalent,
+            );
+        }
+
+        let _ = pdbtbx::save_pdb(
+            &pdb,
+            "/Users/zcpowers/Desktop/PSE/pickletest/test_01.pdb",
+            pdbtbx::StrictnessLevel::Strict,
+        )
+        .expect("PDB output");
+        // let _ = pdbtbx::save_pdb_raw(&pdb, "test_02.pdb", pdbtbx::StrictnessLevel::Loose);
+        // pdb add Model (e.g. structures)
+        // pdb add bonds accessible from the bond table
+        pdb
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct SessionSelectorList(Vec<SessionSelector>);
+
+#[derive(Debug, Serialize)]
+struct SessionSelector {
+    // SelectorAsPyList
+    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer3/Selector.cpp#L2926
+    // list of lists
+    // String: Name of the Object
+    // Vec1: Index Object ( from VLA list )
+    // Vec2: Tag Object ( from VLA list )
+    // selector: Vec<(String, Vec<i32>, Vec<i32>)>, // this is there the selection bits are
+    id: String,
+    values1: Vec<i64>,
+    values2: Vec<i64>,
+}
+
+// You might need a custom Deserialize implementation for SessionSelector
+impl<'de> Deserialize<'de> for SessionSelector {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let (id, values1, values2) = Deserialize::deserialize(deserializer)?;
+        Ok(SessionSelector {
+            id,
+            values1,
+            values2,
+        })
     }
 }
 
@@ -91,43 +334,39 @@ struct PyObject {
 }
 
 /// Coord Set
-/// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/CoordSet.cpp#L363
+/// [pymol_coordset](https://github.com/schrodinger/pymol-open-source/blob/master/layer2/CoordSet.cpp#L363)
+/// [pymol_coordset_settings]( https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Setting.cpp#L962)
 #[derive(Debug, Deserialize, Serialize)]
-struct CoordSet {
-    n_index: i32,
-    n_at_index: i32,
-    coord: Vec<f32>,
-    idx_to_atm: Vec<i32>,
-    atm_to_idx: Option<Vec<i32>>,
+pub struct CoordSet {
+    pub n_index: i32,         // 1519
+    n_at_index: i32,          // 1519
+    pub coord: Vec<f32>,      // len -== 4556 ( 1519 *3 )
+    pub idx_to_atm: Vec<i32>, // 1 - 1518
+    pub atm_to_idx: Option<Vec<i32>>,
     name: String,
-    // PyObject *ObjectStateAsPyList(CObjectState * I)
-    // https://github.com/schrodinger/pymol-open-source/blob/master/layer1/PyMOLObject.cpp#L1391
-    // object_state: Vec<Option<Vec<f64>>>, //
-    // *SettingAsPyList
-    // https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Setting.cpp#L962
     setting: Vec<Option<bool>>, // punting on this
     lab_pos: Option<bool>,      // might be wrong
     field_9: Option<bool>,      // probably wrong...
     // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer1/CGO.cpp#L220
     sculpt_cgo: Option<(i32, Vec<f32>)>,           //
     atom_state_settings: Option<Vec<Option<i32>>>, //
-    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Symmetry.cpp#L30
-    symmetry: Option<Vec<(((i32, i32, i32), (i32, i32, i32)), String)>>, //
+    /// [symettry_settings](https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Symmetry.cpp#L30)
+    symmetry: Option<Vec<(((i32, i32, i32), (i32, i32, i32)), String)>>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 struct AtomInfo {
-    resv: i32,
-    chain: String,
+    pub resv: i32,
+    pub chain: String,
     alt: String,
     resi: String,
     segi: String,
-    resn: String,
-    name: String,
-    elem: String,
+    pub resn: String,
+    pub name: String,
+    pub elem: String,
     text_type: String,
     label: String,
-    ss_type: String,
+    pub ss_type: String,
     is_hydrogen: i8, // this is a boolean
     custom_type: i32,
     priority: i32,
@@ -136,7 +375,7 @@ struct AtomInfo {
     vdw: f64,
     partial_charge: f64,
     formal_charge: i32,
-    hetatm: i8, // this is a boolean
+    pub hetatm: i8, // this is a boolean
     vis_rep: i32,
     color: i32,
     id: i32,
@@ -166,6 +405,32 @@ struct AtomInfo {
     anisou_6: f32,
     custom: String,
 }
+impl AtomInfo {
+    pub fn is_hetero(&self) -> bool {
+        match self.hetatm {
+            1 => true,
+            0 => false,
+            _ => false,
+        }
+    }
+    pub fn to_pdbtbx_atom(&self) -> pdbtbx::Atom {
+        let formal_charge = self.formal_charge as isize;
+
+        let atom = pdbtbx::Atom::new(
+            self.is_hetero(), // hetero
+            0,                // serial_number
+            &self.name,       // atom_name
+            0.0,              // x Todo
+            0.0,              // y Todo
+            0.0,              // z Todo
+            0.0,              // occupancy? Todo
+            self.b,           // b-factor
+            &self.elem,       // element
+            formal_charge,    // charge: todo: is this the right charge?
+        );
+        atom.unwrap()
+    }
+}
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Bond {
@@ -179,77 +444,6 @@ struct Bond {
     // todo hhandle arrity 7 or arrity 8 with specific symmetry info
     // Symmetry operation of the second atom.
     // symop_2: Option<String>,
-}
-
-/// PyObjectMolecule
-/// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3524
-/// ObjectMolecule
-/// https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/ObjectMolecule.h#L58
-///
-#[derive(Debug, Deserialize, Serialize)]
-struct PyObjectMolecule {
-    object: PyObject,
-    n_cset: i32,
-    n_bond: i32,
-    n_atom: i32,
-    coord_set: Vec<CoordSet>,
-    cs_tmpl: Option<Vec<CoordSet>>,
-    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3037
-    bond: Vec<Bond>,
-    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3248
-    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/AtomInfo.cpp#L792
-    atom: Vec<AtomInfo>,
-    discrete_flag: i32,
-    n_discrete: i32,
-    symmetry: Option<(([f32; 3], [f32; 3]), String)>, // crystal space group and name
-    cur_cset: i32,
-    bond_counter: i32,
-    atom_counter: i32,
-    discrete_atm_to_idx: Option<Vec<i32>>,
-    dcs: Option<Vec<i32>>,
-}
-
-// this one works!
-// #[derive(Debug, Deserialize, Serialize)]
-// struct SessionSelectorList(Vec<(String, Vec<i64>, Vec<i64>)>);
-
-// #[derive(Debug, Deserialize, Serialize)]
-// struct SessionSelectorList {
-//     // sessions: Vec<SessionSelector>,
-//     #[serde(rename = "0")]
-//     sessions: Vec<(String, Vec<i64>, Vec<i64>)>,
-// }
-
-// #[derive(Debug, Deserialize, Serialize)]
-// struct SessionSelector {
-//     name: String,
-//     data1: Vec<i64>,
-//     data2: Vec<i64>,
-// }
-
-#[derive(Debug, Deserialize, Serialize)]
-struct SessionSelectorList(Vec<SessionSelector>);
-
-#[derive(Debug, Serialize)]
-struct SessionSelector {
-    id: String,
-    values1: Vec<i64>,
-    values2: Vec<i64>,
-}
-
-// You might need a custom Deserialize implementation for SessionSelector
-impl<'de> Deserialize<'de> for SessionSelector {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let (id, values1, values2) = Deserialize::deserialize(deserializer)?;
-        Ok(SessionSelector {
-            id,
-            values1,
-            values2,
-        })
-    }
 }
 
 // Todo:

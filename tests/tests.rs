@@ -1,6 +1,5 @@
-use pymol_session_utils::molviewspec::builder::create_builder;
-use pymol_session_utils::molviewspec::nodes::{ComponentExpression, KindT, Metadata, Node, State};
-use pymol_session_utils::psedata::PSEData;
+use pymol_session_utils::molviewspec::nodes::{ComponentExpression, KindT, State};
+use pymol_session_utils::PSEData;
 use serde_json::from_reader;
 use std::collections::HashMap;
 use std::fs::File;
@@ -150,23 +149,30 @@ fn test_molspecview_json_full_examples_basic() {
 }
 
 #[test]
-fn test_builder() {
-    // let builder = create_builder();
+fn test_pdb() {
+    let psedata: PSEData = PSEData::load("tests/data/example.pse").unwrap();
+    let names = psedata.get_session_names();
+    print!("{:?}", names);
+    // this has a Molecule and a selection
+    assert_eq!(names.len(), 2);
 
-    let builder = create_builder()
-        .download("https://www.ebi.ac.uk/pdbe/entry-files/download/1cbs_updated.cif".to_string());
+    let mols = psedata.get_molecule_data();
+    assert_eq!(mols.len(), 1);
+    let atom01 = mols[0].get_atom(0);
+    assert!(atom01.x() == 50.87300109863281);
+    assert!(atom01.y() == 32.97800064086914);
+    assert!(atom01.z() == 2.38700008392334);
 
-    // .parse(format="mmcif")
+    let chains = mols[0].get_chains();
+    println!("Chains: {:?}", chains);
+    let residues = mols[0].get_residues_by_chain(chains[0].clone());
+    println!("Residues: {:?}", residues);
 
-    // builder = create_builder()
-    // structure = (builder
-    //     .download(url="https://www.ebi.ac.uk/pdbe/entry-files/download/1cbs_updated.cif")
-    //     .parse(format="mmcif")
-    //     .model_structure()
-    //     .component()
-    //     .representation()
-    //     .color(color="blue")
-    // )
+    let residue = mols[0].create_residue(chains[0].clone(), residues[0]);
+    println!("Residue: {:?}", residue);
 
-    // return builder.get_state()
+    let chain = mols[0].create_chain(chains[0].clone());
+    println!("Chain: {:?}", chain);
+
+    let pdb = mols[0].to_pdb();
 }

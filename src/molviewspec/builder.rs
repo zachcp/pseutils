@@ -1,7 +1,6 @@
 // Use this builder to navigate the creating of MolViewSpec files. Chain operations together as needed and invoke
 //`get_state` or `save_state` to export the corresponding JSON needed to recreate that scene.
-
-use crate::molviewspec::nodes::{DescriptionFormatT, KindT, Node, State};
+use crate::molviewspec::nodes::State;
 
 pub fn create_builder() -> State {
     return State::new();
