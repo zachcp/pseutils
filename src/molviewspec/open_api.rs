@@ -2,6 +2,10 @@
 use serde::{Deserialize, Serialize};
 use validator::{Validate, ValidationError};
 
+pub fn get_builder() -> State {
+    State::new()
+}
+
 #[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct CameraParams {
     #[validate(length(min = 3, max = 3))]
@@ -288,12 +292,32 @@ pub struct Metadata {
     pub description_format: Option<String>,
     pub timestamp: String,
 }
+impl Metadata {
+    pub fn new() -> Self {
+        Metadata {
+            version: "1.0".to_string(),
+            title: None,
+            description: None,
+            description_format: None,
+            timestamp: chrono::Utc::now().to_rfc3339(),
+        }
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Node {
     pub kind: String,
     pub params: Option<serde_json::Value>,
     pub children: Option<Vec<Node>>,
+}
+impl Node {
+    pub fn new(kind: String) -> Node {
+        Node {
+            kind,
+            params: None,
+            children: None,
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
@@ -322,6 +346,14 @@ pub struct SphereParams {
 pub struct State {
     pub root: Node,
     pub metadata: Metadata,
+}
+impl State {
+    pub fn new() -> State {
+        State {
+            root: Node::new("root".to_string()),
+            metadata: Metadata::new(),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
