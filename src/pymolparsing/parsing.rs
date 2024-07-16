@@ -87,43 +87,6 @@ pub struct PyObjectMolecule {
     dcs: Option<Vec<i32>>,
 }
 impl PyObjectMolecule {
-    pub fn to_pdb(&self) -> PDB {
-        // Create Atoms
-        //
-        // get the atom index and use it to extract all the atoms
-        let all_idxs = &self.coord_set[0].idx_to_atm;
-        let pdbtbx_atoms: Vec<pdbtbx::Atom> = all_idxs
-            .into_iter()
-            .map(|atm_idx| self.get_atom(*atm_idx))
-            .collect();
-
-        // Create Conformer from Atoms
-        //
-        // Create Residues from Conformer
-        //
-        // Todo: Function to get all residues from AtomList
-        //
-        // Create Chains from Residues
-        //
-        // let chain = Chain.new();
-        // Create Models from Residues
-        //
-        // let model = Model.new();
-
-        // Create PDB from Models
-        //
-        let pdb = PDB::new();
-
-        // let residue = Residue.new();
-        // let atom = Atom.new();
-        // let bond = Bond.new();
-        //
-        //
-
-        // pdb add Model (e.g. strucutures)
-        // pdb add bonds accessible from the bond table
-        pdb
-    }
     pub fn get_str(&self) -> String {
         // get_str
         // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer4/Cmd.cpp#L3877
@@ -261,6 +224,36 @@ impl PyObjectMolecule {
             .map(|res| new_chain.add_residue(res.clone()));
 
         new_chain
+    }
+    pub fn to_pdb(&self) -> PDB {
+        // Create Atoms
+        //
+        // get the atom index and use it to extract all the atoms
+        let all_idxs = &self.coord_set[0].idx_to_atm;
+        let pdbtbx_atoms: Vec<pdbtbx::Atom> = all_idxs
+            .into_iter()
+            .map(|atm_idx| self.get_atom(*atm_idx))
+            .collect();
+
+        // Create a Model. Need to fix this later if theres multiple models
+        let mut model = pdbtbx::Model::new(1);
+        let chains: Vec<pdbtbx::Chain> = self
+            .get_chains()
+            .iter()
+            .map(|chainid| self.create_chain(chainid.to_string()))
+            .collect();
+
+        for chain in chains {
+            model.add_chain(chain);
+        }
+
+        // Create PDB from Models
+        let mut pdb = PDB::new();
+        pdb.add_model(model);
+
+        // pdb add Model (e.g. strucutures)
+        // pdb add bonds accessible from the bond table
+        pdb
     }
 }
 
