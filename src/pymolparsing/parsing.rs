@@ -1,7 +1,5 @@
-use std::arch::aarch64;
-
 use itertools::Itertools;
-use pdbtbx::{self, PDB};
+use pdbtbx::{self, Residue, PDB};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_pickle::{from_value, Value};
 
@@ -136,9 +134,8 @@ impl PyObjectMolecule {
     }
     /// Create a PDBTBX::Atom from the pymol object datastructure
     pub fn get_atom(&self, atm_idx: i32) -> pdbtbx::Atom {
-        // find atom ids and coordinates in the Coodrset
+        // find atom ids and coordinates in the CoordSet
         // find the remaining atom info in the AtomInfo Vector
-
         let cset = &self.coord_set;
         // println!("{:?}", cset);
         let atom_coords = &cset[0].coord; // note there may be more than one coord set.... Todo.
@@ -146,14 +143,17 @@ impl PyObjectMolecule {
         // println!("{:?}", atom_coords);
         // coords are stored in a 1D vector of x,y,z,x,y,x,z,x,y,z
         let base_coord = (3 * atm_idx) as usize;
-        // println!("{}", base_coord);
+        println!("{}", atm_idx);
+        println!("{}", base_coord);
         let x_coord = atom_coords[base_coord];
+        println!("{}", x_coord);
         let y_coord = atom_coords[base_coord + 1];
+        println!("{}", y_coord);
         let z_coord = atom_coords[base_coord + 2];
+        println!("{}", z_coord);
         // println!("{}, {}, {}", x_coord, y_coord, z_coord);
 
         let atom_info = &self.atom.iter().find(|atm| atm.id == atm_idx + 1).unwrap(); // note that the atom in the atom vector seem to be 1-indexed.
-
         let formal_charge = atom_info.formal_charge as isize;
         let serial_number = atom_info.id as usize;
 
@@ -206,7 +206,7 @@ impl PyObjectMolecule {
             pdbtbx::Conformer::new(res_name, None, None).expect("Couldn't create Conformer");
 
         for atom in atoms {
-            let atom = &self.get_atom(atom.id);
+            let atom = &self.get_atom(atom.id - 1);
             conformer.add_atom(atom.clone());
         }
 
@@ -217,24 +217,20 @@ impl PyObjectMolecule {
     pub fn create_chain(&self, chain: String) -> pdbtbx::Chain {
         let mut new_chain = pdbtbx::Chain::new(chain.clone()).unwrap();
 
-        let _ = self
+        let residues: Vec<Residue> = self
             .get_residues_by_chain(chain.clone())
             .iter()
             .map(|res_num| self.create_residue(chain.clone(), *res_num))
-            .map(|res| new_chain.add_residue(res.clone()));
+            .collect();
+
+        // index out of bounds: the len is 4557 but the index is 4557
+        for res in residues {
+            new_chain.add_residue(res.clone())
+        }
 
         new_chain
     }
     pub fn to_pdb(&self) -> PDB {
-        // Create Atoms
-        //
-        // get the atom index and use it to extract all the atoms
-        let all_idxs = &self.coord_set[0].idx_to_atm;
-        let pdbtbx_atoms: Vec<pdbtbx::Atom> = all_idxs
-            .into_iter()
-            .map(|atm_idx| self.get_atom(*atm_idx))
-            .collect();
-
         // Create a Model. Need to fix this later if theres multiple models
         let mut model = pdbtbx::Model::new(1);
         let chains: Vec<pdbtbx::Chain> = self
@@ -246,12 +242,19 @@ impl PyObjectMolecule {
         for chain in chains {
             model.add_chain(chain);
         }
+        println!("{:?}", model);
 
         // Create PDB from Models
         let mut pdb = PDB::new();
         pdb.add_model(model);
-
-        // pdb add Model (e.g. strucutures)
+        let _ = pdbtbx::save_pdb(
+            &pdb,
+            "/Users/zcpowers/Desktop/PSE/pickletest/test_01.pdb",
+            pdbtbx::StrictnessLevel::Strict,
+        )
+        .expect("PDB output");
+        // let _ = pdbtbx::save_pdb_raw(&pdb, "test_02.pdb", pdbtbx::StrictnessLevel::Loose);
+        // pdb add Model (e.g. structures)
         // pdb add bonds accessible from the bond table
         pdb
     }

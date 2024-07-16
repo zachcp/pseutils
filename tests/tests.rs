@@ -151,9 +151,6 @@ fn test_molspecview_json_full_examples_basic() {
 #[test]
 fn test_pdb() {
     let psedata: PSEData = PSEData::load("tests/data/example.pse").unwrap();
-    let pdb = psedata.create_pdb();
-    assert_eq!(pdb, pdbtbx::PDB::new());
-
     let names = psedata.get_session_names();
     print!("{:?}", names);
     // this has a Molecule and a selection
