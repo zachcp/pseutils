@@ -43,5 +43,6 @@ fn test_open_api_gen2() {
     let mut builder = get_builder();
     let download = builder
         .root
-        .download("https://files.rcsb.org/download/1pdb.pdb");
+        .download("https://files.rcsb.org/download/1pdb.pdb")
+        .parse("pdb");
 }

@@ -330,9 +330,9 @@ impl Node {
     }
 
     pub fn download(&mut self, url: &str) -> Node {
+        // Todo: shoudl we chack allowable kinds here?
         let kind = &self.kind;
         println!("{:?}", kind);
-
         let params = Some(HashMap::from([(
             "url".to_string(),
             serde_json::Value::String(url.to_string()),
@@ -342,6 +342,28 @@ impl Node {
 
         self.add_child(download_node.clone());
         download_node
+    }
+    pub fn parse(&mut self, format: &str) -> Node {
+        let kind = &self.kind;
+        assert!(
+            kind == "download",
+            "Kind must be 'download' for parse operation"
+        );
+
+        assert!(
+            ["pdb", "mmcif"].contains(&format),
+            "Format must be either 'pdb' or 'mmcif'"
+        );
+
+        let params = Some(HashMap::from([(
+            "format".to_string(),
+            serde_json::Value::String(format.to_string()),
+        )]));
+
+        let parse_node = Node::new("parse".to_string(), params);
+
+        self.add_child(parse_node.clone());
+        parse_node
     }
 }
 
