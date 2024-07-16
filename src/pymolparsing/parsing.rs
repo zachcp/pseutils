@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use pdbtbx::{self, Residue, PDB};
+use pdbtbx::{self, Residue, Symmetry, PDB};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_pickle::{from_value, Value};
 
@@ -193,6 +193,29 @@ impl PyObjectMolecule {
             .unique()
             .collect()
     }
+
+    pub fn get_unit_cell_symmetry(&self) -> (pdbtbx::UnitCell, pdbtbx::Symmetry) {
+        let symmetry = &self.symmetry.clone().expect("Expected a symmetry group.");
+        let (([a, b, c], [alpha, beta, gamma]), sym_group) = symmetry;
+        println!(
+            "{}, {}, {}, {}, {}, {}, {}",
+            a, b, c, alpha, beta, gamma, sym_group
+        );
+
+        // let unitcell = pdbtbx::UnitCell::new(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let unitcell = pdbtbx::UnitCell::new(
+            *a as f64,
+            *b as f64,
+            *c as f64,
+            *alpha as f64,
+            *beta as f64,
+            *gamma as f64,
+        );
+
+        let pdbsym = pdbtbx::Symmetry::new(sym_group).expect("Invalid Symmetry group");
+
+        (unitcell, pdbsym)
+    }
     /// Get each residue by chain.
     ///
     pub fn create_residue(&self, chain: String, residue_number: i32) -> pdbtbx::Residue {
@@ -264,8 +287,15 @@ impl PyObjectMolecule {
             );
         }
 
+        // Add Name/ Identifier
         let identifier = self.get_name().clone();
         pdb.identifier = Some(identifier);
+
+        // Add Unit Cell and Symmetrey Info
+        let (unit, sym) = self.get_unit_cell_symmetry();
+        pdb.unit_cell = Some(unit);
+        pdb.symmetry = Some(sym);
+
         pdb
     }
 }

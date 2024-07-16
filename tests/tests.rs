@@ -174,6 +174,11 @@ fn test_pdb() {
     let chain = mols[0].create_chain(chains[0].clone());
     println!("Chain: {:?}", chain);
 
+    // Check symmetry code
+    let (unit, sym) = mols[0].get_unit_cell_symmetry();
+    println!("{:?},{:?}", unit, sym);
+
+    // Move on to PDB, baby!
     let pdb = mols[0].to_pdb();
 
     let _ = pdbtbx::save_pdb(
