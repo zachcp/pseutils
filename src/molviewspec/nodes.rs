@@ -1,6 +1,6 @@
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use validator::Validate;
 
 #[derive(PartialEq, Serialize, Deserialize, Debug, Default, Clone)]
 #[serde(rename_all = "snake_case")]
@@ -32,19 +32,49 @@ pub enum KindT {
     Transform,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum NodeParams {
+    DownloadParams(DownloadParams),
+    ParseParams(ParseParams),
+    StructureParams(StructureParams),
+    RepresentationParams(RepresentationParams),
+    DataFromUriParams(DataFromUriParams),
+    DataFromSourceParams(DataFromSourceParams),
+    ComponentInlineParams(ComponentInlineParams),
+    ComponentFromUriParams(ComponentFromUriParams),
+    ComponentFromSourceParams(ComponentFromSourceParams),
+    ColorInlineParams(ColorInlineParams),
+    ColorFromUriParams(ColorFromUriParams),
+    ColorFromSourceParams(ColorFromSourceParams),
+    LabelInlineParams(LabelInlineParams),
+    LabelFromUriParams(LabelFromUriParams),
+    LabelFromSourceParams(LabelFromSourceParams),
+    TooltipInlineParams(TooltipInlineParams),
+    TooltipFromUriParams(TooltipFromUriParams),
+    TooltipFromSourceParams(TooltipFromSourceParams),
+    FocusInlineParams(FocusInlineParams),
+    TransformParams(TransformParams),
+    CameraParams(CameraParams),
+    CanvasParams(CanvasParams),
+    SphereParams(SphereParams),
+    LineParams(LineParams),
+}
+
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct Node {
     pub kind: KindT,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub params: Option<HashMap<String, serde_json::Value>>,
+    pub params: Option<NodeParams>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub children: Option<Vec<Node>>,
 }
 impl Node {
-    pub fn new(kind: KindT) -> Node {
+    // Common to All Nodes
+    pub fn new(kind: KindT, params: Option<NodeParams>) -> Node {
         Node {
-            kind: kind,
-            ..Default::default()
+            kind,
+            params,
+            children: None,
         }
     }
     pub fn add_child(&mut self, node: Node) {
@@ -58,15 +88,24 @@ impl Node {
     }
     // Only Applicable to the Download Node
     pub fn add_download_info(&mut self, url: String) -> Option<&Node> {
-        let params = Some(HashMap::from([(
-            "url".to_string(),
-            serde_json::Value::String(url),
-        )]));
-
         match self.kind {
             KindT::Download => {
-                self.params = params;
+                self.params = Some(NodeParams::DownloadParams(DownloadParams { url }));
                 Some(self)
+            }
+            _ => None,
+        }
+    }
+    /// Create the download node
+    pub fn download(&mut self, url: String) -> Option<Node> {
+        match self.kind {
+            KindT::Root => {
+                let download_node = Node::new(
+                    KindT::Download,
+                    Some(NodeParams::DownloadParams(DownloadParams { url })),
+                );
+                &self.add_child(download_node.clone());
+                Some(download_node)
             }
             _ => None,
         }
@@ -118,7 +157,7 @@ pub struct State {
 impl State {
     pub fn new() -> Self {
         State {
-            root: Node::new(KindT::Root),
+            root: Node::new(KindT::Root, None),
             metadata: Metadata {
                 version: "1.0".to_string(), // todo: update this
                 timestamp: Utc::now().to_rfc3339().to_string(),
@@ -126,22 +165,22 @@ impl State {
             },
         }
     }
-    pub fn download(&mut self, url: String) -> Option<&Node> {
-        let mut download = Node::new(KindT::Download);
-        download.add_download_info(url);
-        self.root.add_child(download);
-        Some(
-            self.root
-                .children
-                .as_ref()
-                .expect("Children vector should exist")
-                .last()
-                .expect("At least one child should exist after adding"),
-        )
-    }
+    // pub fn download(&mut self, url: String) -> Option<&Node> {
+    //     let mut download = Node::new(KindT::Download);
+    //     download.add_download_info(url);
+    //     self.root.add_child(download.clone());
+    //     Some(
+    //         self.root
+    //             .children
+    //             .as_ref()
+    //             .expect("Children vector should exist")
+    //             .last()
+    //             .expect("At least one child should exist after adding"),
+    //     )
+    // }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum ParseFormatT {
     Mmcif,
@@ -149,12 +188,12 @@ pub enum ParseFormatT {
     Pdb,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ParseParams {
     format: ParseFormatT,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum StructureTypeT {
     Model,
@@ -163,7 +202,7 @@ pub enum StructureTypeT {
     SymmetryMates,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct StructureParams {
     #[serde(rename = "type")]
     structure_type: StructureTypeT,
@@ -185,7 +224,7 @@ pub struct StructureParams {
     ijk_max: Option<(i32, i32, i32)>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum ComponentSelectorT {
     All,
@@ -198,7 +237,7 @@ pub enum ComponentSelectorT {
     Water,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ComponentExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub label_entity_id: Option<String>,
@@ -234,7 +273,7 @@ pub struct ComponentExpression {
     pub atom_index: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum RepresentationTypeT {
     BallAndStick,
@@ -242,7 +281,7 @@ pub enum RepresentationTypeT {
     Surface,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum ColorNamesT {
     Aliceblue,
@@ -394,20 +433,20 @@ pub enum ColorNamesT {
     Yellowgreen,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum ColorT {
     Named(ColorNamesT),
     Hex(String),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RepresentationParams {
     #[serde(rename = "type")]
     representation_type: RepresentationTypeT,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum SchemaT {
     WholeStructure,
@@ -423,7 +462,7 @@ pub enum SchemaT {
     AllAtomic,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum SchemaFormatT {
     Cif,
@@ -431,7 +470,7 @@ pub enum SchemaFormatT {
     Json,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DataFromUriParams {
     uri: String,
     format: SchemaFormatT,
@@ -447,7 +486,7 @@ pub struct DataFromUriParams {
     schema_: SchemaT,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DataFromSourceParams {
     category_name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -460,12 +499,12 @@ pub struct DataFromSourceParams {
     schema_: SchemaT,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ComponentInlineParams {
     selector: ComponentSelector,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum ComponentSelector {
     Selector(ComponentSelectorT),
@@ -473,7 +512,7 @@ pub enum ComponentSelector {
     ExpressionList(Vec<ComponentExpression>),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ComponentFromUriParams {
     #[serde(flatten)]
     base: DataFromUriParams,
@@ -481,7 +520,7 @@ pub struct ComponentFromUriParams {
     field_values: Option<Vec<String>>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ComponentFromSourceParams {
     #[serde(flatten)]
     base: DataFromSourceParams,
@@ -489,60 +528,60 @@ pub struct ComponentFromSourceParams {
     field_values: Option<Vec<String>>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ColorInlineParams {
     #[serde(flatten)]
     base: ComponentInlineParams,
     color: ColorT,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ColorFromUriParams {
     #[serde(flatten)]
     base: DataFromUriParams,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ColorFromSourceParams {
     #[serde(flatten)]
     base: DataFromSourceParams,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LabelInlineParams {
     text: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LabelFromUriParams {
     #[serde(flatten)]
     base: DataFromUriParams,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LabelFromSourceParams {
     #[serde(flatten)]
     base: DataFromSourceParams,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TooltipInlineParams {
     text: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TooltipFromUriParams {
     #[serde(flatten)]
     base: DataFromUriParams,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TooltipFromSourceParams {
     #[serde(flatten)]
     base: DataFromSourceParams,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct FocusInlineParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     direction: Option<(f32, f32, f32)>,
@@ -550,7 +589,7 @@ pub struct FocusInlineParams {
     up: Option<(f32, f32, f32)>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TransformParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     rotation: Option<Vec<f32>>,
@@ -558,19 +597,19 @@ pub struct TransformParams {
     translation: Option<(f32, f32, f32)>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CameraParams {
     target: (f32, f32, f32),
     position: (f32, f32, f32),
     up: (f32, f32, f32),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CanvasParams {
     background_color: ColorT,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SphereParams {
     position: (f32, f32, f32),
     radius: f32,
@@ -581,7 +620,7 @@ pub struct SphereParams {
     tooltip: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LineParams {
     position1: (f32, f32, f32),
     position2: (f32, f32, f32),
@@ -591,4 +630,9 @@ pub struct LineParams {
     label: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tooltip: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate, Clone)]
+pub struct DownloadParams {
+    pub url: String,
 }

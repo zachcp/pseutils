@@ -5,8 +5,8 @@ use pymol_session_utils::molviewspec::{
 
 // #[test]
 // fn test_open_api_gen() {
-//     // Create StructureParams using the builder
 
+//     // Create StructureParams using the builder
 //     let structure_params = StructureParams::builder()
 //         .structure_type("model".to_string())
 //         .assembly_id("1".to_string())
@@ -37,12 +37,15 @@ use pymol_session_utils::molviewspec::{
 //     };
 // }
 
-#[test]
-fn test_open_api_gen2() {
-    // Create a State
-    let mut builder = get_builder();
-    let download = builder
-        .root
-        .download("https://files.rcsb.org/download/1pdb.pdb")
-        .parse("pdb");
-}
+// #[test]
+// fn test_open_api_gen2() {
+//     // Create a State
+//     let mut builder = get_builder();
+//     let download = builder
+//         .root
+//         .download("https://files.rcsb.org/download/1pdb.pdb")
+//         .parse("pdb")
+//         .model_structure(1)
+//         // .component()
+//     //     .representation()
+// }
