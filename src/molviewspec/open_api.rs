@@ -1,6 +1,10 @@
+use std::collections::HashMap;
+
 // use openapi::{Components, Info, OpenApi, Paths};
 use serde::{Deserialize, Serialize};
 use validator::{Validate, ValidationError};
+
+use super::nodes::ParseFormatT;
 
 pub fn get_builder() -> State {
     State::new()
@@ -304,19 +308,40 @@ impl Metadata {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Node {
     pub kind: String,
-    pub params: Option<serde_json::Value>,
+    pub params: Option<HashMap<String, serde_json::Value>>,
     pub children: Option<Vec<Node>>,
 }
 impl Node {
-    pub fn new(kind: String) -> Node {
+    pub fn new(kind: String, params: Option<HashMap<String, serde_json::Value>>) -> Node {
         Node {
             kind,
-            params: None,
+            params: params,
             children: None,
         }
+    }
+    pub fn add_child(&mut self, node: Node) {
+        match &mut self.children {
+            Some(children) => children.push(node),
+            None => self.children = Some(vec![node]),
+        }
+    }
+
+    pub fn download(&mut self, url: &str) -> Node {
+        let kind = &self.kind;
+        println!("{:?}", kind);
+
+        let params = Some(HashMap::from([(
+            "url".to_string(),
+            serde_json::Value::String(url.to_string()),
+        )]));
+
+        let download_node = Node::new("download".to_string(), params);
+
+        self.add_child(download_node.clone());
+        download_node
     }
 }
 
@@ -350,7 +375,7 @@ pub struct State {
 impl State {
     pub fn new() -> State {
         State {
-            root: Node::new("root".to_string()),
+            root: Node::new("root".to_string(), None),
             metadata: Metadata::new(),
         }
     }
