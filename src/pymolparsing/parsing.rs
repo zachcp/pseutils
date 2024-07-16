@@ -206,6 +206,7 @@ impl PyObjectMolecule {
             pdbtbx::Conformer::new(res_name, None, None).expect("Couldn't create Conformer");
 
         for atom in atoms {
+            // coordinate vector is zero-indexed so we need to subtract 1
             let atom = &self.get_atom(atom.id - 1);
             conformer.add_atom(atom.clone());
         }
@@ -247,6 +248,18 @@ impl PyObjectMolecule {
         // Create PDB from Models
         let mut pdb = PDB::new();
         pdb.add_model(model);
+
+        // Add Bonds Here
+        for bond in &self.bond {
+            println!("{:?}", bond);
+            // Todo: proper pymol bond--> pdbtbx bond
+            pdb.add_bond(
+                (bond.index_1 as usize, None),
+                (bond.index_2 as usize, None),
+                pdbtbx::Bond::Covalent,
+            );
+        }
+
         let _ = pdbtbx::save_pdb(
             &pdb,
             "/Users/zcpowers/Desktop/PSE/pickletest/test_01.pdb",
