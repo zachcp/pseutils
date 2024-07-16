@@ -5,6 +5,7 @@ use pymol_session_utils::PSEData;
 use serde_json::from_reader;
 use std::fs::File;
 use std::io::BufReader;
+use std::io::Write;
 
 #[test]
 fn test_load_pse_data_molecule_only() {
@@ -184,4 +185,14 @@ fn test_pdb() {
         pdbtbx::StrictnessLevel::Strict,
     )
     .expect("PDB output");
+}
+
+#[test]
+fn test_pse_output() {
+    let mut state = State::new();
+    state.download("https://files.rcsb.org/download/1pdb.pdb");
+
+    let pretty_json = serde_json::to_string_pretty(&state).unwrap();
+    let mut file = File::create("output.json").unwrap();
+    file.write_all(pretty_json.as_bytes()).unwrap();
 }

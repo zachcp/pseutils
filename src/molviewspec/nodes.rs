@@ -86,29 +86,25 @@ impl Node {
     pub fn get_kind(&self) -> &KindT {
         &self.kind
     }
-    // Only Applicable to the Download Node
-    pub fn add_download_info(&mut self, url: String) -> Option<&Node> {
-        match self.kind {
-            KindT::Download => {
-                self.params = Some(NodeParams::DownloadParams(DownloadParams { url }));
-                Some(self)
-            }
-            _ => None,
-        }
-    }
     /// Create the download node
-    pub fn download(&mut self, url: String) -> Option<Node> {
-        match self.kind {
-            KindT::Root => {
-                let download_node = Node::new(
-                    KindT::Download,
-                    Some(NodeParams::DownloadParams(DownloadParams { url })),
-                );
-                &self.add_child(download_node.clone());
-                Some(download_node)
-            }
-            _ => None,
-        }
+    pub fn download(&mut self, url: &str) -> Option<Node> {
+        (self.kind == KindT::Root).then(|| {
+            let url = url.to_string();
+            let download_node = Node::new(
+                KindT::Download,
+                Some(NodeParams::DownloadParams(DownloadParams { url })),
+            );
+
+            self.add_child(download_node.clone());
+            download_node
+        })
+    }
+    pub fn parse(mut self, params: ParseParams) -> Option<Node> {
+        (self.kind == KindT::Download).then(|| {
+            let parse_node = Node::new(KindT::Parse, Some(NodeParams::ParseParams(params)));
+            self.add_child(parse_node.clone());
+            parse_node
+        })
     }
     // //
     // pub fn create_parser(&mut self, parseformat: String) -> Option<&Node> {
@@ -165,19 +161,9 @@ impl State {
             },
         }
     }
-    // pub fn download(&mut self, url: String) -> Option<&Node> {
-    //     let mut download = Node::new(KindT::Download);
-    //     download.add_download_info(url);
-    //     self.root.add_child(download.clone());
-    //     Some(
-    //         self.root
-    //             .children
-    //             .as_ref()
-    //             .expect("Children vector should exist")
-    //             .last()
-    //             .expect("At least one child should exist after adding"),
-    //     )
-    // }
+    pub fn download(&mut self, url: &str) -> Option<Node> {
+        self.root.download(url)
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
