@@ -1,3 +1,5 @@
+use std::arch::aarch64;
+
 use itertools::Itertools;
 use pdbtbx::{self, PDB};
 use serde::{Deserialize, Deserializer, Serialize};
@@ -216,7 +218,7 @@ impl PyObjectMolecule {
             .collect()
     }
 
-    /// Get unique chain names
+    /// Get each residue by chain.
     pub fn get_residues_by_chain(&self, chain: String) -> Vec<i32> {
         self.atom
             .iter()
@@ -224,6 +226,41 @@ impl PyObjectMolecule {
             .map(|atm| atm.resv)
             .unique()
             .collect()
+    }
+    /// Get each residue by chain.
+    ///
+    pub fn create_residue(&self, chain: String, residue_number: i32) -> pdbtbx::Residue {
+        let atoms: Vec<&AtomInfo> = self
+            .atom
+            .iter()
+            .filter(|atm| atm.chain == chain && atm.resv == residue_number)
+            .collect();
+
+        let resv = residue_number as isize;
+        let res_name = atoms[0].name.clone();
+        let mut residue = pdbtbx::Residue::new(resv, None, None).expect("Couldn't create residue");
+        let mut conformer =
+            pdbtbx::Conformer::new(res_name, None, None).expect("Couldn't create Conformer");
+
+        for atom in atoms {
+            let atom = &self.get_atom(atom.id);
+            conformer.add_atom(atom.clone());
+        }
+
+        residue.add_conformer(conformer);
+        residue
+    }
+
+    pub fn create_chain(&self, chain: String) -> pdbtbx::Chain {
+        let mut new_chain = pdbtbx::Chain::new(chain.clone()).unwrap();
+
+        let _ = self
+            .get_residues_by_chain(chain.clone())
+            .iter()
+            .map(|res_num| self.create_residue(chain.clone(), *res_num))
+            .map(|res| new_chain.add_residue(res.clone()));
+
+        new_chain
     }
 }
 

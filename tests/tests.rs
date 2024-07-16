@@ -171,5 +171,11 @@ fn test_pdb() {
     let residues = mols[0].get_residues_by_chain(chains[0].clone());
     println!("Residues: {:?}", residues);
 
+    let residue = mols[0].create_residue(chains[0].clone(), residues[0]);
+    println!("Residue: {:?}", residue);
+
+    let chain = mols[0].create_chain(chains[0].clone());
+    println!("Chain: {:?}", chain);
+
     let pdb = mols[0].to_pdb();
 }
