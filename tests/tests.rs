@@ -90,63 +90,6 @@ fn test_molspecview_json_2bvk() {
     // assert_eq!(testvec[0].tooltip, "First cycle (by atom_index)");
 }
 
-// #[test]
-// fn test_molspecview_json_full_examples_annotations() {
-//     let file =
-//         File::open("tests/mol-spec-examples/annotations/state.mvsj").expect("Failed to open file");
-//     let reader = BufReader::new(file);
-//     let msvj: State = from_reader(reader).expect("Failed to parse JSON as ComponentExpression");
-
-//     // test metadata
-//     assert_eq!(msvj.metadata.version, "0.1");
-//     assert_eq!(
-//         msvj.metadata.title,
-//         Some("An example with MVS annotations".to_string())
-//     );
-//     assert_eq!(
-//         msvj.metadata.timestamp,
-//         "2024-03-05T18:40:24.870561+00:00".to_string()
-//     );
-
-//     // test root and data
-//     assert_eq!(msvj.root.kind, KindT::Root);
-//     // one child
-//     // let download = &msvj.root.children.unwrap()[0];
-//     // assert_eq!(download.kind, KindT::Download);
-//     // assert_eq!(
-//     //     download.params,
-//     //     Some(NodeParams::DownloadParams(DownloadParams{"https://files.wwpdb.org/download/1h9t.cif"})),
-//     // );
-//     //
-// }
-
-// #[test]
-// fn test_molspecview_json_full_examples_basic() {
-//     let file = File::open("tests/mol-spec-examples/basic/state.mvsj").expect("Failed to open file");
-//     let reader = BufReader::new(file);
-//     let msvj: State = from_reader(reader).expect("Failed to parse JSON as an MVSJ State Object");
-
-//     // test metadata
-//     assert_eq!(msvj.metadata.version, "0.1");
-//     assert_eq!(
-//         msvj.metadata.timestamp,
-//         "2023-11-27T12:05:32.145284".to_string()
-//     );
-
-//     // test root and data
-//     assert_eq!(msvj.root.kind, KindT::Root);
-//     // one child
-//     let download = &msvj.root.children.unwrap()[0];
-//     assert_eq!(download.kind, KindT::Download);
-//     // assert_eq!(
-//     //     download.params,
-//     //     Some(HashMap::from([(
-//     //         "url".to_string(),
-//     //         serde_json::Value::String("https://files.wwpdb.org/download/1cbs.cif".to_string())
-//     //     )])),
-//     // );
-// }
-
 #[test]
 fn test_pdb() {
     let psedata: PSEData = PSEData::load("tests/data/example.pse").unwrap();
@@ -347,6 +290,7 @@ fn test_moviewspec_01_common_actions_selectors() {
 
     // set protein as orange
     let component_prot = ComponentSelector::Selector(ComponentSelectorT::Protein);
+
     structure
         .component(component_prot)
         .expect("Created component")
@@ -460,5 +404,50 @@ fn test_moviewspec_01_common_actions_symmetry() {
 
     let pretty_json = serde_json::to_string_pretty(&state).unwrap();
     let mut file = File::create("test_moviewspec_01_common_actions_cartoon.json").unwrap();
+    file.write_all(pretty_json.as_bytes()).unwrap();
+}
+
+#[test]
+fn test_moviewspec_01_common_actions_symmetry_miller() {
+    // https://colab.research.google.com/drive/1O2TldXlS01s-YgkD9gy87vWsfCBTYuz9#scrollTo=U256gC0Tj2vS
+    // builder = mvs.create_builder()
+    //     builder.download(url="https://files.wwpdb.org/download/4hhb.cif")
+    //     .parse(format="mmcif")
+    //     .symmetry_structure(ijk_min=(-1, -1, -1), ijk_max=(1, 1, 1))
+    //     .component()
+    //     .representation()
+    //     .color(color='#1b9e77')
+
+    // struct params
+    let structparams = StructureParams {
+        structure_type: StructureTypeT::SymmetryMates, // <----- Main difference here
+        ijk_min: Some((-1, -1, -1)),
+        ijk_max: Some((1, 1, 1)),
+        ..Default::default()
+    };
+
+    // color
+    let color = ColorT::Hex("#1b9e77".to_string());
+    let color_component = ComponentSelector::default();
+
+    let mut state = State::new();
+
+    state
+        .download("https://files.wwpdb.org/download/4hhb.cif")
+        .expect("Create a Downlaod node with a URL")
+        .parse(ParseParams {
+            format: ParseFormatT::Mmcif,
+        })
+        .expect("Parseable option")
+        .symmetry_mates_structure(structparams)
+        .expect("a set of Structure options")
+        .component(ComponentSelector::default())
+        .expect("defined a valid component")
+        .representation(RepresentationTypeT::Cartoon)
+        .expect("a valid representation")
+        .color(color, color_component);
+
+    let pretty_json = serde_json::to_string_pretty(&state).unwrap();
+    let mut file = File::create("test_moviewspec_01_common_actions_symmetry_miller.json").unwrap();
     file.write_all(pretty_json.as_bytes()).unwrap();
 }
