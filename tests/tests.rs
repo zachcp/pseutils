@@ -1,5 +1,6 @@
 use pymol_session_utils::molviewspec::nodes::{
     ComponentExpression, DownloadParams, KindT, NodeParams, ParseFormatT, ParseParams, State,
+    StructureParams, StructureTypeT,
 };
 use pymol_session_utils::PSEData;
 use serde_json::from_reader;
@@ -189,16 +190,39 @@ fn test_pdb() {
 
 #[test]
 fn test_pse_output() {
-    let pdb = ParseParams {
-        format: ParseFormatT::Pdb,
+    // https://colab.research.google.com/drive/1O2TldXlS01s-YgkD9gy87vWsfCBTYuz9#scrollTo=U256gC0Tj2vS
+    // builder = mvs.create_builder()
+    // (
+    //     builder.download(url='https://files.wwpdb.org/download/1cbs.cif')
+    //     .parse(format='mmcif')
+    //     .assembly_structure(assembly_id='1')
+    //     .component()
+    //     .representation()
+    //     .color(color='#1b9e77')
+    // )
+
+    // parse params
+    let structfile = ParseParams {
+        format: ParseFormatT::Mmcif,
     };
+
+    // struct params
+    let structparams = StructureParams {
+        structure_type: StructureTypeT::Assembly,
+        assembly_id: Some('1'.to_string()),
+        ..Default::default()
+    };
+
     let mut state = State::new();
     state
-        .download("https://files.rcsb.org/download/1pdb.pdb")
+        .download("https://files.wwpdb.org/download/1cbs.cif")
         .expect("Create a Downlaod node with a URL")
-        .parse(pdb);
+        .parse(structfile)
+        .expect("Parseable option")
+        .assembly_structure(structparams);
 
-    // .parse("pdb")
+    //         // .component()
+    //     //     .representation()
     let pretty_json = serde_json::to_string_pretty(&state).unwrap();
     let mut file = File::create("output.json").unwrap();
     file.write_all(pretty_json.as_bytes()).unwrap();

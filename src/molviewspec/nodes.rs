@@ -60,6 +60,8 @@ pub enum NodeParams {
     LineParams(LineParams),
 }
 
+/// Node
+/// Methods derived from the Python API found [here](https://github.com/molstar/mol-view-spec/blob/master/molviewspec/molviewspec/builder.py)
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct Node {
     pub kind: KindT,
@@ -99,7 +101,7 @@ impl Node {
             download_node
         })
     }
-
+    /// Parse a Download Node
     pub fn parse(mut self, params: ParseParams) -> Option<Node> {
         (self.kind == KindT::Download).then(|| {
             let parse_node = Node::new(KindT::Parse, Some(NodeParams::ParseParams(params)));
@@ -107,24 +109,100 @@ impl Node {
             parse_node
         })
     }
-    // //
-    // pub fn create_parser(&mut self, parseformat: String) -> Option<&Node> {
-    //     let params = Some(HashMap::from([(
-    //         "format".to_string(),
-    //         serde_json::Value::String(parseformat),
-    //     )]));
 
-    //     let mut parse = Node::new(KindT::Parse);
-    //     parse.params = params;
+    // Parse methods ------------------------------------------------------
 
-    //     match self.kind {
-    //         KindT::Download => {
-    //             self.params = params;
-    //             Some(self)
-    //         }
-    //         _ => None,
-    //     }
-    // }
+    /// Create a structure for the deposited coordinates.
+    ///  :param model_index: 0-based model index in case multiple NMR frames are present
+    /// :param block_index: 0-based block index in case multiple mmCIF or SDF data blocks are present
+    /// :param block_header: Reference a specific mmCIF or SDF data block by its block header
+    /// :return: a builder that handles operations at structure level
+    pub fn model_structure() {
+        unimplemented!()
+    }
+    /// Parse a Download Node
+    pub fn assembly_structure(mut self, params: StructureParams) -> Option<Node> {
+        (self.kind == KindT::Parse).then(|| {
+            let struct_node =
+                Node::new(KindT::Structure, Some(NodeParams::StructureParams(params)));
+            self.add_child(struct_node.clone());
+            struct_node
+        })
+    }
+    /// Parse a Download Node
+    pub fn symmetry_structure() {
+        unimplemented!()
+    }
+    /// Parse a Download Node
+    pub fn symmetry_mates_structure() {
+        unimplemented!()
+    }
+
+    // Structure methods ------------------------------------------------------
+    /// Create a Component
+    pub fn component() {
+        unimplemented!()
+    }
+    pub fn component_from_uri() {
+        unimplemented!()
+    }
+    pub fn component_from_source() {
+        unimplemented!()
+    }
+    pub fn label_from_uri() {
+        unimplemented!()
+    }
+    pub fn label_from_source() {
+        unimplemented!()
+    }
+    pub fn tooltip_from_uri() {
+        unimplemented!()
+    }
+    pub fn tooltip_from_source() {
+        unimplemented!()
+    }
+    pub fn transform() {
+        unimplemented!()
+    }
+    pub fn _is_rotation_matrix() {
+        unimplemented!()
+    }
+    // Component methods ------------------------------------------------------
+
+    /// Add a representation for this component.
+    /// :param type: the type of representation, defaults to 'cartoon'
+    /// :return: a builder that handles operations at representation level
+    pub fn representation() {
+        unimplemented!()
+    }
+    pub fn label() {
+        unimplemented!()
+    }
+    pub fn tooltip() {
+        unimplemented!()
+    }
+    pub fn focus() {
+        unimplemented!()
+    }
+
+    // Representation methods ------------------------------------------------------
+    pub fn color_from_source() {
+        unimplemented!()
+    }
+    pub fn color_from_uri() {
+        unimplemented!()
+    }
+    pub fn color() {
+        unimplemented!()
+    }
+
+    // GenericVisuals methods ------------------------------------------------------
+    pub fn sphere() {
+        unimplemented!()
+    }
+    pub fn line() {
+        unimplemented!()
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -162,8 +240,21 @@ impl State {
             },
         }
     }
+    /// Set Camera Location
+    pub fn camera() {
+        unimplemented!()
+    }
+    /// Set Camera Location
+    pub fn canvas() {
+        unimplemented!()
+    }
+    // Download a file
     pub fn download(&mut self, url: &str) -> Option<Node> {
         self.root.download(url)
+    }
+    /// General Lines and Spheres
+    pub fn generic_visuals() {
+        unimplemented!()
     }
 }
 
@@ -188,27 +279,32 @@ pub enum StructureTypeT {
     Symmetry,
     SymmetryMates,
 }
+impl Default for StructureTypeT {
+    fn default() -> Self {
+        StructureTypeT::Assembly
+    }
+}
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct StructureParams {
     #[serde(rename = "type")]
-    structure_type: StructureTypeT,
+    pub structure_type: StructureTypeT,
     #[serde(skip_serializing_if = "Option::is_none")]
-    assembly_id: Option<String>,
+    pub assembly_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    assembly_index: Option<i32>,
+    pub assembly_index: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    model_index: Option<i32>,
+    pub model_index: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    block_index: Option<i32>,
+    pub block_index: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    block_header: Option<String>,
+    pub block_header: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    radius: Option<f64>,
+    pub radius: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    ijk_min: Option<(i32, i32, i32)>,
+    pub ijk_min: Option<(i32, i32, i32)>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    ijk_max: Option<(i32, i32, i32)>,
+    pub ijk_max: Option<(i32, i32, i32)>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
