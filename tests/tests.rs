@@ -7,7 +7,6 @@ use serde_json::from_reader;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::Write;
-use std::sync::Arc;
 
 #[test]
 fn test_load_pse_data_molecule_only() {
@@ -390,14 +389,29 @@ fn test_moviewspec_01_common_actions_selectors() {
     arg_b_217
         .representation(RepresentationTypeT::BallAndStick)
         .expect("Representation")
-        .color(dark, ComponentSelector::default())
+        .color(dark.clone(), ComponentSelector::default())
         .expect("out");
 
     arg_b_217.label("aaRS Class II Signature".to_string());
 
-    // arg_b_537 = structure.component(selector=mvs.ComponentExpression(label_asym_id="B", label_seq_id=537))
-    // arg_b_537.representation(type="ball_and_stick").color(color="#ff0000")
-    // arg_b_537.label(text="aaRS Class II Signature")
+    let arg_b_537 = structure
+        .component(ComponentSelector::Expression(ComponentExpression {
+            label_asym_id: Some("B".to_string()),
+            label_seq_id: Some(537),
+            ..Default::default()
+        }))
+        .expect("Expectation");
+
+    arg_b_537
+        .representation(RepresentationTypeT::BallAndStick)
+        .expect("Representation")
+        .color(dark.clone(), ComponentSelector::default())
+        .expect("out");
+
+    arg_b_537.label("aaRS Class II Signature".to_string());
+
+    // Todo: implement focus
+    // focus = structure.component(selector=[mvs.ComponentExpression(label_asym_id='E'), mvs.ComponentExpression(label_asym_id="B", label_seq_id=217), mvs.ComponentExpression(label_asym_id="B", label_seq_id=537)]).focus()
 
     let pretty_json = serde_json::to_string_pretty(&state).unwrap();
     let mut file = File::create("test_moviewspec_01_common_actions_selectors.json").unwrap();

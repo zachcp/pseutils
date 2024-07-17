@@ -33,6 +33,7 @@ pub enum KindT {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(untagged)]
 pub enum NodeParams {
     DownloadParams(DownloadParams),
     ParseParams(ParseParams),
@@ -349,6 +350,7 @@ pub enum ParseFormatT {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename = "parse")]
 pub struct ParseParams {
     pub format: ParseFormatT,
 }
