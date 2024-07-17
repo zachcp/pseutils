@@ -276,6 +276,7 @@ fn test_moviewspec_01_common_actions_cartoon() {
     let color_component = ComponentSelector::default();
 
     let mut state = State::new();
+
     state
         .download("https://files.wwpdb.org/download/1cbs.cif")
         .expect("Create a Downlaod node with a URL")
