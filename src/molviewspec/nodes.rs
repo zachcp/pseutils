@@ -2,6 +2,8 @@ use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
+use super::open_api::Component;
+
 #[derive(PartialEq, Serialize, Deserialize, Debug, Default, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum KindT {
@@ -172,12 +174,6 @@ impl Node {
                         selector: ComponentSelector::ExpressionList(expr_list),
                     })),
                 ),
-                ComponentSelector::All(all_str) => Node::new(
-                    KindT::Component,
-                    Some(NodeParams::ComponentInlineParams(ComponentInlineParams {
-                        selector: ComponentSelector::All(all_str),
-                    })),
-                ),
             };
             self.children
                 .get_or_insert_with(Vec::new)
@@ -247,14 +243,29 @@ impl Node {
     }
 
     // Representation methods ------------------------------------------------------
+
     pub fn color_from_source() {
         unimplemented!()
     }
     pub fn color_from_uri() {
         unimplemented!()
     }
-    pub fn color() {
-        unimplemented!()
+    // parent Kine => kindt:representation
+    // node: kindt => kindt:color
+    pub fn color(&mut self, color: ColorT, selector: ComponentSelector) -> Option<&mut Node> {
+        if self.kind == KindT::Representation {
+            let color_node = Node::new(
+                KindT::Color,
+                Some(NodeParams::ColorInlineParams(ColorInlineParams {
+                    base: ComponentInlineParams { selector },
+                    color,
+                })),
+            );
+            self.children.get_or_insert_with(Vec::new).push(color_node);
+            self.children.as_mut().unwrap().last_mut()
+        } else {
+            None
+        }
     }
 
     // GenericVisuals methods ------------------------------------------------------
@@ -654,12 +665,10 @@ pub enum ComponentSelector {
     Selector(ComponentSelectorT),
     Expression(ComponentExpression),
     ExpressionList(Vec<ComponentExpression>),
-    #[serde(rename = "all")]
-    All(String),
 }
 impl Default for ComponentSelector {
     fn default() -> Self {
-        ComponentSelector::All("all".to_string())
+        ComponentSelector::Selector(ComponentSelectorT::All)
     }
 }
 

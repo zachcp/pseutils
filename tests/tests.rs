@@ -1,6 +1,7 @@
 use pymol_session_utils::molviewspec::nodes::{
-    ComponentExpression, ComponentSelector, DownloadParams, KindT, NodeParams, ParseFormatT,
-    ParseParams, RepresentationTypeT, State, StructureParams, StructureTypeT,
+    ColorT, ComponentExpression, ComponentSelector, ComponentSelectorT, DownloadParams, KindT,
+    NodeParams, ParseFormatT, ParseParams, RepresentationTypeT, State, StructureParams,
+    StructureTypeT,
 };
 use pymol_session_utils::PSEData;
 use serde_json::from_reader;
@@ -189,7 +190,59 @@ fn test_pdb() {
 }
 
 #[test]
-fn test_pse_output() {
+fn test_moviewspec_00_builder_basics() {
+    // https://colab.research.google.com/drive/1O2TldXlS01s-YgkD9gy87vWsfCBTYuz9#scrollTo=U256gC0Tj2vS
+    // builder = mvs.create_builder()
+    // (
+    //     builder.download(url='https://files.wwpdb.org/download/1cbs.cif')
+    //     .parse(format='mmcif')
+    //     .assembly_structure(assembly_id='1')
+    //     .component()
+    //     .representation()
+    // )
+
+    // parse params
+    let structfile = ParseParams {
+        format: ParseFormatT::Mmcif,
+    };
+
+    // struct params
+    let structparams = StructureParams {
+        structure_type: StructureTypeT::Assembly,
+        assembly_id: Some('1'.to_string()),
+        ..Default::default()
+    };
+
+    // define the component which is going to be `all` here
+    let component = ComponentSelector::default();
+    // cartoon type
+    let cartoon_type = RepresentationTypeT::Cartoon;
+
+    let mut state = State::new();
+
+    // let color = ColorT::Hex("#1b9e77".to_string());
+    // let color_component = ComponentSelector::All("all".to_string());
+
+    state
+        .download("https://files.wwpdb.org/download/1cbs.cif")
+        .expect("Create a Downlaod node with a URL")
+        .parse(structfile)
+        .expect("Parseable option")
+        .assembly_structure(structparams)
+        .expect("a set of Structure options")
+        .component(component)
+        .expect("defined a valid component")
+        .representation(cartoon_type);
+    // .expect("a valid representation")
+    // .color(color, color_component);
+
+    let pretty_json = serde_json::to_string_pretty(&state).unwrap();
+    let mut file = File::create("test_moviewspec_01.json").unwrap();
+    file.write_all(pretty_json.as_bytes()).unwrap();
+}
+
+#[test]
+fn test_moviewspec_01_common_actions_cartoon() {
     // https://colab.research.google.com/drive/1O2TldXlS01s-YgkD9gy87vWsfCBTYuz9#scrollTo=U256gC0Tj2vS
     // builder = mvs.create_builder()
     // (
@@ -214,13 +267,15 @@ fn test_pse_output() {
     };
 
     // define the component which is going to be `all` here
-    let component = ComponentSelector::All("all".to_string());
-
+    let component = ComponentSelector::default();
     // cartoon type
     let cartoon_type = RepresentationTypeT::Cartoon;
 
-    let mut state = State::new();
+    // color
+    let color = ColorT::Hex("#1b9e77".to_string());
+    let color_component = ComponentSelector::default();
 
+    let mut state = State::new();
     state
         .download("https://files.wwpdb.org/download/1cbs.cif")
         .expect("Create a Downlaod node with a URL")
@@ -230,9 +285,74 @@ fn test_pse_output() {
         .expect("a set of Structure options")
         .component(component)
         .expect("defined a valid component")
-        .representation(cartoon_type);
+        .representation(cartoon_type)
+        .expect("a valid representation")
+        .color(color, color_component);
 
     let pretty_json = serde_json::to_string_pretty(&state).unwrap();
-    let mut file = File::create("output.json").unwrap();
+    let mut file = File::create("test_moviewspec_01_common_actions_cartoon.json").unwrap();
+    file.write_all(pretty_json.as_bytes()).unwrap();
+}
+
+#[test]
+fn test_moviewspec_01_common_actions_selectors() {
+    // https://colab.research.google.com/drive/1O2TldXlS01s-YgkD9gy87vWsfCBTYuz9#scrollTo=U256gC0Tj2vS
+    // builder = mvs.create_builder()
+    // structure = builder.download(url="https://files.wwpdb.org/download/1c0a.cif").parse(format="mmcif").assembly_structure()
+    // # represent protein & RNA as cartoon
+    // structure.component(selector="protein").representation().color(color="#e19039")  # protein in orange
+    // structure.component(selector="nucleic").representation().color(color="#4b7fcc")  # RNA in blue
+    // # represent ligand in active site as ball-and-stick
+    // ligand = structure.component(selector=mvs.ComponentExpression(label_asym_id='E'))
+    // ligand.representation(type="ball_and_stick").color(color="#229954")  # ligand in green
+    // # represent 2 crucial arginine residues as red ball-and-stick and label with custom text
+    // arg_b_217 = structure.component(selector=mvs.ComponentExpression(label_asym_id="B", label_seq_id=217))
+    // arg_b_217.representation(type="ball_and_stick").color(color="#ff0000")
+    // arg_b_217.label(text="aaRS Class II Signature")
+    // arg_b_537 = structure.component(selector=mvs.ComponentExpression(label_asym_id="B", label_seq_id=537))
+    // arg_b_537.representation(type="ball_and_stick").color(color="#ff0000")
+    // arg_b_537.label(text="aaRS Class II Signature")
+
+    // # position camera to zoom in on ligand and signature residues
+    // focus = structure.component(selector=[mvs.ComponentExpression(label_asym_id='E'), mvs.ComponentExpression(label_asym_id="B", label_seq_id=217), mvs.ComponentExpression(label_asym_id="B", label_seq_id=537)]).focus()
+
+    // parse params
+    let structfile = ParseParams {
+        format: ParseFormatT::Mmcif,
+    };
+
+    // struct params
+    let structparams = StructureParams {
+        structure_type: StructureTypeT::Assembly,
+        ..Default::default()
+    };
+
+    let mut state = State::new();
+    let mut structure = state
+        .download("https://files.wwpdb.org/download/1cbs.cif")
+        .expect("Create a Download node with a URL")
+        .parse(structfile)
+        .expect("Parseable option")
+        .assembly_structure(structparams);
+
+    // define the component which is going to be `all` here
+    let component_prot = ComponentSelector::Selector(ComponentSelectorT::Protein);
+
+    // cartoon type
+    let cartoon_type = RepresentationTypeT::Cartoon;
+
+    // color
+    let color = ColorT::Hex("#1b9e77".to_string());
+    let color_component = ComponentSelector::default();
+
+    // .expect("a set of Structure options")
+    // .component(component)
+    // .expect("defined a valid component")
+    // .representation(cartoon_type)
+    // .expect("a valid representation")
+    // .color(color, color_component);
+
+    let pretty_json = serde_json::to_string_pretty(&state).unwrap();
+    let mut file = File::create("test_moviewspec_01_common_actions_selectors.json").unwrap();
     file.write_all(pretty_json.as_bytes()).unwrap();
 }
