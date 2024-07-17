@@ -140,13 +140,22 @@ impl Node {
             None
         }
     }
-    /// Parse a Download Node
+    /// Symmetry Structure
     pub fn symmetry_structure() {
         unimplemented!()
     }
+
     /// Parse a Download Node
-    pub fn symmetry_mates_structure() {
-        unimplemented!()
+    pub fn symmetry_mates_structure(&mut self, params: StructureParams) -> Option<&mut Node> {
+        // todo: this is the same as the regular structure bit above......
+        if self.kind == KindT::Parse {
+            let struct_node =
+                Node::new(KindT::Structure, Some(NodeParams::StructureParams(params)));
+            self.children.get_or_insert_with(Vec::new).push(struct_node);
+            self.children.as_mut().unwrap().last_mut()
+        } else {
+            None
+        }
     }
 
     // Structure methods ------------------------------------------------------

@@ -418,3 +418,47 @@ fn test_moviewspec_01_common_actions_selectors() {
     let mut file = File::create("test_moviewspec_01_common_actions_selectors.json").unwrap();
     file.write_all(pretty_json.as_bytes()).unwrap();
 }
+
+#[test]
+fn test_moviewspec_01_common_actions_symmetry() {
+    // https://colab.research.google.com/drive/1O2TldXlS01s-YgkD9gy87vWsfCBTYuz9#scrollTo=U256gC0Tj2vS
+    // builder = mvs.create_builder()
+    // builder = mvs.create_builder()    // (
+    //     builder.download(url="https://files.wwpdb.org/download/4hhb.cif")
+    //     .parse(format="mmcif")
+    //     .symmetry_mates_structure(radius=5.0)
+    //     .component()
+    //     .representation()
+    //     .color(color='#1b9e77')
+
+    // struct params
+    let structparams = StructureParams {
+        structure_type: StructureTypeT::Symmetry, // <----- Main difference here
+        radius: Some(5.0),
+        ..Default::default()
+    };
+
+    // color
+    let color = ColorT::Hex("#1b9e77".to_string());
+    let color_component = ComponentSelector::default();
+
+    let mut state = State::new();
+    state
+        .download("https://files.wwpdb.org/download/4hhb.cif")
+        .expect("Create a Downlaod node with a URL")
+        .parse(ParseParams {
+            format: ParseFormatT::Mmcif,
+        })
+        .expect("Parseable option")
+        .symmetry_mates_structure(structparams)
+        .expect("a set of Structure options")
+        .component(ComponentSelector::default())
+        .expect("defined a valid component")
+        .representation(RepresentationTypeT::Cartoon)
+        .expect("a valid representation")
+        .color(color, color_component);
+
+    let pretty_json = serde_json::to_string_pretty(&state).unwrap();
+    let mut file = File::create("test_moviewspec_01_common_actions_cartoon.json").unwrap();
+    file.write_all(pretty_json.as_bytes()).unwrap();
+}
