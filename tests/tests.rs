@@ -220,6 +220,7 @@ fn test_pse_output() {
     let cartoon_type = RepresentationTypeT::Cartoon;
 
     let mut state = State::new();
+
     state
         .download("https://files.wwpdb.org/download/1cbs.cif")
         .expect("Create a Downlaod node with a URL")

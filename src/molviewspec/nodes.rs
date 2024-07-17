@@ -89,25 +89,33 @@ impl Node {
         &self.kind
     }
     /// Create the download node
-    pub fn download(&mut self, url: &str) -> Option<Node> {
-        (self.kind == KindT::Root).then(|| {
+    pub fn download(&mut self, url: &str) -> Option<&mut Node> {
+        if self.kind == KindT::Root {
             let url = url.to_string();
             let download_node = Node::new(
                 KindT::Download,
                 Some(NodeParams::DownloadParams(DownloadParams { url })),
             );
 
-            self.add_child(download_node.clone());
-            download_node
-        })
+            self.children
+                .get_or_insert_with(Vec::new)
+                .push(download_node);
+            self.children.as_mut().unwrap().last_mut()
+        } else {
+            None
+        }
     }
     /// Parse a Download Node
-    pub fn parse(mut self, params: ParseParams) -> Option<Node> {
-        (self.kind == KindT::Download).then(|| {
-            let parse_node = Node::new(KindT::Parse, Some(NodeParams::ParseParams(params)));
-            self.add_child(parse_node.clone());
-            parse_node
-        })
+    pub fn parse(&mut self, params: ParseParams) -> Option<&mut Node> {
+        println!("In the parse node!");
+        println!("{:?}", self.kind);
+        if self.kind == KindT::Download {
+            let mut parse_node = Node::new(KindT::Parse, Some(NodeParams::ParseParams(params)));
+            self.children.get_or_insert_with(Vec::new).push(parse_node);
+            self.children.as_mut().unwrap().last_mut()
+        } else {
+            None
+        }
     }
 
     // Parse methods ------------------------------------------------------
@@ -121,13 +129,15 @@ impl Node {
         unimplemented!()
     }
     /// Parse a Download Node
-    pub fn assembly_structure(mut self, params: StructureParams) -> Option<Node> {
-        (self.kind == KindT::Parse).then(|| {
+    pub fn assembly_structure(&mut self, params: StructureParams) -> Option<&mut Node> {
+        if self.kind == KindT::Parse {
             let struct_node =
                 Node::new(KindT::Structure, Some(NodeParams::StructureParams(params)));
-            self.add_child(struct_node.clone());
-            struct_node
-        })
+            self.children.get_or_insert_with(Vec::new).push(struct_node);
+            self.children.as_mut().unwrap().last_mut()
+        } else {
+            None
+        }
     }
     /// Parse a Download Node
     pub fn symmetry_structure() {
@@ -139,9 +149,10 @@ impl Node {
     }
 
     // Structure methods ------------------------------------------------------
+
     /// Create a Component
-    pub fn component(&mut self, selector: ComponentSelector) -> Option<Node> {
-        (self.kind == KindT::Structure).then(|| {
+    pub fn component(&mut self, selector: ComponentSelector) -> Option<&mut Node> {
+        if self.kind == KindT::Structure {
             let component_node = match selector {
                 ComponentSelector::Selector(sel) => Node::new(
                     KindT::Component,
@@ -168,9 +179,13 @@ impl Node {
                     })),
                 ),
             };
-            self.add_child(component_node.clone());
-            component_node
-        })
+            self.children
+                .get_or_insert_with(Vec::new)
+                .push(component_node);
+            self.children.as_mut().unwrap().last_mut()
+        } else {
+            None
+        }
     }
     pub fn component_from_uri() {
         unimplemented!()
@@ -202,17 +217,24 @@ impl Node {
     /// :param type: the type of representation, defaults to 'cartoon'
     /// :return: a builder that handles operations at representation level
 
-    pub fn representation(&mut self, representation_type: RepresentationTypeT) -> Option<Node> {
-        (self.kind == KindT::Component).then(|| {
+    pub fn representation(
+        &mut self,
+        representation_type: RepresentationTypeT,
+    ) -> Option<&mut Node> {
+        if self.kind == KindT::Component {
             let representation_node = Node::new(
                 KindT::Representation,
                 Some(NodeParams::RepresentationParams(RepresentationParams {
                     representation_type,
                 })),
             );
-            self.add_child(representation_node.clone());
-            representation_node
-        })
+            self.children
+                .get_or_insert_with(Vec::new)
+                .push(representation_node);
+            self.children.as_mut().unwrap().last_mut()
+        } else {
+            None
+        }
     }
     pub fn label() {
         unimplemented!()
@@ -273,7 +295,7 @@ impl State {
         State {
             root: Node::new(KindT::Root, None),
             metadata: Metadata {
-                version: "1.0".to_string(), // todo: update this
+                version: "0.1".to_string(), // todo: update this
                 timestamp: Utc::now().to_rfc3339().to_string(),
                 ..Default::default()
             },
@@ -288,7 +310,7 @@ impl State {
         unimplemented!()
     }
     // Download a file
-    pub fn download(&mut self, url: &str) -> Option<Node> {
+    pub fn download(&mut self, url: &str) -> Option<&mut Node> {
         self.root.download(url)
     }
     /// General Lines and Spheres
