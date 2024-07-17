@@ -1,6 +1,37 @@
 // use openapi::{Components, Info, OpenApi, Paths};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use validator::{Validate, ValidationError};
+
+pub fn get_builder() -> State {
+    State::new()
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+enum AllParams {
+    CameraParams(CameraParams),
+    CanvasParams(CanvasParams),
+    ColorFromSourceParams(ColorFromSourceParams),
+    ColorFromUriParams(ColorFromUriParams),
+    ColorInlineParams(ColorInlineParams),
+    ComponentFromSourceParams(ComponentFromSourceParams),
+    ComponentFromUriParams(ComponentFromUriParams),
+    ComponentInlineParams(ComponentInlineParams),
+    DownloadParams(DownloadParams),
+    FocusInlineParams(FocusInlineParams),
+    LabelFromSourceParams(LabelFromSourceParams),
+    LabelFromUriParams(LabelFromUriParams),
+    LabelInlineParams(LabelInlineParams),
+    LineParams(LineParams),
+    ParseParams(ParseParams),
+    RepresentationParams(RepresentationParams),
+    SphereParams(SphereParams),
+    StructureParams(StructureParams),
+    TooltipFromSourceParams(TooltipFromSourceParams),
+    TooltipFromUriParams(TooltipFromUriParams),
+    TooltipInlineParams(TooltipInlineParams),
+    TransformParams(TransformParams),
+}
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct CameraParams {
@@ -288,12 +319,127 @@ pub struct Metadata {
     pub description_format: Option<String>,
     pub timestamp: String,
 }
+impl Metadata {
+    pub fn new() -> Self {
+        Metadata {
+            version: "1.0".to_string(),
+            title: None,
+            description: None,
+            description_format: None,
+            timestamp: chrono::Utc::now().to_rfc3339(),
+        }
+    }
+}
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Node {
     pub kind: String,
-    pub params: Option<serde_json::Value>,
+    pub params: Option<HashMap<String, serde_json::Value>>,
     pub children: Option<Vec<Node>>,
+}
+impl Node {
+    pub fn new(kind: String, params: Option<HashMap<String, serde_json::Value>>) -> Node {
+        Node {
+            kind,
+            params: params,
+            children: None,
+        }
+    }
+    pub fn add_child(&mut self, node: Node) {
+        match &mut self.children {
+            Some(children) => children.push(node),
+            None => self.children = Some(vec![node]),
+        }
+    }
+    /// Create the download node
+    pub fn download(&mut self, url: &str) -> Node {
+        // Todo: shoudl we chack allowable kinds here?
+        let kind = &self.kind;
+        println!("{:?}", kind);
+        let params = Some(HashMap::from([(
+            "url".to_string(),
+            serde_json::Value::String(url.to_string()),
+        )]));
+
+        let download_node = Node::new("download".to_string(), params);
+
+        self.add_child(download_node.clone());
+        download_node
+    }
+    // Create the parse node
+    pub fn parse(&mut self, format: &str) -> Node {
+        let kind = &self.kind;
+        assert!(
+            kind == "download",
+            "Kind must be 'download' for parse operation"
+        );
+
+        assert!(
+            ["pdb", "mmcif"].contains(&format),
+            "Format must be either 'pdb' or 'mmcif'"
+        );
+
+        let params = Some(HashMap::from([(
+            "format".to_string(),
+            serde_json::Value::String(format.to_string()),
+        )]));
+
+        let parse_node = Node::new("parse".to_string(), params);
+
+        self.add_child(parse_node.clone());
+        parse_node
+    }
+    // Define Assembly Structure
+    pub fn model_structure(&mut self, model_index: i32) -> Node {
+        let kind = &self.kind;
+        assert!(
+            kind == "parse",
+            "Kind must be 'parse' for assembly_structure"
+        );
+
+        let params = Some(HashMap::from([(
+            "model index".to_string(),
+            serde_json::Value::Number(serde_json::Number::from(model_index as i64)),
+        )]));
+
+        let structure_node = Node::new("structure".to_string(), params);
+        self.add_child(structure_node.clone());
+        structure_node
+    }
+    pub fn component(&mut self) -> Node {
+        let kind = &self.kind;
+        assert!(
+            kind == "structure",
+            "Kind must be 'structure' for assembly_structure"
+        );
+
+        let params = Some(HashMap::from([(
+            "component".to_string(),
+            serde_json::Value::String("".to_string()),
+        )]));
+
+        let parse_node = Node::new("component".to_string(), params);
+
+        self.add_child(parse_node.clone());
+        parse_node
+    }
+    pub fn representation(&mut self) -> Node {
+        let kind = &self.kind;
+        assert!(
+            kind == "structure",
+            "Kind must be 'structure' for assembly_structure"
+        );
+
+        let params = Some(HashMap::from([(
+            "component".to_string(),
+            serde_json::Value::String("".to_string()),
+        )]));
+
+        let parse_node = Node::new("component".to_string(), params);
+
+        self.add_child(parse_node.clone());
+        parse_node
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Validate)]
@@ -322,6 +468,14 @@ pub struct SphereParams {
 pub struct State {
     pub root: Node,
     pub metadata: Metadata,
+}
+impl State {
+    pub fn new() -> State {
+        State {
+            root: Node::new("root".to_string(), None),
+            metadata: Metadata::new(),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Validate)]

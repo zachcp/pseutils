@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use pdbtbx::{self, Residue, PDB};
+use pdbtbx::{self, Residue, Symmetry, PDB};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_pickle::{from_value, Value};
 
@@ -85,6 +85,9 @@ pub struct PyObjectMolecule {
     dcs: Option<Vec<i32>>,
 }
 impl PyObjectMolecule {
+    pub fn get_name(&self) -> String {
+        self.object.name.to_string()
+    }
     pub fn get_str(&self) -> String {
         // get_str
         // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer4/Cmd.cpp#L3877
@@ -143,14 +146,14 @@ impl PyObjectMolecule {
         // println!("{:?}", atom_coords);
         // coords are stored in a 1D vector of x,y,z,x,y,x,z,x,y,z
         let base_coord = (3 * atm_idx) as usize;
-        println!("{}", atm_idx);
-        println!("{}", base_coord);
+        // println!("{}", atm_idx);
+        // println!("{}", base_coord);
         let x_coord = atom_coords[base_coord];
-        println!("{}", x_coord);
+        // println!("{}", x_coord);
         let y_coord = atom_coords[base_coord + 1];
-        println!("{}", y_coord);
+        // println!("{}", y_coord);
         let z_coord = atom_coords[base_coord + 2];
-        println!("{}", z_coord);
+        // println!("{}", z_coord);
         // println!("{}, {}, {}", x_coord, y_coord, z_coord);
 
         let atom_info = &self.atom.iter().find(|atm| atm.id == atm_idx + 1).unwrap(); // note that the atom in the atom vector seem to be 1-indexed.
@@ -189,6 +192,29 @@ impl PyObjectMolecule {
             .map(|atm| atm.resv)
             .unique()
             .collect()
+    }
+
+    pub fn get_unit_cell_symmetry(&self) -> (pdbtbx::UnitCell, pdbtbx::Symmetry) {
+        let symmetry = &self.symmetry.clone().expect("Expected a symmetry group.");
+        let (([a, b, c], [alpha, beta, gamma]), sym_group) = symmetry;
+        println!(
+            "{}, {}, {}, {}, {}, {}, {}",
+            a, b, c, alpha, beta, gamma, sym_group
+        );
+
+        // let unitcell = pdbtbx::UnitCell::new(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let unitcell = pdbtbx::UnitCell::new(
+            *a as f64,
+            *b as f64,
+            *c as f64,
+            *alpha as f64,
+            *beta as f64,
+            *gamma as f64,
+        );
+
+        let pdbsym = pdbtbx::Symmetry::new(sym_group).expect("Invalid Symmetry group");
+
+        (unitcell, pdbsym)
     }
     /// Get each residue by chain.
     ///
@@ -231,6 +257,7 @@ impl PyObjectMolecule {
 
         new_chain
     }
+    // Create a pdbtbx::PDB
     pub fn to_pdb(&self) -> PDB {
         // Create a Model. Need to fix this later if theres multiple models
         let mut model = pdbtbx::Model::new(1);
@@ -243,7 +270,7 @@ impl PyObjectMolecule {
         for chain in chains {
             model.add_chain(chain);
         }
-        println!("{:?}", model);
+        // println!("{:?}", model);
 
         // Create PDB from Models
         let mut pdb = PDB::new();
@@ -251,7 +278,7 @@ impl PyObjectMolecule {
 
         // Add Bonds Here
         for bond in &self.bond {
-            println!("{:?}", bond);
+            // println!("{:?}", bond);
             // Todo: proper pymol bond--> pdbtbx bond
             pdb.add_bond(
                 (bond.index_1 as usize, None),
@@ -260,15 +287,15 @@ impl PyObjectMolecule {
             );
         }
 
-        let _ = pdbtbx::save_pdb(
-            &pdb,
-            "/Users/zcpowers/Desktop/PSE/pickletest/test_01.pdb",
-            pdbtbx::StrictnessLevel::Strict,
-        )
-        .expect("PDB output");
-        // let _ = pdbtbx::save_pdb_raw(&pdb, "test_02.pdb", pdbtbx::StrictnessLevel::Loose);
-        // pdb add Model (e.g. structures)
-        // pdb add bonds accessible from the bond table
+        // Add Name/ Identifier
+        let identifier = self.get_name().clone();
+        pdb.identifier = Some(identifier);
+
+        // Add Unit Cell and Symmetrey Info
+        let (unit, sym) = self.get_unit_cell_symmetry();
+        pdb.unit_cell = Some(unit);
+        pdb.symmetry = Some(sym);
+
         pdb
     }
 }

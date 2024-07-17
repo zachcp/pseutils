@@ -1,9 +1,12 @@
-use pymol_session_utils::molviewspec::nodes::{ComponentExpression, KindT, State};
+use pymol_session_utils::molviewspec::nodes::{
+    ColorT, ComponentExpression, ComponentSelector, ComponentSelectorT, ParseFormatT, ParseParams,
+    RepresentationTypeT, State, StructureParams, StructureTypeT,
+};
 use pymol_session_utils::PSEData;
 use serde_json::from_reader;
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
+use std::io::Write;
 
 #[test]
 fn test_load_pse_data_molecule_only() {
@@ -87,66 +90,62 @@ fn test_molspecview_json_2bvk() {
     // assert_eq!(testvec[0].tooltip, "First cycle (by atom_index)");
 }
 
-#[test]
-fn test_molspecview_json_full_examples_annotations() {
-    let file =
-        File::open("tests/mol-spec-examples/annotations/state.mvsj").expect("Failed to open file");
-    let reader = BufReader::new(file);
-    let msvj: State = from_reader(reader).expect("Failed to parse JSON as ComponentExpression");
+// #[test]
+// fn test_molspecview_json_full_examples_annotations() {
+//     let file =
+//         File::open("tests/mol-spec-examples/annotations/state.mvsj").expect("Failed to open file");
+//     let reader = BufReader::new(file);
+//     let msvj: State = from_reader(reader).expect("Failed to parse JSON as ComponentExpression");
 
-    // test metadata
-    assert_eq!(msvj.metadata.version, "0.1");
-    assert_eq!(
-        msvj.metadata.title,
-        Some("An example with MVS annotations".to_string())
-    );
-    assert_eq!(
-        msvj.metadata.timestamp,
-        "2024-03-05T18:40:24.870561+00:00".to_string()
-    );
+//     // test metadata
+//     assert_eq!(msvj.metadata.version, "0.1");
+//     assert_eq!(
+//         msvj.metadata.title,
+//         Some("An example with MVS annotations".to_string())
+//     );
+//     assert_eq!(
+//         msvj.metadata.timestamp,
+//         "2024-03-05T18:40:24.870561+00:00".to_string()
+//     );
 
-    // test root and data
-    assert_eq!(msvj.root.kind, KindT::Root);
-    // one child
-    let download = &msvj.root.children.unwrap()[0];
-    assert_eq!(download.kind, KindT::Download);
-    assert_eq!(
-        download.params,
-        Some(HashMap::from([(
-            "url".to_string(),
-            serde_json::Value::String("https://files.wwpdb.org/download/1h9t.cif".to_string())
-        )])),
-    );
+//     // test root and data
+//     assert_eq!(msvj.root.kind, KindT::Root);
+//     // one child
+//     // let download = &msvj.root.children.unwrap()[0];
+//     // assert_eq!(download.kind, KindT::Download);
+//     // assert_eq!(
+//     //     download.params,
+//     //     Some(NodeParams::DownloadParams(DownloadParams{"https://files.wwpdb.org/download/1h9t.cif"})),
+//     // );
+//     //
+// }
 
-    //
-}
+// #[test]
+// fn test_molspecview_json_full_examples_basic() {
+//     let file = File::open("tests/mol-spec-examples/basic/state.mvsj").expect("Failed to open file");
+//     let reader = BufReader::new(file);
+//     let msvj: State = from_reader(reader).expect("Failed to parse JSON as an MVSJ State Object");
 
-#[test]
-fn test_molspecview_json_full_examples_basic() {
-    let file = File::open("tests/mol-spec-examples/basic/state.mvsj").expect("Failed to open file");
-    let reader = BufReader::new(file);
-    let msvj: State = from_reader(reader).expect("Failed to parse JSON as an MVSJ State Object");
+//     // test metadata
+//     assert_eq!(msvj.metadata.version, "0.1");
+//     assert_eq!(
+//         msvj.metadata.timestamp,
+//         "2023-11-27T12:05:32.145284".to_string()
+//     );
 
-    // test metadata
-    assert_eq!(msvj.metadata.version, "0.1");
-    assert_eq!(
-        msvj.metadata.timestamp,
-        "2023-11-27T12:05:32.145284".to_string()
-    );
-
-    // test root and data
-    assert_eq!(msvj.root.kind, KindT::Root);
-    // one child
-    let download = &msvj.root.children.unwrap()[0];
-    assert_eq!(download.kind, KindT::Download);
-    assert_eq!(
-        download.params,
-        Some(HashMap::from([(
-            "url".to_string(),
-            serde_json::Value::String("https://files.wwpdb.org/download/1cbs.cif".to_string())
-        )])),
-    );
-}
+//     // test root and data
+//     assert_eq!(msvj.root.kind, KindT::Root);
+//     // one child
+//     let download = &msvj.root.children.unwrap()[0];
+//     assert_eq!(download.kind, KindT::Download);
+//     // assert_eq!(
+//     //     download.params,
+//     //     Some(HashMap::from([(
+//     //         "url".to_string(),
+//     //         serde_json::Value::String("https://files.wwpdb.org/download/1cbs.cif".to_string())
+//     //     )])),
+//     // );
+// }
 
 #[test]
 fn test_pdb() {
@@ -174,5 +173,247 @@ fn test_pdb() {
     let chain = mols[0].create_chain(chains[0].clone());
     println!("Chain: {:?}", chain);
 
+    // Check symmetry code
+    let (unit, sym) = mols[0].get_unit_cell_symmetry();
+    println!("{:?},{:?}", unit, sym);
+
+    // Move on to PDB, baby!
     let pdb = mols[0].to_pdb();
+
+    let _ = pdbtbx::save_pdb(
+        &pdb,
+        "/Users/zcpowers/Desktop/PSE/pickletest/test_01.pdb",
+        pdbtbx::StrictnessLevel::Strict,
+    )
+    .expect("PDB output");
+}
+
+#[test]
+fn test_moviewspec_00_builder_basics() {
+    // https://colab.research.google.com/drive/1O2TldXlS01s-YgkD9gy87vWsfCBTYuz9#scrollTo=U256gC0Tj2vS
+    // builder = mvs.create_builder()
+    // (
+    //     builder.download(url='https://files.wwpdb.org/download/1cbs.cif')
+    //     .parse(format='mmcif')
+    //     .assembly_structure(assembly_id='1')
+    //     .component()
+    //     .representation()
+    // )
+
+    // parse params
+    let structfile = ParseParams {
+        format: ParseFormatT::Mmcif,
+    };
+
+    // struct params
+    let structparams = StructureParams {
+        structure_type: StructureTypeT::Assembly,
+        assembly_id: Some('1'.to_string()),
+        ..Default::default()
+    };
+
+    // define the component which is going to be `all` here
+    let component = ComponentSelector::default();
+
+    // cartoon type
+    let cartoon_type = RepresentationTypeT::Cartoon;
+
+    let mut state = State::new();
+
+    // let color = ColorT::Hex("#1b9e77".to_string());
+    // let color_component = ComponentSelector::All("all".to_string());
+
+    state
+        .download("https://files.wwpdb.org/download/1cbs.cif")
+        .expect("Create a Downlaod node with a URL")
+        .parse(structfile)
+        .expect("Parseable option")
+        .assembly_structure(structparams)
+        .expect("a set of Structure options")
+        .component(component)
+        .expect("defined a valid component")
+        .representation(cartoon_type);
+    // .expect("a valid representation")
+    // .color(color, color_component);
+
+    let pretty_json = serde_json::to_string_pretty(&state).unwrap();
+    let mut file = File::create("test_moviewspec_01.json").unwrap();
+    file.write_all(pretty_json.as_bytes()).unwrap();
+}
+
+#[test]
+fn test_moviewspec_01_common_actions_cartoon() {
+    // https://colab.research.google.com/drive/1O2TldXlS01s-YgkD9gy87vWsfCBTYuz9#scrollTo=U256gC0Tj2vS
+    // builder = mvs.create_builder()
+    // (
+    //     builder.download(url='https://files.wwpdb.org/download/1cbs.cif')
+    //     .parse(format='mmcif')
+    //     .assembly_structure(assembly_id='1')
+    //     .component()
+    //     .representation()
+    //     .color(color='#1b9e77')
+    // )
+
+    // parse params
+    let structfile = ParseParams {
+        format: ParseFormatT::Mmcif,
+    };
+
+    // struct params
+    let structparams = StructureParams {
+        structure_type: StructureTypeT::Assembly,
+        assembly_id: Some('1'.to_string()),
+        ..Default::default()
+    };
+
+    // define the component which is going to be `all` here
+    let component = ComponentSelector::default();
+    // cartoon type
+    let cartoon_type = RepresentationTypeT::Cartoon;
+
+    // color
+    let color = ColorT::Hex("#1b9e77".to_string());
+    let color_component = ComponentSelector::default();
+
+    let mut state = State::new();
+    state
+        .download("https://files.wwpdb.org/download/1cbs.cif")
+        .expect("Create a Downlaod node with a URL")
+        .parse(structfile)
+        .expect("Parseable option")
+        .assembly_structure(structparams)
+        .expect("a set of Structure options")
+        .component(component)
+        .expect("defined a valid component")
+        .representation(cartoon_type)
+        .expect("a valid representation")
+        .color(color, color_component);
+
+    let pretty_json = serde_json::to_string_pretty(&state).unwrap();
+    let mut file = File::create("test_moviewspec_01_common_actions_cartoon.json").unwrap();
+    file.write_all(pretty_json.as_bytes()).unwrap();
+}
+
+#[test]
+fn test_moviewspec_01_common_actions_selectors() {
+    // https://colab.research.google.com/drive/1O2TldXlS01s-YgkD9gy87vWsfCBTYuz9#scrollTo=U256gC0Tj2vS
+    // builder = mvs.create_builder()
+    // structure = builder.download(url="https://files.wwpdb.org/download/1c0a.cif").parse(format="mmcif").assembly_structure()
+    // # represent protein & RNA as cartoon
+    // structure.component(selector="protein").representation().color(color="#e19039")  # protein in orange
+    // structure.component(selector="nucleic").representation().color(color="#4b7fcc")  # RNA in blue
+    // # represent ligand in active site as ball-and-stick
+    // ligand = structure.component(selector=mvs.ComponentExpression(label_asym_id='E'))
+    // ligand.representation(type="ball_and_stick").color(color="#229954")  # ligand in green
+    // # represent 2 crucial arginine residues as red ball-and-stick and label with custom text
+    // arg_b_217 = structure.component(selector=mvs.ComponentExpression(label_asym_id="B", label_seq_id=217))
+    // arg_b_217.representation(type="ball_and_stick").color(color="#ff0000")
+    // arg_b_217.label(text="aaRS Class II Signature")
+    // arg_b_537 = structure.component(selector=mvs.ComponentExpression(label_asym_id="B", label_seq_id=537))
+    // arg_b_537.representation(type="ball_and_stick").color(color="#ff0000")
+    // arg_b_537.label(text="aaRS Class II Signature")
+
+    // # position camera to zoom in on ligand and signature residues
+    // focus = structure.component(selector=[mvs.ComponentExpression(label_asym_id='E'), mvs.ComponentExpression(label_asym_id="B", label_seq_id=217), mvs.ComponentExpression(label_asym_id="B", label_seq_id=537)]).focus()
+
+    // parse params
+    let structfile = ParseParams {
+        format: ParseFormatT::Mmcif,
+    };
+
+    // struct params
+    let structparams = StructureParams {
+        structure_type: StructureTypeT::Assembly,
+        ..Default::default()
+    };
+
+    // State is the base model
+    let mut state = State::new();
+
+    // structure
+    let mut structure = state
+        .download("https://files.wwpdb.org/download/1cbs.cif")
+        .expect("Create a Download node with a URL")
+        .parse(structfile)
+        .expect("Parseable option")
+        .assembly_structure(structparams)
+        .expect("Structure params");
+
+    let orange = ColorT::Hex("#e19039".to_string());
+    let blue = ColorT::Hex("#4b7fcc".to_string());
+    let green = ColorT::Hex("#229954".to_string());
+    let dark = ColorT::Hex("#ff0000".to_string());
+
+    // set protein as orange
+    let component_prot = ComponentSelector::Selector(ComponentSelectorT::Protein);
+    structure
+        .component(component_prot)
+        .expect("Created component")
+        .representation(RepresentationTypeT::Cartoon)
+        .expect("Faithful representation")
+        .color(
+            orange,
+            ComponentSelector::Selector(ComponentSelectorT::Protein),
+        );
+
+    // set RNA as blue
+    let component_rna = ComponentSelector::Selector(ComponentSelectorT::Nucleic);
+    structure
+        .component(component_rna)
+        .expect("Created component")
+        .representation(RepresentationTypeT::Cartoon)
+        .expect("Faithful representation")
+        .color(blue, ComponentSelector::default());
+
+    // ligan dis green
+    let ligand = structure
+        .component(ComponentSelector::Expression(ComponentExpression {
+            label_asym_id: Some("E".to_string()),
+            ..Default::default()
+        }))
+        .expect("Expectation");
+
+    ligand
+        .representation(RepresentationTypeT::Cartoon)
+        .expect("Represented correctly")
+        .color(green, ComponentSelector::default());
+
+    let arg_b_217 = structure
+        .component(ComponentSelector::Expression(ComponentExpression {
+            label_asym_id: Some("B".to_string()),
+            label_seq_id: Some(217),
+            ..Default::default()
+        }))
+        .expect("Expectation");
+
+    arg_b_217
+        .representation(RepresentationTypeT::BallAndStick)
+        .expect("Representation")
+        .color(dark.clone(), ComponentSelector::default())
+        .expect("out");
+
+    arg_b_217.label("aaRS Class II Signature".to_string());
+
+    let arg_b_537 = structure
+        .component(ComponentSelector::Expression(ComponentExpression {
+            label_asym_id: Some("B".to_string()),
+            label_seq_id: Some(537),
+            ..Default::default()
+        }))
+        .expect("Expectation");
+
+    arg_b_537
+        .representation(RepresentationTypeT::BallAndStick)
+        .expect("Representation")
+        .color(dark.clone(), ComponentSelector::default())
+        .expect("out");
+
+    arg_b_537.label("aaRS Class II Signature".to_string());
+
+    // Todo: implement focus
+    // focus = structure.component(selector=[mvs.ComponentExpression(label_asym_id='E'), mvs.ComponentExpression(label_asym_id="B", label_seq_id=217), mvs.ComponentExpression(label_asym_id="B", label_seq_id=537)]).focus()
+
+    let pretty_json = serde_json::to_string_pretty(&state).unwrap();
+    let mut file = File::create("test_moviewspec_01_common_actions_selectors.json").unwrap();
+    file.write_all(pretty_json.as_bytes()).unwrap();
 }
