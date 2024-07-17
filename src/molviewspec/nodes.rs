@@ -99,6 +99,7 @@ impl Node {
             download_node
         })
     }
+
     pub fn parse(mut self, params: ParseParams) -> Option<Node> {
         (self.kind == KindT::Download).then(|| {
             let parse_node = Node::new(KindT::Parse, Some(NodeParams::ParseParams(params)));
@@ -176,7 +177,7 @@ pub enum ParseFormatT {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ParseParams {
-    format: ParseFormatT,
+    pub format: ParseFormatT,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

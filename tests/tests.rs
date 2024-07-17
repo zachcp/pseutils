@@ -1,5 +1,5 @@
 use pymol_session_utils::molviewspec::nodes::{
-    ComponentExpression, DownloadParams, KindT, NodeParams, State,
+    ComponentExpression, DownloadParams, KindT, NodeParams, ParseFormatT, ParseParams, State,
 };
 use pymol_session_utils::PSEData;
 use serde_json::from_reader;
@@ -189,9 +189,16 @@ fn test_pdb() {
 
 #[test]
 fn test_pse_output() {
+    let pdb = ParseParams {
+        format: ParseFormatT::Pdb,
+    };
     let mut state = State::new();
-    state.download("https://files.rcsb.org/download/1pdb.pdb");
+    state
+        .download("https://files.rcsb.org/download/1pdb.pdb")
+        .expect("Create a Downlaod node with a URL")
+        .parse(pdb);
 
+    // .parse("pdb")
     let pretty_json = serde_json::to_string_pretty(&state).unwrap();
     let mut file = File::create("output.json").unwrap();
     file.write_all(pretty_json.as_bytes()).unwrap();
