@@ -140,8 +140,37 @@ impl Node {
 
     // Structure methods ------------------------------------------------------
     /// Create a Component
-    pub fn component() {
-        unimplemented!()
+    pub fn component(&mut self, selector: ComponentSelector) -> Option<Node> {
+        (self.kind == KindT::Structure).then(|| {
+            let component_node = match selector {
+                ComponentSelector::Selector(sel) => Node::new(
+                    KindT::Component,
+                    Some(NodeParams::ComponentInlineParams(ComponentInlineParams {
+                        selector: ComponentSelector::Selector(sel),
+                    })),
+                ),
+                ComponentSelector::Expression(expr) => Node::new(
+                    KindT::Component,
+                    Some(NodeParams::ComponentInlineParams(ComponentInlineParams {
+                        selector: ComponentSelector::Expression(expr),
+                    })),
+                ),
+                ComponentSelector::ExpressionList(expr_list) => Node::new(
+                    KindT::Component,
+                    Some(NodeParams::ComponentInlineParams(ComponentInlineParams {
+                        selector: ComponentSelector::ExpressionList(expr_list),
+                    })),
+                ),
+                ComponentSelector::All(all_str) => Node::new(
+                    KindT::Component,
+                    Some(NodeParams::ComponentInlineParams(ComponentInlineParams {
+                        selector: ComponentSelector::All(all_str),
+                    })),
+                ),
+            };
+            self.add_child(component_node.clone());
+            component_node
+        })
     }
     pub fn component_from_uri() {
         unimplemented!()
@@ -172,8 +201,18 @@ impl Node {
     /// Add a representation for this component.
     /// :param type: the type of representation, defaults to 'cartoon'
     /// :return: a builder that handles operations at representation level
-    pub fn representation() {
-        unimplemented!()
+
+    pub fn representation(&mut self, representation_type: RepresentationTypeT) -> Option<Node> {
+        (self.kind == KindT::Component).then(|| {
+            let representation_node = Node::new(
+                KindT::Representation,
+                Some(NodeParams::RepresentationParams(RepresentationParams {
+                    representation_type,
+                })),
+            );
+            self.add_child(representation_node.clone());
+            representation_node
+        })
     }
     pub fn label() {
         unimplemented!()
@@ -593,6 +632,13 @@ pub enum ComponentSelector {
     Selector(ComponentSelectorT),
     Expression(ComponentExpression),
     ExpressionList(Vec<ComponentExpression>),
+    #[serde(rename = "all")]
+    All(String),
+}
+impl Default for ComponentSelector {
+    fn default() -> Self {
+        ComponentSelector::All("all".to_string())
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

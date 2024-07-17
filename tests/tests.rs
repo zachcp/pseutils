@@ -1,6 +1,6 @@
 use pymol_session_utils::molviewspec::nodes::{
-    ComponentExpression, DownloadParams, KindT, NodeParams, ParseFormatT, ParseParams, State,
-    StructureParams, StructureTypeT,
+    ComponentExpression, ComponentSelector, DownloadParams, KindT, NodeParams, ParseFormatT,
+    ParseParams, RepresentationTypeT, State, StructureParams, StructureTypeT,
 };
 use pymol_session_utils::PSEData;
 use serde_json::from_reader;
@@ -213,16 +213,24 @@ fn test_pse_output() {
         ..Default::default()
     };
 
+    // define the component which is going to be `all` here
+    let component = ComponentSelector::All("all".to_string());
+
+    // cartoon type
+    let cartoon_type = RepresentationTypeT::Cartoon;
+
     let mut state = State::new();
     state
         .download("https://files.wwpdb.org/download/1cbs.cif")
         .expect("Create a Downlaod node with a URL")
         .parse(structfile)
         .expect("Parseable option")
-        .assembly_structure(structparams);
+        .assembly_structure(structparams)
+        .expect("a set of Structure options")
+        .component(component)
+        .expect("defined a valid component")
+        .representation(cartoon_type);
 
-    //         // .component()
-    //     //     .representation()
     let pretty_json = serde_json::to_string_pretty(&state).unwrap();
     let mut file = File::create("output.json").unwrap();
     file.write_all(pretty_json.as_bytes()).unwrap();
