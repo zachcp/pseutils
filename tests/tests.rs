@@ -1,13 +1,13 @@
 use pymol_session_utils::molviewspec::nodes::{
-    ColorT, ComponentExpression, ComponentSelector, ComponentSelectorT, DownloadParams, KindT,
-    NodeParams, ParseFormatT, ParseParams, RepresentationTypeT, State, StructureParams,
-    StructureTypeT,
+    ColorT, ComponentExpression, ComponentSelector, ComponentSelectorT, ParseFormatT, ParseParams,
+    RepresentationTypeT, State, StructureParams, StructureTypeT,
 };
 use pymol_session_utils::PSEData;
 use serde_json::from_reader;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::Write;
+use std::sync::Arc;
 
 #[test]
 fn test_load_pse_data_molecule_only() {
@@ -215,6 +215,7 @@ fn test_moviewspec_00_builder_basics() {
 
     // define the component which is going to be `all` here
     let component = ComponentSelector::default();
+
     // cartoon type
     let cartoon_type = RepresentationTypeT::Cartoon;
 
@@ -327,30 +328,76 @@ fn test_moviewspec_01_common_actions_selectors() {
         ..Default::default()
     };
 
+    // State is the base model
     let mut state = State::new();
+
+    // structure
     let mut structure = state
         .download("https://files.wwpdb.org/download/1cbs.cif")
         .expect("Create a Download node with a URL")
         .parse(structfile)
         .expect("Parseable option")
-        .assembly_structure(structparams);
+        .assembly_structure(structparams)
+        .expect("Structure params");
 
-    // define the component which is going to be `all` here
+    let orange = ColorT::Hex("#e19039".to_string());
+    let blue = ColorT::Hex("#4b7fcc".to_string());
+    let green = ColorT::Hex("#229954".to_string());
+    let dark = ColorT::Hex("#ff0000".to_string());
+
+    // set protein as orange
     let component_prot = ComponentSelector::Selector(ComponentSelectorT::Protein);
+    structure
+        .component(component_prot)
+        .expect("Created component")
+        .representation(RepresentationTypeT::Cartoon)
+        .expect("Faithful representation")
+        .color(
+            orange,
+            ComponentSelector::Selector(ComponentSelectorT::Protein),
+        );
 
-    // cartoon type
-    let cartoon_type = RepresentationTypeT::Cartoon;
+    // set RNA as blue
+    let component_rna = ComponentSelector::Selector(ComponentSelectorT::Nucleic);
+    structure
+        .component(component_rna)
+        .expect("Created component")
+        .representation(RepresentationTypeT::Cartoon)
+        .expect("Faithful representation")
+        .color(blue, ComponentSelector::default());
 
-    // color
-    let color = ColorT::Hex("#1b9e77".to_string());
-    let color_component = ComponentSelector::default();
+    // ligan dis green
+    let ligand = structure
+        .component(ComponentSelector::Expression(ComponentExpression {
+            label_asym_id: Some("E".to_string()),
+            ..Default::default()
+        }))
+        .expect("Expectation");
 
-    // .expect("a set of Structure options")
-    // .component(component)
-    // .expect("defined a valid component")
-    // .representation(cartoon_type)
-    // .expect("a valid representation")
-    // .color(color, color_component);
+    ligand
+        .representation(RepresentationTypeT::Cartoon)
+        .expect("Represented correctly")
+        .color(green, ComponentSelector::default());
+
+    let arg_b_217 = structure
+        .component(ComponentSelector::Expression(ComponentExpression {
+            label_asym_id: Some("B".to_string()),
+            label_seq_id: Some(217),
+            ..Default::default()
+        }))
+        .expect("Expectation");
+
+    arg_b_217
+        .representation(RepresentationTypeT::BallAndStick)
+        .expect("Representation")
+        .color(dark, ComponentSelector::default())
+        .expect("out");
+
+    arg_b_217.label("aaRS Class II Signature".to_string());
+
+    // arg_b_537 = structure.component(selector=mvs.ComponentExpression(label_asym_id="B", label_seq_id=537))
+    // arg_b_537.representation(type="ball_and_stick").color(color="#ff0000")
+    // arg_b_537.label(text="aaRS Class II Signature")
 
     let pretty_json = serde_json::to_string_pretty(&state).unwrap();
     let mut file = File::create("test_moviewspec_01_common_actions_selectors.json").unwrap();

@@ -2,8 +2,6 @@ use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-use super::open_api::Component;
-
 #[derive(PartialEq, Serialize, Deserialize, Debug, Default, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum KindT {
@@ -232,8 +230,20 @@ impl Node {
             None
         }
     }
-    pub fn label() {
-        unimplemented!()
+
+    pub fn label(&mut self, label: String) -> Option<&mut Node> {
+        if self.kind == KindT::Component {
+            let label_node = Node::new(
+                KindT::Label,
+                Some(NodeParams::LabelInlineParams(LabelInlineParams {
+                    text: label,
+                })),
+            );
+            self.children.get_or_insert_with(Vec::new).push(label_node);
+            self.children.as_mut().unwrap().last_mut()
+        } else {
+            None
+        }
     }
     pub fn tooltip() {
         unimplemented!()
@@ -392,7 +402,7 @@ pub enum ComponentSelectorT {
     Water,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct ComponentExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub label_entity_id: Option<String>,
