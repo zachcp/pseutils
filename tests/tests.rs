@@ -451,3 +451,33 @@ fn test_moviewspec_01_common_actions_symmetry_miller() {
     let mut file = File::create("test_moviewspec_01_common_actions_symmetry_miller.json").unwrap();
     file.write_all(pretty_json.as_bytes()).unwrap();
 }
+
+#[test]
+fn test_moviewspec_01_common_actions_transform_superimpose() {
+    // builder = mvs.create_builder()
+    // structure1 = (
+    //     builder.download(url="https://files.wwpdb.org/download/1oj6.cif")
+    //     .parse(format="mmcif")
+    //     .assembly_structure()
+    // )
+    // # 1st structure colored in orange
+    // structure1.component(selector='polymer').representation(type='cartoon').color(color='#e19039')
+    // structure1.component(selector='ligand').representation(type='ball_and_stick').color(color='#eec190')
+    //
+    // structure2 = (
+    //     builder.download(url="https://files.wwpdb.org/download/5mjd.cif")
+    //     .parse(format="mmcif")
+    //     .assembly_structure()
+    //     # move these coordinates to align both structures
+    //     .transform(
+    //         rotation=[-0.39652203922082313, 0.918022802798312, 0.002099036562725462, 0.9068461182538327, 0.39133670281585825, 0.1564790811487865, 0.14282993460796656, 0.06395090751149791, -0.9876790426086504],
+    //         translation=[-17.636085896690037, 7.970761314734439, 88.54613248028247]
+    //     )
+    // )
+    // # 2nd structure colored in blue
+    // structure2.component(selector='polymer').representation(type='cartoon').color(color='#4b7fcc')
+    // structure2.component(selector='ligand').representation(type='ball_and_stick').color(color='#9cb8e3')
+    // print(builder.get_state())
+
+    //Todo
+}
