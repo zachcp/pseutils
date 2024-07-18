@@ -95,20 +95,6 @@ impl PSEData {
             .collect()
     }
 
-    /// session is where all the action happens
-    // pub fn get_molecule_data(&self) -> Vec<PyObjectMolecule> {
-    //     self.names
-    //         .iter()
-    //         .filter_map(|session_name| session_name.as_ref().map(|session| &session.data))
-    //         .filter_map(|data| {
-    //             if let CustomValue::PyObjectMolecule(molecule) = data {
-    //                 Some(molecule.clone())
-    //             } else {
-    //                 None
-    //             }
-    //         })
-    //         .collect()
-    // }
     pub fn get_molecule_data(&self) -> Vec<&PyObjectMolecule> {
         self.names
             .iter()
@@ -121,6 +107,7 @@ impl PSEData {
     }
 
     pub fn create_pdb(&self) -> PDB {
+        // todo: exten this to more than one molecuelo and/or to modify the global scene
         let moldata = &self.get_molecule_data();
         let first_mol = moldata[0];
         first_mol.to_pdb()

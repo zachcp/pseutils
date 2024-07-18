@@ -62,6 +62,9 @@ pub enum NodeParams {
 }
 
 /// Node
+///
+/// This is the core datastructure for generating MSVJ files. Each node type can have a type, params, and children.
+///
 /// Methods derived from the Python API found [here](https://github.com/molstar/mol-view-spec/blob/master/molviewspec/molviewspec/builder.py)
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct Node {
