@@ -22,7 +22,7 @@
 //!      - Curve
 //!  - Selection
 //!
-use crate::molviewspec::nodes::{self, State};
+use crate::molviewspec::nodes::{self as mvsnodes, State};
 use crate::pymolparsing::parsing::{
     CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName, SessionSelectorList,
 };
@@ -107,6 +107,7 @@ impl PSEData {
             })
             .collect()
     }
+
     pub fn get_selection_data(&self) -> Vec<&SessionSelectorList> {
         self.names
             .iter()
@@ -156,12 +157,22 @@ impl PSEData {
         let mut state = State::new();
 
         for molecule in self.get_molecule_data() {
+            let molname = molecule.get_name();
+
             state
-                .download(&format!("pdb/{}.pdb", molecule.get_name()))
-                .expect("Create a Downlaod node with a URL");
+                .download(&format!("pdb/{}.pdb", molname))
+                .expect("Create a Download node with a URL")
+                .parse(mvsnodes::ParseParams {
+                    format: mvsnodes::ParseFormatT::Mmcif,
+                });
         }
 
-        for selection in self.get_session_names() {}
+        // selections return MVD ComponentExpression
+        for selection in self.get_selection_data() {
+            // printnln!("{}", selection);
+            // add selection data components
+            // find
+        }
 
         state
     }

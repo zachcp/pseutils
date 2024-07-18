@@ -302,10 +302,10 @@ impl PyObjectMolecule {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct SessionSelectorList(Vec<SessionSelector>);
+pub struct SessionSelectorList(Vec<SessionSelector>);
 
 #[derive(Debug, Serialize)]
-struct SessionSelector {
+pub struct SessionSelector {
     // SelectorAsPyList
     // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer3/Selector.cpp#L2926
     // list of lists
