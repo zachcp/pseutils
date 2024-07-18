@@ -153,6 +153,7 @@ impl PSEData {
 
         state
     }
+
     pub fn to_disk(&self, file_path: &str) -> std::io::Result<()> {
         let path = std::path::Path::new(file_path);
         let msvj_file = path.join("state.msvj");
@@ -163,5 +164,10 @@ impl PSEData {
         std::fs::write(msvj_file, pretty_json)?;
 
         Ok(())
+    }
+
+    pub fn to_mvsj_url(&self) -> String {
+        let state = self.create_molviewspec();
+        state.to_url()
     }
 }

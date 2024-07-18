@@ -392,6 +392,8 @@ fn test_moviewspec_01_common_actions_symmetry_miller() {
     let pretty_json = serde_json::to_string_pretty(&state).unwrap();
     let mut file = File::create("test_moviewspec_01_common_actions_symmetry_miller.json").unwrap();
     file.write_all(pretty_json.as_bytes()).unwrap();
+
+    println!("{}", state.to_url())
 }
 
 #[test]

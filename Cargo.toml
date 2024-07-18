@@ -12,3 +12,4 @@ chrono = "0.4.38"
 validator = { version = "0.18", features = ["derive"] }
 pdbtbx = "0.11.0"
 itertools = "0.13.0"
+urlencoding = "2.1.3"

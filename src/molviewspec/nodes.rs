@@ -1,5 +1,7 @@
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
+use serde_json;
+use urlencoding;
 use validator::Validate;
 
 #[derive(PartialEq, Serialize, Deserialize, Debug, Default, Clone)]
@@ -337,7 +339,7 @@ impl State {
         State {
             root: Node::new(KindT::Root, None),
             metadata: Metadata {
-                version: "0.1".to_string(), // todo: update this
+                version: "1".to_string(), // todo: update this
                 timestamp: Utc::now().to_rfc3339().to_string(),
                 ..Default::default()
             },
@@ -358,6 +360,16 @@ impl State {
     /// General Lines and Spheres
     pub fn generic_visuals() {
         unimplemented!()
+    }
+
+    pub fn to_url(&self) -> String {
+        let json = serde_json::to_string(&self).expect("Json conversion");
+        let encoded = urlencoding::encode(&json);
+        let url = format!(
+            "https://molstar.org/viewer/?mvs-format=mvsj&mvs-data={}",
+            encoded
+        );
+        url
     }
 }
 
