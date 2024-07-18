@@ -22,14 +22,17 @@
 //!      - Curve
 //!  - Selection
 //!
+use crate::molviewspec::nodes::{self as mvsnodes, State};
 use crate::pymolparsing::parsing::{
-    CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName,
+    CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName, SessionSelector,
+    SessionSelectorList,
 };
 use pdbtbx::PDB;
 use serde::{Deserialize, Serialize};
 use serde_pickle::de::{from_reader, DeOptions};
+use std::collections::HashMap;
+use std::fs::File;
 use std::io::Read;
-use std::{collections::HashMap, fs::File};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PSEData {
@@ -95,20 +98,6 @@ impl PSEData {
             .collect()
     }
 
-    /// session is where all the action happens
-    // pub fn get_molecule_data(&self) -> Vec<PyObjectMolecule> {
-    //     self.names
-    //         .iter()
-    //         .filter_map(|session_name| session_name.as_ref().map(|session| &session.data))
-    //         .filter_map(|data| {
-    //             if let CustomValue::PyObjectMolecule(molecule) = data {
-    //                 Some(molecule.clone())
-    //             } else {
-    //                 None
-    //             }
-    //         })
-    //         .collect()
-    // }
     pub fn get_molecule_data(&self) -> Vec<&PyObjectMolecule> {
         self.names
             .iter()
@@ -120,9 +109,107 @@ impl PSEData {
             .collect()
     }
 
+    pub fn get_selection_data(&self) -> Vec<&SessionSelectorList> {
+        self.names
+            .iter()
+            .filter_map(|session_name| session_name.as_ref())
+            .filter_map(|session| match &session.data {
+                PymolSessionObjectData::SessionSelectorList(a) => Some(a),
+                _ => None,
+            })
+            .collect()
+    }
+
     pub fn create_pdb(&self) -> PDB {
+        // todo: extend this to more than one molecuelo and/or to modify the global scene
         let moldata = &self.get_molecule_data();
         let first_mol = moldata[0];
         first_mol.to_pdb()
+    }
+
+    pub fn save_pdbs(&self, file_path: &str) -> std::io::Result<()> {
+        let path = std::path::Path::new(file_path);
+        let pdb_folder = path.join("pdb");
+        std::fs::create_dir_all(&pdb_folder)?;
+
+        let mut file_list = Vec::new();
+
+        for (index, molecule) in self.get_molecule_data().iter().enumerate() {
+            let pdb = molecule.to_pdb();
+            let filename = format!("{}.pdb", molecule.get_name());
+            let file_path = pdb_folder.join(&filename);
+
+            let _ = pdbtbx::save_pdb(
+                &pdb,
+                file_path.to_str().expect("Invalid UTF-8 in file path"),
+                pdbtbx::StrictnessLevel::Strict,
+            );
+            file_list.push(filename);
+        }
+
+        let contents = file_list.join("\n");
+        std::fs::write(path.join("pdb_contents.txt"), contents)?;
+
+        Ok(())
+    }
+
+    pub fn create_molviewspec(&self) -> State {
+        // write state for loading the PDB files
+        let mut state = State::new();
+
+        for molecule in self.get_molecule_data() {
+            let molname = molecule.get_name();
+
+            let structure = state
+                .download(&format!("pdb/{}.pdb", molname))
+                .expect("Create a Download node with a URL")
+                .parse(mvsnodes::ParseParams {
+                    format: mvsnodes::ParseFormatT::Mmcif,
+                })
+                .expect("Parseable option")
+                .assembly_structure(mvsnodes::StructureParams {
+                    structure_type: mvsnodes::StructureTypeT::Model,
+                    ..Default::default()
+                })
+                .expect("a set of Structure options");
+
+            // add base structure component then any selections that may be relevant
+            structure
+                .component(mvsnodes::ComponentSelector::default())
+                .expect("defined a valid component")
+                .representation(mvsnodes::RepresentationTypeT::Cartoon);
+
+            // selections return MVD ComponentExpression
+            let selection_data = self.get_selection_data()[0];
+            for selector in selection_data.get_selectors() {
+                if selector.id == molname {
+                    println!("Found a selction for Model {}!!!!", molname);
+                    let component = selector.to_component();
+                    structure
+                        .component(component)
+                        .expect("defined a valid component")
+                        .representation(mvsnodes::RepresentationTypeT::BallAndStick);
+                }
+            }
+        }
+
+        state
+    }
+
+    pub fn to_disk(&self, file_path: &str) -> std::io::Result<()> {
+        let path = std::path::Path::new(file_path);
+        let msvj_file = path.join("state.msvj");
+        let state = self.create_molviewspec();
+        let pretty_json = serde_json::to_string_pretty(&state)?;
+
+        self.save_pdbs(file_path)?;
+        std::fs::write(msvj_file, pretty_json)?;
+
+        Ok(())
+    }
+
+    pub fn to_mvsj_url(&self) -> String {
+        let state = self.create_molviewspec();
+        state.to_url()
     }
 }

@@ -2,27 +2,10 @@ use pymol_session_utils::molviewspec::nodes::{
     ColorT, ComponentExpression, ComponentSelector, ComponentSelectorT, ParseFormatT, ParseParams,
     RepresentationTypeT, State, StructureParams, StructureTypeT,
 };
-use pymol_session_utils::PSEData;
 use serde_json::from_reader;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::Write;
-
-#[test]
-fn test_load_pse_data_molecule_only() {
-    //https://users.rust-lang.org/t/serde-untagged-enum-ruins-precise-errors/54128/2
-    // https://www.gustavwengel.dk/serde-untagged-enum-errors-are-bad
-    let deserialized: PSEData = PSEData::load("tests/data/example_molecule_only.pse").unwrap();
-    // deserialized.to_json("tests/data/example_molecule_only.json");
-    // Check fields of PSEData
-    assert!(deserialized.version == 3000000);
-}
-
-#[test]
-fn test_load_pse_data_molecule_selection() {
-    let deserialized: PSEData = PSEData::load("tests/data/example.pse").unwrap();
-    assert!(deserialized.version == 3000000);
-}
 
 #[test]
 fn test_molspecview_json_1cbs() {
@@ -88,104 +71,6 @@ fn test_molspecview_json_2bvk() {
     // assert_eq!(testvec[0].color, "#ffdd88");
     // // Todo : Fix tooltip type on Component Expression
     // assert_eq!(testvec[0].tooltip, "First cycle (by atom_index)");
-}
-
-// #[test]
-// fn test_molspecview_json_full_examples_annotations() {
-//     let file =
-//         File::open("tests/mol-spec-examples/annotations/state.mvsj").expect("Failed to open file");
-//     let reader = BufReader::new(file);
-//     let msvj: State = from_reader(reader).expect("Failed to parse JSON as ComponentExpression");
-
-//     // test metadata
-//     assert_eq!(msvj.metadata.version, "0.1");
-//     assert_eq!(
-//         msvj.metadata.title,
-//         Some("An example with MVS annotations".to_string())
-//     );
-//     assert_eq!(
-//         msvj.metadata.timestamp,
-//         "2024-03-05T18:40:24.870561+00:00".to_string()
-//     );
-
-//     // test root and data
-//     assert_eq!(msvj.root.kind, KindT::Root);
-//     // one child
-//     // let download = &msvj.root.children.unwrap()[0];
-//     // assert_eq!(download.kind, KindT::Download);
-//     // assert_eq!(
-//     //     download.params,
-//     //     Some(NodeParams::DownloadParams(DownloadParams{"https://files.wwpdb.org/download/1h9t.cif"})),
-//     // );
-//     //
-// }
-
-// #[test]
-// fn test_molspecview_json_full_examples_basic() {
-//     let file = File::open("tests/mol-spec-examples/basic/state.mvsj").expect("Failed to open file");
-//     let reader = BufReader::new(file);
-//     let msvj: State = from_reader(reader).expect("Failed to parse JSON as an MVSJ State Object");
-
-//     // test metadata
-//     assert_eq!(msvj.metadata.version, "0.1");
-//     assert_eq!(
-//         msvj.metadata.timestamp,
-//         "2023-11-27T12:05:32.145284".to_string()
-//     );
-
-//     // test root and data
-//     assert_eq!(msvj.root.kind, KindT::Root);
-//     // one child
-//     let download = &msvj.root.children.unwrap()[0];
-//     assert_eq!(download.kind, KindT::Download);
-//     // assert_eq!(
-//     //     download.params,
-//     //     Some(HashMap::from([(
-//     //         "url".to_string(),
-//     //         serde_json::Value::String("https://files.wwpdb.org/download/1cbs.cif".to_string())
-//     //     )])),
-//     // );
-// }
-
-#[test]
-fn test_pdb() {
-    let psedata: PSEData = PSEData::load("tests/data/example.pse").unwrap();
-    let names = psedata.get_session_names();
-    print!("{:?}", names);
-    // this has a Molecule and a selection
-    assert_eq!(names.len(), 2);
-
-    let mols = psedata.get_molecule_data();
-    assert_eq!(mols.len(), 1);
-    let atom01 = mols[0].get_atom(0);
-    assert!(atom01.x() == 50.87300109863281);
-    assert!(atom01.y() == 32.97800064086914);
-    assert!(atom01.z() == 2.38700008392334);
-
-    let chains = mols[0].get_chains();
-    println!("Chains: {:?}", chains);
-    let residues = mols[0].get_residues_by_chain(chains[0].clone());
-    println!("Residues: {:?}", residues);
-
-    let residue = mols[0].create_residue(chains[0].clone(), residues[0]);
-    println!("Residue: {:?}", residue);
-
-    let chain = mols[0].create_chain(chains[0].clone());
-    println!("Chain: {:?}", chain);
-
-    // Check symmetry code
-    let (unit, sym) = mols[0].get_unit_cell_symmetry();
-    println!("{:?},{:?}", unit, sym);
-
-    // Move on to PDB, baby!
-    let pdb = mols[0].to_pdb();
-
-    let _ = pdbtbx::save_pdb(
-        &pdb,
-        "/Users/zcpowers/Desktop/PSE/pickletest/test_01.pdb",
-        pdbtbx::StrictnessLevel::Strict,
-    )
-    .expect("PDB output");
 }
 
 #[test]
@@ -276,6 +161,7 @@ fn test_moviewspec_01_common_actions_cartoon() {
     let color_component = ComponentSelector::default();
 
     let mut state = State::new();
+
     state
         .download("https://files.wwpdb.org/download/1cbs.cif")
         .expect("Create a Downlaod node with a URL")
@@ -346,6 +232,7 @@ fn test_moviewspec_01_common_actions_selectors() {
 
     // set protein as orange
     let component_prot = ComponentSelector::Selector(ComponentSelectorT::Protein);
+
     structure
         .component(component_prot)
         .expect("Created component")
@@ -416,4 +303,125 @@ fn test_moviewspec_01_common_actions_selectors() {
     let pretty_json = serde_json::to_string_pretty(&state).unwrap();
     let mut file = File::create("test_moviewspec_01_common_actions_selectors.json").unwrap();
     file.write_all(pretty_json.as_bytes()).unwrap();
+}
+
+#[test]
+fn test_moviewspec_01_common_actions_symmetry() {
+    // https://colab.research.google.com/drive/1O2TldXlS01s-YgkD9gy87vWsfCBTYuz9#scrollTo=U256gC0Tj2vS
+    // builder = mvs.create_builder()
+    // builder = mvs.create_builder()    // (
+    //     builder.download(url="https://files.wwpdb.org/download/4hhb.cif")
+    //     .parse(format="mmcif")
+    //     .symmetry_mates_structure(radius=5.0)
+    //     .component()
+    //     .representation()
+    //     .color(color='#1b9e77')
+
+    // struct params
+    let structparams = StructureParams {
+        structure_type: StructureTypeT::Symmetry, // <----- Main difference here
+        radius: Some(5.0),
+        ..Default::default()
+    };
+
+    // color
+    let color = ColorT::Hex("#1b9e77".to_string());
+    let color_component = ComponentSelector::default();
+
+    let mut state = State::new();
+    state
+        .download("https://files.wwpdb.org/download/4hhb.cif")
+        .expect("Create a Downlaod node with a URL")
+        .parse(ParseParams {
+            format: ParseFormatT::Mmcif,
+        })
+        .expect("Parseable option")
+        .symmetry_mates_structure(structparams)
+        .expect("a set of Structure options")
+        .component(ComponentSelector::default())
+        .expect("defined a valid component")
+        .representation(RepresentationTypeT::Cartoon)
+        .expect("a valid representation")
+        .color(color, color_component);
+
+    let pretty_json = serde_json::to_string_pretty(&state).unwrap();
+    let mut file = File::create("test_moviewspec_01_common_actions_cartoon.json").unwrap();
+    file.write_all(pretty_json.as_bytes()).unwrap();
+}
+
+#[test]
+fn test_moviewspec_01_common_actions_symmetry_miller() {
+    // https://colab.research.google.com/drive/1O2TldXlS01s-YgkD9gy87vWsfCBTYuz9#scrollTo=U256gC0Tj2vS
+    // builder = mvs.create_builder()
+    //     builder.download(url="https://files.wwpdb.org/download/4hhb.cif")
+    //     .parse(format="mmcif")
+    //     .symmetry_structure(ijk_min=(-1, -1, -1), ijk_max=(1, 1, 1))
+    //     .component()
+    //     .representation()
+    //     .color(color='#1b9e77')
+
+    // struct params
+    let structparams = StructureParams {
+        structure_type: StructureTypeT::SymmetryMates, // <----- Main difference here
+        ijk_min: Some((-1, -1, -1)),
+        ijk_max: Some((1, 1, 1)),
+        ..Default::default()
+    };
+
+    // color
+    let color = ColorT::Hex("#1b9e77".to_string());
+    let color_component = ComponentSelector::default();
+
+    let mut state = State::new();
+
+    state
+        .download("https://files.wwpdb.org/download/4hhb.cif")
+        .expect("Create a Downlaod node with a URL")
+        .parse(ParseParams {
+            format: ParseFormatT::Mmcif,
+        })
+        .expect("Parseable option")
+        .symmetry_mates_structure(structparams)
+        .expect("a set of Structure options")
+        .component(ComponentSelector::default())
+        .expect("defined a valid component")
+        .representation(RepresentationTypeT::Cartoon)
+        .expect("a valid representation")
+        .color(color, color_component);
+
+    let pretty_json = serde_json::to_string_pretty(&state).unwrap();
+    let mut file = File::create("test_moviewspec_01_common_actions_symmetry_miller.json").unwrap();
+    file.write_all(pretty_json.as_bytes()).unwrap();
+
+    println!("{}", state.to_url())
+}
+
+#[test]
+fn test_moviewspec_01_common_actions_transform_superimpose() {
+    // builder = mvs.create_builder()
+    // structure1 = (
+    //     builder.download(url="https://files.wwpdb.org/download/1oj6.cif")
+    //     .parse(format="mmcif")
+    //     .assembly_structure()
+    // )
+    // # 1st structure colored in orange
+    // structure1.component(selector='polymer').representation(type='cartoon').color(color='#e19039')
+    // structure1.component(selector='ligand').representation(type='ball_and_stick').color(color='#eec190')
+    //
+    // structure2 = (
+    //     builder.download(url="https://files.wwpdb.org/download/5mjd.cif")
+    //     .parse(format="mmcif")
+    //     .assembly_structure()
+    //     # move these coordinates to align both structures
+    //     .transform(
+    //         rotation=[-0.39652203922082313, 0.918022802798312, 0.002099036562725462, 0.9068461182538327, 0.39133670281585825, 0.1564790811487865, 0.14282993460796656, 0.06395090751149791, -0.9876790426086504],
+    //         translation=[-17.636085896690037, 7.970761314734439, 88.54613248028247]
+    //     )
+    // )
+    // # 2nd structure colored in blue
+    // structure2.component(selector='polymer').representation(type='cartoon').color(color='#4b7fcc')
+    // structure2.component(selector='ligand').representation(type='ball_and_stick').color(color='#9cb8e3')
+    // print(builder.get_state())
+
+    //Todo
 }

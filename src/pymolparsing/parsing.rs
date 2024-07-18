@@ -1,5 +1,6 @@
+use crate::molviewspec::nodes::{ComponentExpression, ComponentSelector};
 use itertools::Itertools;
-use pdbtbx::{self, Residue, Symmetry, PDB};
+use pdbtbx::{self, Residue, PDB};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_pickle::{from_value, Value};
 
@@ -301,10 +302,15 @@ impl PyObjectMolecule {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct SessionSelectorList(Vec<SessionSelector>);
+pub struct SessionSelectorList(Vec<SessionSelector>);
+impl SessionSelectorList {
+    pub fn get_selectors(&self) -> &Vec<SessionSelector> {
+        &self.0
+    }
+}
 
 #[derive(Debug, Serialize)]
-struct SessionSelector {
+pub struct SessionSelector {
     // SelectorAsPyList
     // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer3/Selector.cpp#L2926
     // list of lists
@@ -312,9 +318,25 @@ struct SessionSelector {
     // Vec1: Index Object ( from VLA list )
     // Vec2: Tag Object ( from VLA list )
     // selector: Vec<(String, Vec<i32>, Vec<i32>)>, // this is there the selection bits are
-    id: String,
-    values1: Vec<i64>,
-    values2: Vec<i64>,
+    pub id: String,
+    pub atom_index: Vec<i64>,
+    pub atom_tag: Vec<i64>,
+}
+
+impl SessionSelector {
+    pub fn to_component(&self) -> ComponentSelector {
+        let mut expression_list: Vec<ComponentExpression> = vec![];
+
+        for idx in &self.atom_index {
+            let idx32: i32 = *idx as i32;
+            expression_list.push(ComponentExpression {
+                label_entity_id: Some(self.id.clone()),
+                atom_id: Some(idx32),
+                ..Default::default()
+            });
+        }
+        ComponentSelector::ExpressionList(expression_list)
+    }
 }
 
 // You might need a custom Deserialize implementation for SessionSelector
@@ -323,11 +345,11 @@ impl<'de> Deserialize<'de> for SessionSelector {
     where
         D: Deserializer<'de>,
     {
-        let (id, values1, values2) = Deserialize::deserialize(deserializer)?;
+        let (id, atom_index, atom_tag) = Deserialize::deserialize(deserializer)?;
         Ok(SessionSelector {
             id,
-            values1,
-            values2,
+            atom_index,
+            atom_tag,
         })
     }
 }

@@ -2,6 +2,11 @@
 
 **WIP: Currently not working**
 
+
+## Goal
+
+Binary serializaton from `.pse` to `X` using RUST. Where I want `X` to be [mol-view-spec](https://github.com/molstar/mol-view-spec)
+
 ## Testing
 
 ```sh
@@ -11,10 +16,6 @@ cargo test
 cargo test -- --nocapture
 ```
 
-
-## Goal
-
-Binary serializaton from `.pse` to `X` using RUST. Where I want `X` to be [mol-view-spec](https://github.com/molstar/mol-view-spec)
 
 ## Related
 

@@ -1,5 +1,7 @@
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
+use serde_json;
+use urlencoding;
 use validator::Validate;
 
 #[derive(PartialEq, Serialize, Deserialize, Debug, Default, Clone)]
@@ -62,6 +64,9 @@ pub enum NodeParams {
 }
 
 /// Node
+///
+/// This is the core datastructure for generating MSVJ files. Each node type can have a type, params, and children.
+///
 /// Methods derived from the Python API found [here](https://github.com/molstar/mol-view-spec/blob/master/molviewspec/molviewspec/builder.py)
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct Node {
@@ -140,13 +145,30 @@ impl Node {
             None
         }
     }
-    /// Parse a Download Node
-    pub fn symmetry_structure() {
-        unimplemented!()
+    /// Symmetry Structure
+    pub fn symmetry_structure(&mut self, params: StructureParams) -> Option<&mut Node> {
+        // todo: this is the same as the regular structure bit above......
+        if self.kind == KindT::Parse {
+            let struct_node =
+                Node::new(KindT::Structure, Some(NodeParams::StructureParams(params)));
+            self.children.get_or_insert_with(Vec::new).push(struct_node);
+            self.children.as_mut().unwrap().last_mut()
+        } else {
+            None
+        }
     }
+
     /// Parse a Download Node
-    pub fn symmetry_mates_structure() {
-        unimplemented!()
+    pub fn symmetry_mates_structure(&mut self, params: StructureParams) -> Option<&mut Node> {
+        // todo: this is the same as the regular structure bit above......
+        if self.kind == KindT::Parse {
+            let struct_node =
+                Node::new(KindT::Structure, Some(NodeParams::StructureParams(params)));
+            self.children.get_or_insert_with(Vec::new).push(struct_node);
+            self.children.as_mut().unwrap().last_mut()
+        } else {
+            None
+        }
     }
 
     // Structure methods ------------------------------------------------------
@@ -317,7 +339,7 @@ impl State {
         State {
             root: Node::new(KindT::Root, None),
             metadata: Metadata {
-                version: "0.1".to_string(), // todo: update this
+                version: "1".to_string(), // todo: update this
                 timestamp: Utc::now().to_rfc3339().to_string(),
                 ..Default::default()
             },
@@ -338,6 +360,16 @@ impl State {
     /// General Lines and Spheres
     pub fn generic_visuals() {
         unimplemented!()
+    }
+
+    pub fn to_url(&self) -> String {
+        let json = serde_json::to_string(&self).expect("Json conversion");
+        let encoded = urlencoding::encode(&json);
+        let url = format!(
+            "https://molstar.org/viewer/?mvs-format=mvsj&mvs-data={}",
+            encoded
+        );
+        url
     }
 }
 
