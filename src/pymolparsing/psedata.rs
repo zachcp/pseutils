@@ -22,6 +22,7 @@
 //!      - Curve
 //!  - Selection
 //!
+use crate::molviewspec::nodes::{self, State};
 use crate::pymolparsing::parsing::{
     CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName,
 };
@@ -107,13 +108,13 @@ impl PSEData {
     }
 
     pub fn create_pdb(&self) -> PDB {
-        // todo: exten this to more than one molecuelo and/or to modify the global scene
+        // todo: extend this to more than one molecuelo and/or to modify the global scene
         let moldata = &self.get_molecule_data();
         let first_mol = moldata[0];
         first_mol.to_pdb()
     }
 
-    pub fn save_pdbs(&self, file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn save_pdbs(&self, file_path: &str) -> std::io::Result<()> {
         let path = std::path::Path::new(file_path);
         let pdb_folder = path.join("pdb");
         std::fs::create_dir_all(&pdb_folder)?;
@@ -137,5 +138,9 @@ impl PSEData {
         std::fs::write(path.join("pdb_contents.txt"), contents)?;
 
         Ok(())
+    }
+
+    pub fn create_molviewspec(&self) -> State {
+        State::new()
     }
 }
