@@ -63,4 +63,5 @@ fn test_pdb_01() {
     let _ = psedata.to_disk("./test_pse_out");
     let url = psedata.to_mvsj_url();
     println!("{}", url);
+    let mvs = psedata.create_molviewspec();
 }

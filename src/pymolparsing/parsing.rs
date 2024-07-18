@@ -324,7 +324,7 @@ pub struct SessionSelector {
 }
 
 impl SessionSelector {
-    pub fn to_molview_spec(&self) -> ComponentSelector {
+    pub fn to_component(&self) -> ComponentSelector {
         let mut expression_list: Vec<ComponentExpression> = vec![];
 
         for idx in &self.atom_index {

@@ -183,7 +183,12 @@ impl PSEData {
             let selection_data = self.get_selection_data()[0];
             for selector in selection_data.get_selectors() {
                 if selector.id == molname {
-                    println!("Fund a slection for Model {}!!!!", molname);
+                    println!("Found a selction for Model {}!!!!", molname);
+                    let component = selector.to_component();
+                    structure
+                        .component(component)
+                        .expect("defined a valid component")
+                        .representation(mvsnodes::RepresentationTypeT::BallAndStick);
                 }
             }
         }
