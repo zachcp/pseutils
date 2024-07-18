@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use pdbtbx::{self, Residue, Symmetry, PDB};
+use pdbtbx::{self, Residue, PDB};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_pickle::{from_value, Value};
 
