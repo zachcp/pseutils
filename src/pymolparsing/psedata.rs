@@ -29,8 +29,9 @@ use crate::pymolparsing::parsing::{
 use pdbtbx::PDB;
 use serde::{Deserialize, Serialize};
 use serde_pickle::de::{from_reader, DeOptions};
+use std::collections::HashMap;
+use std::fs::File;
 use std::io::Read;
-use std::{collections::HashMap, fs::File};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PSEData {
@@ -141,6 +142,26 @@ impl PSEData {
     }
 
     pub fn create_molviewspec(&self) -> State {
-        State::new()
+        // write state for loading the PDB files
+        let mut state = State::new();
+
+        for molecule in self.get_molecule_data() {
+            state
+                .download(&format!("pdb/{}.pdb", molecule.get_name()))
+                .expect("Create a Downlaod node with a URL");
+        }
+
+        state
+    }
+    pub fn to_disk(&self, file_path: &str) -> std::io::Result<()> {
+        let path = std::path::Path::new(file_path);
+        let msvj_file = path.join("state.msvj");
+        let state = self.create_molviewspec();
+        let pretty_json = serde_json::to_string_pretty(&state)?;
+
+        self.save_pdbs(file_path)?;
+        std::fs::write(msvj_file, pretty_json)?;
+
+        Ok(())
     }
 }

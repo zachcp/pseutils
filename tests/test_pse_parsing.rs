@@ -60,5 +60,6 @@ fn test_pdb_00() {
 #[test]
 fn test_pdb_01() {
     let psedata: PSEData = PSEData::load("tests/data/example.pse").unwrap();
-    let _ = psedata.save_pdbs("./test_pse_out");
+    // let _ = psedata.save_pdbs("./test_pse_out");
+    let _ = psedata.to_disk("./test_pse_out");
 }
