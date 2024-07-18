@@ -17,7 +17,7 @@ fn test_load_pse_data_molecule_selection() {
 }
 
 #[test]
-fn test_pdb() {
+fn test_pdb_00() {
     let psedata: PSEData = PSEData::load("tests/data/example.pse").unwrap();
     let names = psedata.get_session_names();
     print!("{:?}", names);
@@ -55,4 +55,10 @@ fn test_pdb() {
         pdbtbx::StrictnessLevel::Strict,
     )
     .expect("PDB output");
+}
+
+#[test]
+fn test_pdb_01() {
+    let psedata: PSEData = PSEData::load("tests/data/example.pse").unwrap();
+    let _ = psedata.save_pdbs("./test_pse_out");
 }

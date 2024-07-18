@@ -113,31 +113,29 @@ impl PSEData {
         first_mol.to_pdb()
     }
 
-    // pub fn save_pdbs(&self, file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
-    //     let path = std::path::Path::new(file_path);
-    //     if !path.exists() {
-    //         return Err(Box::new(std::io::Error::new(
-    //             std::io::ErrorKind::NotFound,
-    //             "File path does not exist",
-    //         )));
-    //     }
+    pub fn save_pdbs(&self, file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let path = std::path::Path::new(file_path);
+        let pdb_folder = path.join("pdb");
+        std::fs::create_dir_all(&pdb_folder)?;
 
-    //     let pdb_folder = path.join("pdb");
-    //     std::fs::create_dir_all(&pdb_folder)?;
+        let mut file_list = Vec::new();
 
-    //     let mut file_list = Vec::new();
+        for (index, molecule) in self.get_molecule_data().iter().enumerate() {
+            let pdb = molecule.to_pdb();
+            let filename = format!("{}.pdb", molecule.get_name());
+            let file_path = pdb_folder.join(&filename);
 
-    //     for (index, molecule) in self.get_molecule_data().iter().enumerate() {
-    //         let pdb = molecule.to_pdb();
-    //         let filename = format!("molecule_{}.pdb", index + 1);
-    //         let file_path = pdb_folder.join(&filename);
-    //         pdb.write_pdb(&file_path.to_str().unwrap())?;
-    //         file_list.push(filename);
-    //     }
+            let _ = pdbtbx::save_pdb(
+                &pdb,
+                file_path.to_str().expect("Invalid UTF-8 in file path"),
+                pdbtbx::StrictnessLevel::Strict,
+            );
+            file_list.push(filename);
+        }
 
-    //     let contents = file_list.join("\n");
-    //     std::fs::write(pdb_folder.join("pdb_contents.txt"), contents)?;
+        let contents = file_list.join("\n");
+        std::fs::write(path.join("pdb_contents.txt"), contents)?;
 
-    //     Ok(())
-    // }
+        Ok(())
+    }
 }
