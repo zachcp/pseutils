@@ -2,7 +2,6 @@ use pymol_session_utils::molviewspec::nodes::{
     ColorT, ComponentExpression, ComponentSelector, ComponentSelectorT, ParseFormatT, ParseParams,
     RepresentationTypeT, State, StructureParams, StructureTypeT,
 };
-use pymol_session_utils::PSEData;
 use serde_json::from_reader;
 use std::fs::File;
 use std::io::BufReader;
