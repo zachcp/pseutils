@@ -24,7 +24,7 @@
 //!
 use crate::molviewspec::nodes::{self, State};
 use crate::pymolparsing::parsing::{
-    CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName,
+    CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName, SessionSelectorList,
 };
 use pdbtbx::PDB;
 use serde::{Deserialize, Serialize};
@@ -107,6 +107,16 @@ impl PSEData {
             })
             .collect()
     }
+    pub fn get_selection_data(&self) -> Vec<&SessionSelectorList> {
+        self.names
+            .iter()
+            .filter_map(|session_name| session_name.as_ref())
+            .filter_map(|session| match &session.data {
+                PymolSessionObjectData::SessionSelectorList(a) => Some(a),
+                _ => None,
+            })
+            .collect()
+    }
 
     pub fn create_pdb(&self) -> PDB {
         // todo: extend this to more than one molecuelo and/or to modify the global scene
@@ -150,6 +160,8 @@ impl PSEData {
                 .download(&format!("pdb/{}.pdb", molecule.get_name()))
                 .expect("Create a Downlaod node with a URL");
         }
+
+        for selection in self.get_session_names() {}
 
         state
     }
