@@ -303,6 +303,11 @@ impl PyObjectMolecule {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SessionSelectorList(Vec<SessionSelector>);
+impl SessionSelectorList {
+    pub fn get_selectors(&self) -> &Vec<SessionSelector> {
+        &self.0
+    }
+}
 
 #[derive(Debug, Serialize)]
 pub struct SessionSelector {

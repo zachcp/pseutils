@@ -24,7 +24,8 @@
 //!
 use crate::molviewspec::nodes::{self as mvsnodes, State};
 use crate::pymolparsing::parsing::{
-    CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName, SessionSelectorList,
+    CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName, SessionSelector,
+    SessionSelectorList,
 };
 use pdbtbx::PDB;
 use serde::{Deserialize, Serialize};
@@ -159,19 +160,32 @@ impl PSEData {
         for molecule in self.get_molecule_data() {
             let molname = molecule.get_name();
 
-            state
+            let structure = state
                 .download(&format!("pdb/{}.pdb", molname))
                 .expect("Create a Download node with a URL")
                 .parse(mvsnodes::ParseParams {
                     format: mvsnodes::ParseFormatT::Mmcif,
-                });
-        }
+                })
+                .expect("Parseable option")
+                .assembly_structure(mvsnodes::StructureParams {
+                    structure_type: mvsnodes::StructureTypeT::Model,
+                    ..Default::default()
+                })
+                .expect("a set of Structure options");
 
-        // selections return MVD ComponentExpression
-        for selection in self.get_selection_data() {
-            // printnln!("{}", selection);
-            // add selection data components
-            // find
+            // add base structure component then any selections that may be relevant
+            structure
+                .component(mvsnodes::ComponentSelector::default())
+                .expect("defined a valid component")
+                .representation(mvsnodes::RepresentationTypeT::Cartoon);
+
+            // selections return MVD ComponentExpression
+            let selection_data = self.get_selection_data()[0];
+            for selector in selection_data.get_selectors() {
+                if selector.id == molname {
+                    println!("Fund a slection for Model {}!!!!", molname);
+                }
+            }
         }
 
         state
