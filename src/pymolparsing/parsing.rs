@@ -13,6 +13,35 @@
 //! This module is designed to work with serialized PyMOL session data and
 //! provides methods for deserializing and manipulating this data.
 //!
+//! ## Links
+//!
+//! - [Molecule Experter](https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L1627)
+//! - [PymolMoleculeExporter](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer4/Cmd.cpp#L3877)
+//! - [PDB Exporter](https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L1627)
+//! - [MoleculeExporterPDB](https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L439)
+//!
+//! exporter->init(G);
+//! exporter->setMulti(multi);
+//! exporter->setRefObject(ref_object, ref_state);
+//! exporter->execute(sele, state);
+//!
+//! CoordSetAtomToPDBStrVLA
+//! Variables:
+//! - m_iter: SeleCoordIterator m_iter;
+//! Atoms:
+//! how do we check for multiple objects?
+//! m_iter.obj defines the object. By number? by name?
+//! - iterate through the coordinates
+//! - check for multi
+//! update transformation matrices
+//! updateMatrix(m_mat_full, true);
+//! updateMatrix(m_mat_move, false);
+//! beginCoordSet();
+//! m_last_cs = m_iter.cs;
+//! for bonds
+//! if (!m_tmpids[m_iter.getAtm()]) {
+//! m_id = m_retain_ids ? m_iter.getAtomInfo()->id : (m_id + 1);
+//!  m_tmpids[m_iter.getAtm()] = m_id;
 use crate::molviewspec::nodes::{ComponentExpression, ComponentSelector};
 use itertools::Itertools;
 use pdbtbx::{self, Residue, PDB};
@@ -69,6 +98,7 @@ use serde_pickle::{from_value, Value};
 /// * `has_setting` - Flag indicating if the atom has custom settings
 /// * `anisou_1` to `anisou_6` - Anisotropic temperature factors
 /// * `custom` - Custom data string
+///
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AtomInfo {
     pub resv: i32,
@@ -131,7 +161,6 @@ impl AtomInfo {
     }
     pub fn to_pdbtbx_atom(&self) -> pdbtbx::Atom {
         let formal_charge = self.formal_charge as isize;
-
         let atom = pdbtbx::Atom::new(
             self.is_hetero(), // hetero
             0,                // serial_number
@@ -175,10 +204,14 @@ pub struct Bond {
     // symop_2: Option<String>,
 }
 
-/// Coord Set
+/// Coord Set: Class for storage of coordinates
 ///
+/// Links:
 /// - [pymol_coordset](https://github.com/schrodinger/pymol-open-source/blob/master/layer2/CoordSet.cpp#L363)
 /// - [pymol_coordset_settings]( https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Setting.cpp#L962)
+/// - [CGO](https://github.com/schrodinger/pymol-open-source/blob/master/layer1/CGO.cpp#L220)
+/// - [symettry_settings](https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Symmetry.cpp#L30)
+///
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CoordSet {
     pub n_index: i32,         // 1519
@@ -187,16 +220,18 @@ pub struct CoordSet {
     pub idx_to_atm: Vec<i32>, // 1 - 1518
     pub atm_to_idx: Option<Vec<i32>>,
     pub name: String,
-    pub setting: Vec<Option<bool>>, // punting on this
-    pub lab_pos: Option<bool>,      // might be wrong
-    field_9: Option<bool>,          // probably wrong...
-    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer1/CGO.cpp#L220
-    pub sculpt_cgo: Option<(i32, Vec<f32>)>,           //
+    pub setting: Vec<Option<bool>>,          // punting on this
+    pub lab_pos: Option<bool>,               // might be wrong
+    field_9: Option<bool>,                   // probably wrong...
+    pub sculpt_cgo: Option<(i32, Vec<f32>)>, //
     pub atom_state_settings: Option<Vec<Option<i32>>>, //
-    /// [symettry_settings](https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Symmetry.cpp#L30)
     pub symmetry: Option<Vec<(((i32, i32, i32), (i32, i32, i32)), String)>>,
 }
 
+/// Custom Value
+///
+/// needed for the settings triplet.
+///
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum CustomValue {
@@ -204,10 +239,12 @@ pub enum CustomValue {
     Float(f64),
     String(String),
     Boolean(bool),
-    // Add more variants if needed, e.g., None for Python's None
 }
 
 /// PyObject
+///
+/// General settings object
+///
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PyObject {
     pub object_type: i32,
@@ -226,14 +263,15 @@ pub struct PyObject {
     pub view_elem: Option<bool>, //hack
 }
 
-/// PyObjectMolecule:
-///
-/// Represents a molecule object in PyMOL.
+/// PyObjectMolecule: Represents a molecule in PyMOL.
 ///
 /// ## Link
 ///
 /// - [pymol code](https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3524)
 /// - [ObjectMolecule](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/ObjectMolecule.h#L58)
+/// - [Bond](https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3037)
+/// - [AtomInfo](https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3248)
+/// - [AtomInfo2](https://github.com/schrodinger/pymol-open-source/blob/master/layer2/AtomInfo.cpp#L792)
 ///
 /// ## Fields
 ///
@@ -263,10 +301,7 @@ pub struct PyObjectMolecule {
     /// Vector of Coordinates
     pub coord_set: Vec<CoordSet>,
     pub cs_tmpl: Option<Vec<CoordSet>>,
-    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3037
     pub bond: Vec<Bond>,
-    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3248
-    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/AtomInfo.cpp#L792
     pub atom: Vec<AtomInfo>,
     pub discrete_flag: i32,
     pub n_discrete: i32,
@@ -280,53 +315,6 @@ pub struct PyObjectMolecule {
 impl PyObjectMolecule {
     pub fn get_name(&self) -> String {
         self.object.name.to_string()
-    }
-    pub fn get_str(&self) -> String {
-        // get_str
-        // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer4/Cmd.cpp#L3877
-        // PymolMoleculeExporter
-        // https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L1627
-        // PDB Exporter
-        // MoleculeExporterPDB
-        // https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L439
-        //
-        //
-        // exporter->init(G);
-        //
-        // exporter->setMulti(multi);
-        // exporter->setRefObject(ref_object, ref_state);
-        // exporter->execute(sele, state);
-        //
-        // CoordSetAtomToPDBStrVLA
-        //
-        // Variables:
-        //  - m_iter: SeleCoordIterator m_iter;
-        //
-        // // Atoms:
-        //     // how do we check for multiple objects?
-        //     // m_iter.obj defines the object. By number? by name?
-        //     - iterate through the coordinates
-        //     - check for multi
-
-        // update transformation matrices
-        // updateMatrix(m_mat_full, true);
-        // updateMatrix(m_mat_move, false);
-
-        // beginCoordSet();
-        // m_last_cs = m_iter.cs;
-
-        // for bonds
-        // if (!m_tmpids[m_iter.getAtm()]) {
-        //   m_id = m_retain_ids ? m_iter.getAtomInfo()->id : (m_id + 1);
-        //   m_tmpids[m_iter.getAtm()] = m_id;
-        // }
-
-        //
-
-        // for coord in &self.coord_set {
-        //     println!("{:?}", coord);
-        // }
-        "test".to_string()
     }
     /// Create a PDBTBX::Atom from the pymol object datastructure
     pub fn get_atom(&self, atm_idx: i32) -> pdbtbx::Atom {
@@ -367,7 +355,6 @@ impl PyObjectMolecule {
         );
         atom.unwrap()
     }
-
     /// Get unique chain names
     pub fn get_chains(&self) -> Vec<String> {
         self.atom
@@ -376,7 +363,6 @@ impl PyObjectMolecule {
             .unique() // from itertools
             .collect()
     }
-
     /// Get each residue by chain.
     pub fn get_residues_by_chain(&self, chain: String) -> Vec<i32> {
         self.atom
@@ -386,7 +372,6 @@ impl PyObjectMolecule {
             .unique()
             .collect()
     }
-
     pub fn get_unit_cell_symmetry(&self) -> (pdbtbx::UnitCell, pdbtbx::Symmetry) {
         let symmetry = &self.symmetry.clone().expect("Expected a symmetry group.");
         let (([a, b, c], [alpha, beta, gamma]), sym_group) = symmetry;
@@ -410,7 +395,6 @@ impl PyObjectMolecule {
         (unitcell, pdbsym)
     }
     /// Get each residue by chain.
-    ///
     pub fn create_residue(&self, chain: String, residue_number: i32) -> pdbtbx::Residue {
         let atoms: Vec<&AtomInfo> = self
             .atom
@@ -433,7 +417,6 @@ impl PyObjectMolecule {
         residue.add_conformer(conformer);
         residue
     }
-
     pub fn create_chain(&self, chain: String) -> pdbtbx::Chain {
         let mut new_chain = pdbtbx::Chain::new(chain.clone()).unwrap();
 
@@ -463,7 +446,6 @@ impl PyObjectMolecule {
         for chain in chains {
             model.add_chain(chain);
         }
-        // println!("{:?}", model);
 
         // Create PDB from Models
         let mut pdb = PDB::new();
@@ -471,7 +453,6 @@ impl PyObjectMolecule {
 
         // Add Bonds Here
         for bond in &self.bond {
-            // println!("{:?}", bond);
             // Todo: proper pymol bond--> pdbtbx bond
             pdb.add_bond(
                 (bond.index_1 as usize, None),
