@@ -221,7 +221,8 @@ impl PSEData {
         std::fs::write(msvj_file, pretty_json)?;
         Ok(())
     }
-
+    /// this one will write  a ready-to-go folder with pdbs, an msvj file, and the
+    /// html/css/js needed to load them
     pub fn to_disk_full(&self, file_path: &str) -> std::io::Result<()> {
         // Create the directory if it doesn't exist
         fs::create_dir_all(file_path)?;

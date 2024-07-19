@@ -17,6 +17,10 @@ cargo test -- --nocapture
 
 # build the docs
 cargo clean --doc && cargo doc --no-deps --open
+
+# to look at results
+cargo test # generate an example
+cd test_temporary && python -m http.server
 ```
 
 

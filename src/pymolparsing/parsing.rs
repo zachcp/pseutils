@@ -544,11 +544,10 @@ pub struct SessionSelector {
 impl SessionSelector {
     pub fn to_component(&self) -> ComponentSelector {
         let mut expression_list: Vec<ComponentExpression> = vec![];
-
         for idx in &self.atom_index {
             let idx32: i32 = *idx as i32;
             expression_list.push(ComponentExpression {
-                // label_entity_id: Some(self.id.clone()),
+                // internal representaiton of selection is available as the atom_index
                 atom_index: Some(idx32),
                 ..Default::default()
             });
