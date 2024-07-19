@@ -28,10 +28,9 @@
 //! - Selection ---> WIP.
 //!
 
-use crate::molviewspec::nodes::{self as mvsnodes, State};
+use crate::molviewspec::nodes::{self as mvsnodes, ColorNamesT, State};
 use crate::pymolparsing::parsing::{
-    CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName, SessionSelector,
-    SessionSelectorList,
+    CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName, SessionSelectorList,
 };
 use pdbtbx::PDB;
 use serde::{Deserialize, Serialize};
@@ -204,7 +203,14 @@ impl PSEData {
                     structure
                         .component(component)
                         .expect("defined a valid component")
-                        .representation(mvsnodes::RepresentationTypeT::BallAndStick);
+                        .representation(mvsnodes::RepresentationTypeT::BallAndStick)
+                        .expect("a representation")
+                        // to do add colors and other settings....
+                        .color(
+                            mvsnodes::ColorT::Named(ColorNamesT::Magenta),
+                            mvsnodes::ComponentSelector::default(),
+                        )
+                        .expect("a color");
                 }
             }
         }

@@ -547,7 +547,7 @@ impl SessionSelector {
         for idx in &self.atom_index {
             let idx32: i32 = *idx as i32;
             expression_list.push(ComponentExpression {
-                // internal representaiton of selection is available as the atom_index
+                // internal representation of selection is available as the atom_index
                 atom_index: Some(idx32),
                 ..Default::default()
             });
