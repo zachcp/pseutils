@@ -346,10 +346,19 @@ impl State {
         }
     }
     /// Set Camera Location
-    pub fn camera() {
-        unimplemented!()
+    pub fn camera(&mut self, params: CameraParams) -> Option<&mut Node> {
+        if self.root.kind == KindT::Root {
+            let camera_node = Node::new(KindT::Camera, Some(NodeParams::CameraParams(params)));
+            self.root
+                .children
+                .get_or_insert_with(Vec::new)
+                .push(camera_node);
+            self.root.children.as_mut().unwrap().last_mut()
+        } else {
+            None
+        }
     }
-    /// Set Camera Location
+    /// Set Canves Information Location
     pub fn canvas() {
         unimplemented!()
     }
@@ -801,11 +810,12 @@ pub struct TransformParams {
     pub translation: Option<(f32, f32, f32)>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct CameraParams {
-    pub target: (f32, f32, f32),
-    pub position: (f32, f32, f32),
-    pub up: (f32, f32, f32),
+    pub target: (f64, f64, f64),
+    pub position: (f64, f64, f64),
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub up: Option<(f64, f64, f64)>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

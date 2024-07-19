@@ -28,7 +28,7 @@
 //! - Selection ---> WIP.
 //!
 
-use crate::molviewspec::nodes::{self as mvsnodes, ColorNamesT, State};
+use crate::molviewspec::nodes::{self as mvsnodes, CameraParams, ColorNamesT, State};
 use crate::pymolparsing::parsing::{
     CustomValue, PyObjectMolecule, PymolSessionObjectData, SceneView, SessionName,
     SessionSelectorList, Settings, SettingsEnum,
@@ -181,6 +181,16 @@ impl PSEData {
         // write state for loading the PDB files
         let mut state = State::new();
 
+        // Add Global Data
+        let pos = self.view.position;
+        let camparam = CameraParams {
+            target: (0.0, 0.0, 0.0), // <--- Todo
+            position: (pos[0], pos[1], pos[2]),
+            ..Default::default() // <--- Todo
+        };
+        state.camera(camparam);
+
+        // Add Molecule Data
         for molecule in self.get_molecule_data() {
             let molname = molecule.get_name();
 

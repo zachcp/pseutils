@@ -68,11 +68,6 @@ fn test_molspecview_json_2bvk() {
         from_reader(reader).expect("Failed to parse JSON as ComponentExpression");
 
     assert_eq!(testvec[0].atom_index, Some(0));
-
-    // // Todo : Fix color type on Component Expression
-    // assert_eq!(testvec[0].color, "#ffdd88");
-    // // Todo : Fix tooltip type on Component Expression
-    // assert_eq!(testvec[0].tooltip, "First cycle (by atom_index)");
 }
 
 #[test]
@@ -101,15 +96,8 @@ fn test_moviewspec_00_builder_basics() {
 
     // define the component which is going to be `all` here
     let component = ComponentSelector::default();
-
-    // cartoon type
     let cartoon_type = RepresentationTypeT::Cartoon;
-
     let mut state = State::new();
-
-    // let color = ColorT::Hex("#1b9e77".to_string());
-    // let color_component = ComponentSelector::All("all".to_string());
-
     state
         .download("https://files.wwpdb.org/download/1cbs.cif")
         .expect("Create a Downlaod node with a URL")
@@ -122,7 +110,7 @@ fn test_moviewspec_00_builder_basics() {
         .representation(cartoon_type);
     // .expect("a valid representation")
     // .color(color, color_component);
-
+    std::fs::create_dir_all(TEST_OUTPUT_DIR).expect("Failed to create output directory");
     let pretty_json = serde_json::to_string_pretty(&state).unwrap();
     let mut file = File::create(format!("{}/test_moviewspec_01.json", TEST_OUTPUT_DIR)).unwrap();
     file.write_all(pretty_json.as_bytes()).unwrap();
@@ -207,22 +195,17 @@ fn test_moviewspec_01_common_actions_selectors() {
 
     // # position camera to zoom in on ligand and signature residues
     // focus = structure.component(selector=[mvs.ComponentExpression(label_asym_id='E'), mvs.ComponentExpression(label_asym_id="B", label_seq_id=217), mvs.ComponentExpression(label_asym_id="B", label_seq_id=537)]).focus()
-
     // parse params
     let structfile = ParseParams {
         format: ParseFormatT::Mmcif,
     };
-
     // struct params
     let structparams = StructureParams {
         structure_type: StructureTypeT::Assembly,
         ..Default::default()
     };
-
     // State is the base model
     let mut state = State::new();
-
-    // structure
     let mut structure = state
         .download("https://files.wwpdb.org/download/1cbs.cif")
         .expect("Create a Download node with a URL")
@@ -230,15 +213,12 @@ fn test_moviewspec_01_common_actions_selectors() {
         .expect("Parseable option")
         .assembly_structure(structparams)
         .expect("Structure params");
-
     let orange = ColorT::Hex("#e19039".to_string());
     let blue = ColorT::Hex("#4b7fcc".to_string());
     let green = ColorT::Hex("#229954".to_string());
     let dark = ColorT::Hex("#ff0000".to_string());
-
     // set protein as orange
     let component_prot = ComponentSelector::Selector(ComponentSelectorT::Protein);
-
     structure
         .component(component_prot)
         .expect("Created component")
@@ -258,7 +238,7 @@ fn test_moviewspec_01_common_actions_selectors() {
         .expect("Faithful representation")
         .color(blue, ComponentSelector::default());
 
-    // ligan dis green
+    // ligand is green
     let ligand = structure
         .component(ComponentSelector::Expression(ComponentExpression {
             label_asym_id: Some("E".to_string()),
@@ -410,7 +390,6 @@ fn test_moviewspec_01_common_actions_symmetry_miller() {
     ))
     .unwrap();
     file.write_all(pretty_json.as_bytes()).unwrap();
-
     println!("{}", state.to_url())
 }
 
