@@ -27,6 +27,7 @@
 //! - Curve
 //! - Selection ---> WIP.
 //!
+
 use crate::molviewspec::nodes::{self as mvsnodes, State};
 use crate::pymolparsing::parsing::{
     CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName, SessionSelector,
@@ -36,8 +37,10 @@ use pdbtbx::PDB;
 use serde::{Deserialize, Serialize};
 use serde_pickle::de::{from_reader, DeOptions};
 use std::collections::HashMap;
+use std::fs;
 use std::fs::File;
 use std::io::Read;
+use std::path::Path;
 
 /// PSEData represents the structure of a PyMOL Session File (PSE).
 ///
@@ -222,6 +225,24 @@ impl PSEData {
 
         self.save_pdbs(file_path)?;
         std::fs::write(msvj_file, pretty_json)?;
+
+        Ok(())
+    }
+
+    pub fn to_disk_full(&self, file_path: &str) -> std::io::Result<()> {
+        // Create the directory if it doesn't exist
+        fs::create_dir_all(file_path)?;
+
+        // Copy our standard files
+        let resources_dir = Path::new("resources");
+        let files_to_copy = ["index.html", "molstar.css", "molstar.js"];
+        for file_name in files_to_copy.iter() {
+            let src_path = resources_dir.join(file_name);
+            let dest_path = Path::new(file_path).join(file_name);
+            fs::copy(&src_path, &dest_path)?;
+        }
+        // copy our custom files
+        let _ = self.to_disk(file_path);
 
         Ok(())
     }

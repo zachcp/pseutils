@@ -5,4 +5,4 @@
 pub mod molviewspec;
 pub mod pymolparsing;
 
-// pub use crate::pymolparsing::psedata::PSEData;
+pub use crate::pymolparsing::psedata::PSEData;
