@@ -57,10 +57,10 @@ impl<'de> Deserialize<'de> for PymolSessionObjectData {
     }
 }
 
-/// PyObjectMolecule
-/// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3524
-/// ObjectMolecule
-/// https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/ObjectMolecule.h#L58
+/// PyObjectMolecule:
+///
+/// - [pymol code](https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3524)
+/// - [ObjectMolecule](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/ObjectMolecule.h#L58)
 ///
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PyObjectMolecule {
@@ -382,8 +382,9 @@ pub struct PyObject {
 }
 
 /// Coord Set
-/// [pymol_coordset](https://github.com/schrodinger/pymol-open-source/blob/master/layer2/CoordSet.cpp#L363)
-/// [pymol_coordset_settings]( https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Setting.cpp#L962)
+///
+/// - [pymol_coordset](https://github.com/schrodinger/pymol-open-source/blob/master/layer2/CoordSet.cpp#L363)
+/// - [pymol_coordset_settings]( https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Setting.cpp#L962)
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CoordSet {
     pub n_index: i32,         // 1519
@@ -482,7 +483,7 @@ impl AtomInfo {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct Bond {
+pub struct Bond {
     pub index_1: i32,
     pub index_2: i32,
     pub order: i32,
