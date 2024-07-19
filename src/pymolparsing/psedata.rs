@@ -152,14 +152,11 @@ impl PSEData {
         let path = std::path::Path::new(file_path);
         let pdb_folder = path.join("pdb");
         std::fs::create_dir_all(&pdb_folder)?;
-
         let mut file_list = Vec::new();
-
         for (index, molecule) in self.get_molecule_data().iter().enumerate() {
             let pdb = molecule.to_pdb();
             let filename = format!("{}.pdb", molecule.get_name());
             let file_path = pdb_folder.join(&filename);
-
             let _ = pdbtbx::save_pdb(
                 &pdb,
                 file_path.to_str().expect("Invalid UTF-8 in file path"),
@@ -167,10 +164,8 @@ impl PSEData {
             );
             file_list.push(filename);
         }
-
         let contents = file_list.join("\n");
         std::fs::write(path.join("pdb_contents.txt"), contents)?;
-
         Ok(())
     }
 
@@ -185,7 +180,7 @@ impl PSEData {
                 .download(&format!("pdb/{}.pdb", molname))
                 .expect("Create a Download node with a URL")
                 .parse(mvsnodes::ParseParams {
-                    format: mvsnodes::ParseFormatT::Mmcif,
+                    format: mvsnodes::ParseFormatT::Pdb,
                 })
                 .expect("Parseable option")
                 .assembly_structure(mvsnodes::StructureParams {
@@ -222,10 +217,8 @@ impl PSEData {
         let msvj_file = path.join("state.msvj");
         let state = self.create_molviewspec();
         let pretty_json = serde_json::to_string_pretty(&state)?;
-
         self.save_pdbs(file_path)?;
         std::fs::write(msvj_file, pretty_json)?;
-
         Ok(())
     }
 
@@ -243,7 +236,6 @@ impl PSEData {
         }
         // copy our custom files
         let _ = self.to_disk(file_path);
-
         Ok(())
     }
 
