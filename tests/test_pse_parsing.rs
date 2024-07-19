@@ -9,7 +9,13 @@ fn test_load_pse_data_molecule_only() {
     let deserialized: PSEData = PSEData::load("tests/data/example_molecule_only.pse").unwrap();
     // deserialized.to_json("tests/data/example_molecule_only.json");
     assert!(deserialized.version == 3000000);
-    assert!(deserialized.get(SettingsEnum::Orthoscopic).unwrap().value == CustomValue::Integer(0));
+    assert!(
+        deserialized
+            .get_setting(SettingsEnum::Orthoscopic)
+            .unwrap()
+            .value
+            == CustomValue::Integer(0)
+    );
     // println!("{:?}", deserialized.settings);
 }
 

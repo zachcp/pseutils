@@ -64,8 +64,25 @@ pub struct PSEData {
     unique_settings: Vec<i32>,
     selector_secrets: Vec<i32>,
     editor: Vec<i32>,
-    // we want to propogate this to the json
-    view: Vec<f32>,
+    /// pymol view of 25 floats is likely to be from the `SceneGetView`
+    ///
+    /// [pymol](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/Scene.cpp#L872C1-L883C35)
+    ///
+    /// /**
+    /// Get information required to define the geometry
+    /// of a particular view, for shipping to and from python
+    /// as a list of floats
+    /// @verbatim
+    /// 0-15 = 4x4 rotation matrix
+    /// 16-18 = position
+    /// 19-21 = origin
+    /// 22    = front plane
+    /// 23    = rear plane
+    /// 24    = orthoscopic flag
+    /// @endverbatim
+    /// @param[out] view buffer to fill
+    /// */
+    pub view: [f32; 25],
     view_dict: HashMap<String, String>,
     #[serde(with = "serde_bytes")]
     wizard: Vec<u8>,
@@ -120,11 +137,13 @@ impl PSEData {
             })
             .collect()
     }
-
-    pub fn get(&self, setting: SettingsEnum) -> Option<Settings> {
+    /// Global Pymol Settings
+    pub fn get_setting(&self, setting: SettingsEnum) -> Option<Settings> {
         self.settings.iter().find(|s| s.setting == setting).cloned()
     }
-
+    // pub fn get_view(&self) -> &Vec<f32> {
+    //     let view = self.view; // f32: 25
+    // }
     pub fn get_molecule_data(&self) -> Vec<&PyObjectMolecule> {
         self.names
             .iter()
