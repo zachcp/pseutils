@@ -548,8 +548,8 @@ impl SessionSelector {
         for idx in &self.atom_index {
             let idx32: i32 = *idx as i32;
             expression_list.push(ComponentExpression {
-                label_entity_id: Some(self.id.clone()),
-                atom_id: Some(idx32),
+                // label_entity_id: Some(self.id.clone()),
+                atom_index: Some(idx32),
                 ..Default::default()
             });
         }
