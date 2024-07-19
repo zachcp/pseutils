@@ -214,7 +214,7 @@ impl PSEData {
 
     pub fn to_disk(&self, file_path: &str) -> std::io::Result<()> {
         let path = std::path::Path::new(file_path);
-        let msvj_file = path.join("state.msvj");
+        let msvj_file = path.join("state.mvsj");
         let state = self.create_molviewspec();
         let pretty_json = serde_json::to_string_pretty(&state)?;
         self.save_pdbs(file_path)?;
