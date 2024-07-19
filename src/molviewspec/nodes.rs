@@ -642,7 +642,7 @@ pub enum ColorT {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RepresentationParams {
     #[serde(rename = "type")]
-    representation_type: RepresentationTypeT,
+    pub representation_type: RepresentationTypeT,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -671,36 +671,36 @@ pub enum SchemaFormatT {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DataFromUriParams {
-    uri: String,
-    format: SchemaFormatT,
+    pub uri: String,
+    pub format: SchemaFormatT,
     #[serde(skip_serializing_if = "Option::is_none")]
-    category_name: Option<String>,
+    pub category_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    field_name: Option<String>,
+    pub field_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    block_header: Option<String>,
+    pub block_header: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    block_index: Option<i32>,
+    pub block_index: Option<i32>,
     #[serde(rename = "schema")]
-    schema_: SchemaT,
+    pub schema_: SchemaT,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DataFromSourceParams {
-    category_name: String,
+    pub category_name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    field_name: Option<String>,
+    pub field_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    block_header: Option<String>,
+    pub block_header: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    block_index: Option<i32>,
+    pub block_index: Option<i32>,
     #[serde(rename = "schema")]
-    schema_: SchemaT,
+    pub schema_: SchemaT,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ComponentInlineParams {
-    selector: ComponentSelector,
+    pub selector: ComponentSelector,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -719,121 +719,121 @@ impl Default for ComponentSelector {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ComponentFromUriParams {
     #[serde(flatten)]
-    base: DataFromUriParams,
+    pub base: DataFromUriParams,
     #[serde(skip_serializing_if = "Option::is_none")]
-    field_values: Option<Vec<String>>,
+    pub field_values: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ComponentFromSourceParams {
     #[serde(flatten)]
-    base: DataFromSourceParams,
+    pub base: DataFromSourceParams,
     #[serde(skip_serializing_if = "Option::is_none")]
-    field_values: Option<Vec<String>>,
+    pub field_values: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ColorInlineParams {
     #[serde(flatten)]
-    base: ComponentInlineParams,
-    color: ColorT,
+    pub base: ComponentInlineParams,
+    pub color: ColorT,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ColorFromUriParams {
     #[serde(flatten)]
-    base: DataFromUriParams,
+    pub base: DataFromUriParams,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ColorFromSourceParams {
     #[serde(flatten)]
-    base: DataFromSourceParams,
+    pub base: DataFromSourceParams,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LabelInlineParams {
-    text: String,
+    pub text: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LabelFromUriParams {
     #[serde(flatten)]
-    base: DataFromUriParams,
+    pub base: DataFromUriParams,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LabelFromSourceParams {
     #[serde(flatten)]
-    base: DataFromSourceParams,
+    pub base: DataFromSourceParams,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TooltipInlineParams {
-    text: String,
+    pub text: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TooltipFromUriParams {
     #[serde(flatten)]
-    base: DataFromUriParams,
+    pub base: DataFromUriParams,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TooltipFromSourceParams {
     #[serde(flatten)]
-    base: DataFromSourceParams,
+    pub base: DataFromSourceParams,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct FocusInlineParams {
     #[serde(skip_serializing_if = "Option::is_none")]
-    direction: Option<(f32, f32, f32)>,
+    pub direction: Option<(f32, f32, f32)>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    up: Option<(f32, f32, f32)>,
+    pub up: Option<(f32, f32, f32)>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TransformParams {
     #[serde(skip_serializing_if = "Option::is_none")]
-    rotation: Option<Vec<f32>>,
+    pub rotation: Option<Vec<f32>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    translation: Option<(f32, f32, f32)>,
+    pub translation: Option<(f32, f32, f32)>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CameraParams {
-    target: (f32, f32, f32),
-    position: (f32, f32, f32),
-    up: (f32, f32, f32),
+    pub target: (f32, f32, f32),
+    pub position: (f32, f32, f32),
+    pub up: (f32, f32, f32),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CanvasParams {
-    background_color: ColorT,
+    pub background_color: ColorT,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SphereParams {
-    position: (f32, f32, f32),
-    radius: f32,
-    color: ColorT,
+    pub position: (f32, f32, f32),
+    pub radius: f32,
+    pub color: ColorT,
     #[serde(skip_serializing_if = "Option::is_none")]
-    label: Option<String>,
+    pub label: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    tooltip: Option<String>,
+    pub tooltip: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LineParams {
-    position1: (f32, f32, f32),
-    position2: (f32, f32, f32),
-    radius: f32,
-    color: ColorT,
+    pub position1: (f32, f32, f32),
+    pub position2: (f32, f32, f32),
+    pub radius: f32,
+    pub color: ColorT,
     #[serde(skip_serializing_if = "Option::is_none")]
-    label: Option<String>,
+    pub label: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    tooltip: Option<String>,
+    pub tooltip: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Validate, Clone)]

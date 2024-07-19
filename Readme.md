@@ -14,6 +14,9 @@ cargo test
 
 # to get all the print statements that are sprinkled around.
 cargo test -- --nocapture
+
+# build the docs
+cargo clean --doc && cargo doc --no-deps --open
 ```
 
 
