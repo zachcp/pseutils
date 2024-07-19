@@ -19,57 +19,211 @@ use pdbtbx::{self, Residue, PDB};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_pickle::{from_value, Value};
 
+/// AtomInfo
+///
+/// This struct contains various properties of an atom, including its position,
+/// chemical properties, and visualization settings.
+///
+/// # Fields
+///
+/// * `resv` - Residue sequence number
+/// * `chain` - Chain identifier
+/// * `alt` - Alternate location indicator
+/// * `resi` - Residue identifier
+/// * `segi` - Segment identifier
+/// * `resn` - Residue name
+/// * `name` - Atom name
+/// * `elem` - Element symbol
+/// * `text_type` - Text type
+/// * `label` - Label text
+/// * `ss_type` - Secondary structure type
+/// * `is_hydrogen` - Flag indicating if the atom is hydrogen
+/// * `custom_type` - Custom type identifier
+/// * `priority` - Priority value
+/// * `b` - B-factor (temperature factor)
+/// * `q` - Occupancy
+/// * `vdw` - Van der Waals radius
+/// * `partial_charge` - Partial charge
+/// * `formal_charge` - Formal charge
+/// * `hetatm` - Flag indicating if the atom is a heteroatom
+/// * `vis_rep` - Visualization representation
+/// * `color` - Color index
+/// * `id` - Atom ID
+/// * `cartoon` - Cartoon representation type
+/// * `flags` - Various flags
+/// * `is_bonded` - Flag indicating if the atom is bonded
+/// * `chem_flag` - Chemical flag
+/// * `geom` - Geometry type
+/// * `valence` - Valence
+/// * `is_masked` - Flag indicating if the atom is masked
+/// * `is_protected` - Flag indicating if the atom is protected
+/// * `protons` - Number of protons
+/// * `unique_id` - Unique identifier
+/// * `stereo` - Stereochemistry indicator
+/// * `discrete_state` - Discrete state
+/// * `elec_radius` - Electronic radius
+/// * `rank` - Rank
+/// * `hb_donor` - Hydrogen bond donor flag
+/// * `hb_acceptor` - Hydrogen bond acceptor flag
+/// * `atomic_color` - Atomic color
+/// * `has_setting` - Flag indicating if the atom has custom settings
+/// * `anisou_1` to `anisou_6` - Anisotropic temperature factors
+/// * `custom` - Custom data string
 #[derive(Debug, Deserialize, Serialize)]
-pub struct SessionName {
+pub struct AtomInfo {
+    pub resv: i32,
+    pub chain: String,
+    pub alt: String,
+    pub resi: String,
+    pub segi: String,
+    pub resn: String,
     pub name: String,
-    pub object: i32,
-    pub visible: i32,
-    unused: Option<bool>,
-    unused2: i32,
-    pub data: PymolSessionObjectData,
-    pub group: String,
+    pub elem: String,
+    pub text_type: String,
+    pub label: String,
+    pub ss_type: String,
+    pub is_hydrogen: i8,
+    pub custom_type: i32,
+    pub priority: i32,
+    pub b: f64,
+    pub q: f64,
+    pub vdw: f64,
+    pub partial_charge: f64,
+    pub formal_charge: i32,
+    pub hetatm: i8,
+    pub vis_rep: i32,
+    pub color: i32,
+    pub id: i32,
+    pub cartoon: i32,
+    pub flags: i64,
+    pub is_bonded: i8,
+    pub chem_flag: i32,
+    pub geom: i32,
+    pub valence: i32,
+    pub is_masked: i8,
+    pub is_protected: i8,
+    pub protons: i32,
+    pub unique_id: i64,
+    pub stereo: i8,
+    pub discrete_state: i32,
+    pub elec_radius: f64,
+    pub rank: i32,
+    pub hb_donor: i8,
+    pub hb_acceptor: i8,
+    pub atomic_color: i32,
+    pub has_setting: i8,
+    pub anisou_1: f32,
+    pub anisou_2: f32,
+    pub anisou_3: f32,
+    pub anisou_4: f32,
+    pub anisou_5: f32,
+    pub anisou_6: f32,
+    pub custom: String,
 }
 
-#[derive(Debug, Serialize)]
-#[serde(untagged)]
-pub enum PymolSessionObjectData {
-    PyObjectMolecule(PyObjectMolecule),
-    SessionSelectorList(SessionSelectorList),
-    // MolVariant(PyObjectMolecule),
-    // SessionVariant(SessionSelector),
-}
-
-impl<'de> Deserialize<'de> for PymolSessionObjectData {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let value = Value::deserialize(deserializer)?;
-
-        // Debug print
-        // println!("Deserialized value: {:?}", value);
-
-        // Try to deserialize as PyObjectMolecule
-        match from_value::<PyObjectMolecule>(value.clone()) {
-            Ok(molecule) => return Ok(PymolSessionObjectData::PyObjectMolecule(molecule)),
-            Err(_) => {} // If it fails, we'll try the next option
+impl AtomInfo {
+    pub fn is_hetero(&self) -> bool {
+        match self.hetatm {
+            1 => true,
+            0 => false,
+            _ => false,
         }
-
-        // println!(
-        //     "Did not serialize as a molecule. Not trying as a session: {:?}",
-        //     value
-        // );
-
-        // If that fails, try to deserialize as SessionSelector
-        match from_value::<SessionSelectorList>(value.clone()) {
-            Ok(selection) => return Ok(PymolSessionObjectData::SessionSelectorList(selection)),
-            Err(_) => {} // If it fails, we'll return an error
-        }
-
-        // If both fail, return a generic error
-        // Err(String::from("We are unable to serialize this Value"));
-        Err(panic!("Problem opening the file"))
     }
+    pub fn to_pdbtbx_atom(&self) -> pdbtbx::Atom {
+        let formal_charge = self.formal_charge as isize;
+
+        let atom = pdbtbx::Atom::new(
+            self.is_hetero(), // hetero
+            0,                // serial_number
+            &self.name,       // atom_name
+            0.0,              // x Todo
+            0.0,              // y Todo
+            0.0,              // z Todo
+            0.0,              // occupancy? Todo
+            self.b,           // b-factor
+            &self.elem,       // element
+            formal_charge,    // charge: todo: is this the right charge?
+        );
+        atom.unwrap()
+    }
+}
+
+/// Bond Structure
+///
+/// Represents a chemical bond between two atoms in a molecule.
+///
+/// # Fields
+///
+/// * `index_1` - Index of the first atom in the bond
+/// * `index_2` - Index of the second atom in the bond
+/// * `order` - Bond order (e.g., single, double, triple)
+/// * `id` - Unique identifier for the bond
+/// * `stereo` - Stereochemistry information for the bond
+/// * `unique_id` - Another unique identifier for the bond
+/// * `has_setting` - Flag indicating if the bond has custom settings
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Bond {
+    pub index_1: i32,
+    pub index_2: i32,
+    pub order: i32,
+    pub id: i32,
+    pub stereo: i32,
+    pub unique_id: i32,
+    pub has_setting: i32,
+    // todo hhandle arrity 7 or arrity 8 with specific symmetry info
+    // Symmetry operation of the second atom.
+    // symop_2: Option<String>,
+}
+
+/// Coord Set
+///
+/// - [pymol_coordset](https://github.com/schrodinger/pymol-open-source/blob/master/layer2/CoordSet.cpp#L363)
+/// - [pymol_coordset_settings]( https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Setting.cpp#L962)
+#[derive(Debug, Deserialize, Serialize)]
+pub struct CoordSet {
+    pub n_index: i32,         // 1519
+    n_at_index: i32,          // 1519
+    pub coord: Vec<f32>,      // len -== 4556 ( 1519 *3 )
+    pub idx_to_atm: Vec<i32>, // 1 - 1518
+    pub atm_to_idx: Option<Vec<i32>>,
+    pub name: String,
+    pub setting: Vec<Option<bool>>, // punting on this
+    pub lab_pos: Option<bool>,      // might be wrong
+    field_9: Option<bool>,          // probably wrong...
+    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer1/CGO.cpp#L220
+    pub sculpt_cgo: Option<(i32, Vec<f32>)>,           //
+    pub atom_state_settings: Option<Vec<Option<i32>>>, //
+    /// [symettry_settings](https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Symmetry.cpp#L30)
+    pub symmetry: Option<Vec<(((i32, i32, i32), (i32, i32, i32)), String)>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum CustomValue {
+    Integer(i64),
+    Float(f64),
+    String(String),
+    Boolean(bool),
+    // Add more variants if needed, e.g., None for Python's None
+}
+
+/// PyObject
+#[derive(Debug, Deserialize, Serialize)]
+pub struct PyObject {
+    pub object_type: i32,
+    pub name: String,
+    pub color: i32,
+    pub vis_rep: i32,
+    pub extent_min: [f32; 3],
+    pub extent_max: [f32; 3],
+    pub extent_flag: i32,
+    pub ttt_flag: i32,
+    pub setting: Option<bool>, // this is a hack
+    pub enabled: i32,
+    pub render_context: i32,
+    pub ttt: Vec<f32>,
+    pub n_frame: i32,
+    pub view_elem: Option<bool>, //hack
 }
 
 /// PyObjectMolecule:
@@ -339,12 +493,56 @@ impl PyObjectMolecule {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct SessionSelectorList(Vec<SessionSelector>);
-impl SessionSelectorList {
-    pub fn get_selectors(&self) -> &Vec<SessionSelector> {
-        &self.0
+#[derive(Debug, Serialize)]
+#[serde(untagged)]
+pub enum PymolSessionObjectData {
+    PyObjectMolecule(PyObjectMolecule),
+    SessionSelectorList(SessionSelectorList),
+    // MolVariant(PyObjectMolecule),
+    // SessionVariant(SessionSelector),
+}
+impl<'de> Deserialize<'de> for PymolSessionObjectData {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let value = Value::deserialize(deserializer)?;
+
+        // Debug print
+        // println!("Deserialized value: {:?}", value);
+
+        // Try to deserialize as PyObjectMolecule
+        match from_value::<PyObjectMolecule>(value.clone()) {
+            Ok(molecule) => return Ok(PymolSessionObjectData::PyObjectMolecule(molecule)),
+            Err(_) => {} // If it fails, we'll try the next option
+        }
+
+        // println!(
+        //     "Did not serialize as a molecule. Not trying as a session: {:?}",
+        //     value
+        // );
+
+        // If that fails, try to deserialize as SessionSelector
+        match from_value::<SessionSelectorList>(value.clone()) {
+            Ok(selection) => return Ok(PymolSessionObjectData::SessionSelectorList(selection)),
+            Err(_) => {} // If it fails, we'll return an error
+        }
+
+        // If both fail, return a generic error
+        // Err(String::from("We are unable to serialize this Value"));
+        Err(panic!("Problem opening the file"))
     }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct SessionName {
+    pub name: String,
+    pub object: i32,
+    pub visible: i32,
+    unused: Option<bool>,
+    unused2: i32,
+    pub data: PymolSessionObjectData,
+    pub group: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -391,210 +589,12 @@ impl<'de> Deserialize<'de> for SessionSelector {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum CustomValue {
-    Integer(i64),
-    Float(f64),
-    String(String),
-    Boolean(bool),
-    // Add more variants if needed, e.g., None for Python's None
-}
-
 #[derive(Debug, Deserialize, Serialize)]
-pub struct PyObject {
-    pub object_type: i32,
-    pub name: String,
-    pub color: i32,
-    pub vis_rep: i32,
-    pub extent_min: [f32; 3],
-    pub extent_max: [f32; 3],
-    pub extent_flag: i32,
-    pub ttt_flag: i32,
-    pub setting: Option<bool>, // this is a hack
-    pub enabled: i32,
-    pub render_context: i32,
-    pub ttt: Vec<f32>,
-    pub n_frame: i32,
-    pub view_elem: Option<bool>, //hack
-}
-
-/// Coord Set
-///
-/// - [pymol_coordset](https://github.com/schrodinger/pymol-open-source/blob/master/layer2/CoordSet.cpp#L363)
-/// - [pymol_coordset_settings]( https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Setting.cpp#L962)
-#[derive(Debug, Deserialize, Serialize)]
-pub struct CoordSet {
-    pub n_index: i32,         // 1519
-    n_at_index: i32,          // 1519
-    pub coord: Vec<f32>,      // len -== 4556 ( 1519 *3 )
-    pub idx_to_atm: Vec<i32>, // 1 - 1518
-    pub atm_to_idx: Option<Vec<i32>>,
-    pub name: String,
-    pub setting: Vec<Option<bool>>, // punting on this
-    pub lab_pos: Option<bool>,      // might be wrong
-    field_9: Option<bool>,          // probably wrong...
-    // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer1/CGO.cpp#L220
-    pub sculpt_cgo: Option<(i32, Vec<f32>)>,           //
-    pub atom_state_settings: Option<Vec<Option<i32>>>, //
-    /// [symettry_settings](https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Symmetry.cpp#L30)
-    pub symmetry: Option<Vec<(((i32, i32, i32), (i32, i32, i32)), String)>>,
-}
-
-/// AtomInfor
-///
-/// This struct contains various properties of an atom, including its position,
-/// chemical properties, and visualization settings.
-///
-/// # Fields
-///
-/// * `resv` - Residue sequence number
-/// * `chain` - Chain identifier
-/// * `alt` - Alternate location indicator
-/// * `resi` - Residue identifier
-/// * `segi` - Segment identifier
-/// * `resn` - Residue name
-/// * `name` - Atom name
-/// * `elem` - Element symbol
-/// * `text_type` - Text type
-/// * `label` - Label text
-/// * `ss_type` - Secondary structure type
-/// * `is_hydrogen` - Flag indicating if the atom is hydrogen
-/// * `custom_type` - Custom type identifier
-/// * `priority` - Priority value
-/// * `b` - B-factor (temperature factor)
-/// * `q` - Occupancy
-/// * `vdw` - Van der Waals radius
-/// * `partial_charge` - Partial charge
-/// * `formal_charge` - Formal charge
-/// * `hetatm` - Flag indicating if the atom is a heteroatom
-/// * `vis_rep` - Visualization representation
-/// * `color` - Color index
-/// * `id` - Atom ID
-/// * `cartoon` - Cartoon representation type
-/// * `flags` - Various flags
-/// * `is_bonded` - Flag indicating if the atom is bonded
-/// * `chem_flag` - Chemical flag
-/// * `geom` - Geometry type
-/// * `valence` - Valence
-/// * `is_masked` - Flag indicating if the atom is masked
-/// * `is_protected` - Flag indicating if the atom is protected
-/// * `protons` - Number of protons
-/// * `unique_id` - Unique identifier
-/// * `stereo` - Stereochemistry indicator
-/// * `discrete_state` - Discrete state
-/// * `elec_radius` - Electronic radius
-/// * `rank` - Rank
-/// * `hb_donor` - Hydrogen bond donor flag
-/// * `hb_acceptor` - Hydrogen bond acceptor flag
-/// * `atomic_color` - Atomic color
-/// * `has_setting` - Flag indicating if the atom has custom settings
-/// * `anisou_1` to `anisou_6` - Anisotropic temperature factors
-/// * `custom` - Custom data string
-#[derive(Debug, Deserialize, Serialize)]
-pub struct AtomInfo {
-    pub resv: i32,
-    pub chain: String,
-    pub alt: String,
-    pub resi: String,
-    pub segi: String,
-    pub resn: String,
-    pub name: String,
-    pub elem: String,
-    pub text_type: String,
-    pub label: String,
-    pub ss_type: String,
-    pub is_hydrogen: i8,
-    pub custom_type: i32,
-    pub priority: i32,
-    pub b: f64,
-    pub q: f64,
-    pub vdw: f64,
-    pub partial_charge: f64,
-    pub formal_charge: i32,
-    pub hetatm: i8,
-    pub vis_rep: i32,
-    pub color: i32,
-    pub id: i32,
-    pub cartoon: i32,
-    pub flags: i64,
-    pub is_bonded: i8,
-    pub chem_flag: i32,
-    pub geom: i32,
-    pub valence: i32,
-    pub is_masked: i8,
-    pub is_protected: i8,
-    pub protons: i32,
-    pub unique_id: i64,
-    pub stereo: i8,
-    pub discrete_state: i32,
-    pub elec_radius: f64,
-    pub rank: i32,
-    pub hb_donor: i8,
-    pub hb_acceptor: i8,
-    pub atomic_color: i32,
-    pub has_setting: i8,
-    pub anisou_1: f32,
-    pub anisou_2: f32,
-    pub anisou_3: f32,
-    pub anisou_4: f32,
-    pub anisou_5: f32,
-    pub anisou_6: f32,
-    pub custom: String,
-}
-
-impl AtomInfo {
-    pub fn is_hetero(&self) -> bool {
-        match self.hetatm {
-            1 => true,
-            0 => false,
-            _ => false,
-        }
+pub struct SessionSelectorList(Vec<SessionSelector>);
+impl SessionSelectorList {
+    pub fn get_selectors(&self) -> &Vec<SessionSelector> {
+        &self.0
     }
-    pub fn to_pdbtbx_atom(&self) -> pdbtbx::Atom {
-        let formal_charge = self.formal_charge as isize;
-
-        let atom = pdbtbx::Atom::new(
-            self.is_hetero(), // hetero
-            0,                // serial_number
-            &self.name,       // atom_name
-            0.0,              // x Todo
-            0.0,              // y Todo
-            0.0,              // z Todo
-            0.0,              // occupancy? Todo
-            self.b,           // b-factor
-            &self.elem,       // element
-            formal_charge,    // charge: todo: is this the right charge?
-        );
-        atom.unwrap()
-    }
-}
-
-/// Bond Structure
-///
-/// Represents a chemical bond between two atoms in a molecule.
-///
-/// # Fields
-///
-/// * `index_1` - Index of the first atom in the bond
-/// * `index_2` - Index of the second atom in the bond
-/// * `order` - Bond order (e.g., single, double, triple)
-/// * `id` - Unique identifier for the bond
-/// * `stereo` - Stereochemistry information for the bond
-/// * `unique_id` - Another unique identifier for the bond
-/// * `has_setting` - Flag indicating if the bond has custom settings
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Bond {
-    pub index_1: i32,
-    pub index_2: i32,
-    pub order: i32,
-    pub id: i32,
-    pub stereo: i32,
-    pub unique_id: i32,
-    pub has_setting: i32,
-    // todo hhandle arrity 7 or arrity 8 with specific symmetry info
-    // Symmetry operation of the second atom.
-    // symop_2: Option<String>,
 }
 
 // Todo:
