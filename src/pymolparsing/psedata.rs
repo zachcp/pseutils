@@ -31,6 +31,7 @@
 use crate::molviewspec::nodes::{self as mvsnodes, ColorNamesT, State};
 use crate::pymolparsing::parsing::{
     CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName, SessionSelectorList,
+    Settings,
 };
 use pdbtbx::PDB;
 use serde::{Deserialize, Serialize};
@@ -63,12 +64,14 @@ pub struct PSEData {
     unique_settings: Vec<i32>,
     selector_secrets: Vec<i32>,
     editor: Vec<i32>,
+    // we want to propogate this to the json
     view: Vec<f32>,
     view_dict: HashMap<String, String>,
     #[serde(with = "serde_bytes")]
     wizard: Vec<u8>,
     moviescenes: Vec<Vec<i32>>,
-    settings: Vec<(i32, i32, CustomValue)>,
+    // High level state settings: we need to prpogate these..
+    settings: Vec<Settings>,
     movie: (
         i32,
         i32,
@@ -118,6 +121,9 @@ impl PSEData {
             .collect()
     }
 
+    pub fn get(&self) {
+        unimplemented!()
+    }
     pub fn get_molecule_data(&self) -> Vec<&PyObjectMolecule> {
         self.names
             .iter()
