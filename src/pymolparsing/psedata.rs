@@ -27,17 +27,19 @@
 //! - Curve
 //! - Selection ---> WIP.
 //!
-use crate::molviewspec::nodes::{self as mvsnodes, State};
+
+use crate::molviewspec::nodes::{self as mvsnodes, ColorNamesT, State};
 use crate::pymolparsing::parsing::{
-    CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName, SessionSelector,
-    SessionSelectorList,
+    CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName, SessionSelectorList,
 };
 use pdbtbx::PDB;
 use serde::{Deserialize, Serialize};
 use serde_pickle::de::{from_reader, DeOptions};
 use std::collections::HashMap;
+use std::fs;
 use std::fs::File;
 use std::io::Read;
+use std::path::Path;
 
 /// PSEData represents the structure of a PyMOL Session File (PSE).
 ///
@@ -149,14 +151,11 @@ impl PSEData {
         let path = std::path::Path::new(file_path);
         let pdb_folder = path.join("pdb");
         std::fs::create_dir_all(&pdb_folder)?;
-
         let mut file_list = Vec::new();
-
         for (index, molecule) in self.get_molecule_data().iter().enumerate() {
             let pdb = molecule.to_pdb();
             let filename = format!("{}.pdb", molecule.get_name());
             let file_path = pdb_folder.join(&filename);
-
             let _ = pdbtbx::save_pdb(
                 &pdb,
                 file_path.to_str().expect("Invalid UTF-8 in file path"),
@@ -164,10 +163,8 @@ impl PSEData {
             );
             file_list.push(filename);
         }
-
         let contents = file_list.join("\n");
         std::fs::write(path.join("pdb_contents.txt"), contents)?;
-
         Ok(())
     }
 
@@ -182,7 +179,7 @@ impl PSEData {
                 .download(&format!("pdb/{}.pdb", molname))
                 .expect("Create a Download node with a URL")
                 .parse(mvsnodes::ParseParams {
-                    format: mvsnodes::ParseFormatT::Mmcif,
+                    format: mvsnodes::ParseFormatT::Pdb,
                 })
                 .expect("Parseable option")
                 .assembly_structure(mvsnodes::StructureParams {
@@ -206,7 +203,14 @@ impl PSEData {
                     structure
                         .component(component)
                         .expect("defined a valid component")
-                        .representation(mvsnodes::RepresentationTypeT::BallAndStick);
+                        .representation(mvsnodes::RepresentationTypeT::BallAndStick)
+                        .expect("a representation")
+                        // to do add colors and other settings....
+                        .color(
+                            mvsnodes::ColorT::Named(ColorNamesT::Magenta),
+                            mvsnodes::ComponentSelector::default(),
+                        )
+                        .expect("a color");
                 }
             }
         }
@@ -216,13 +220,29 @@ impl PSEData {
 
     pub fn to_disk(&self, file_path: &str) -> std::io::Result<()> {
         let path = std::path::Path::new(file_path);
-        let msvj_file = path.join("state.msvj");
+        let msvj_file = path.join("state.mvsj");
         let state = self.create_molviewspec();
         let pretty_json = serde_json::to_string_pretty(&state)?;
-
         self.save_pdbs(file_path)?;
         std::fs::write(msvj_file, pretty_json)?;
+        Ok(())
+    }
+    /// this one will write  a ready-to-go folder with pdbs, an msvj file, and the
+    /// html/css/js needed to load them
+    pub fn to_disk_full(&self, file_path: &str) -> std::io::Result<()> {
+        // Create the directory if it doesn't exist
+        fs::create_dir_all(file_path)?;
 
+        // Copy our standard files
+        let resources_dir = Path::new("resources");
+        let files_to_copy = ["index.html", "molstar.css", "molstar.js"];
+        for file_name in files_to_copy.iter() {
+            let src_path = resources_dir.join(file_name);
+            let dest_path = Path::new(file_path).join(file_name);
+            fs::copy(&src_path, &dest_path)?;
+        }
+        // copy our custom files
+        let _ = self.to_disk(file_path);
         Ok(())
     }
 

@@ -19,6 +19,8 @@
 //! - [PymolMoleculeExporter](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer4/Cmd.cpp#L3877)
 //! - [PDB Exporter](https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L1627)
 //! - [MoleculeExporterPDB](https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L439)
+//! - [Gadget_01](https://github.com/schrodinger/pymol-open-source/blob/master/layer3/Executive.cpp#L5237)
+//! - [Gadget_02](https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectGadget.cpp#L386)
 //!
 //! exporter->init(G);
 //! exporter->setMulti(multi);
@@ -199,7 +201,7 @@ pub struct Bond {
     pub stereo: i32,
     pub unique_id: i32,
     pub has_setting: i32,
-    // todo hhandle arrity 7 or arrity 8 with specific symmetry info
+    // todo handle arity 7 or arity 8 with specific symmetry info
     // Symmetry operation of the second atom.
     // symop_2: Option<String>,
 }
@@ -542,12 +544,11 @@ pub struct SessionSelector {
 impl SessionSelector {
     pub fn to_component(&self) -> ComponentSelector {
         let mut expression_list: Vec<ComponentExpression> = vec![];
-
         for idx in &self.atom_index {
             let idx32: i32 = *idx as i32;
             expression_list.push(ComponentExpression {
-                label_entity_id: Some(self.id.clone()),
-                atom_id: Some(idx32),
+                // internal representation of selection is available as the atom_index
+                atom_index: Some(idx32),
                 ..Default::default()
             });
         }
@@ -580,9 +581,6 @@ impl SessionSelectorList {
 
 // Todo:
 //
-// PyObjectGadget
-// https://github.com/schrodinger/pymol-open-source/blob/master/layer3/Executive.cpp#L5237
-// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectGadget.cpp#L386
 // struct PyObjectGadget {}
 // struct PyObjectDist {}
 // struct PyObjectMap {}

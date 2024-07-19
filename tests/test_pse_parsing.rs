@@ -1,4 +1,5 @@
 use pymol_session_utils::PSEData;
+const TEST_OUTPUT_DIR: &str = "./test_temporary";
 
 #[test]
 fn test_load_pse_data_molecule_only() {
@@ -51,7 +52,7 @@ fn test_pdb_00() {
 
     let _ = pdbtbx::save_pdb(
         &pdb,
-        "/Users/zcpowers/Desktop/PSE/pickletest/test_01.pdb",
+        format!("{}/test_01.pdb", TEST_OUTPUT_DIR),
         pdbtbx::StrictnessLevel::Strict,
     )
     .expect("PDB output");
@@ -60,8 +61,8 @@ fn test_pdb_00() {
 #[test]
 fn test_pdb_01() {
     let psedata: PSEData = PSEData::load("tests/data/example.pse").unwrap();
-    let _ = psedata.to_disk("./test_pse_out");
+    // let _ = psedata.to_disk(TEST_OUTPUT_DIR);
+    let _ = psedata.to_disk_full(TEST_OUTPUT_DIR);
     let url = psedata.to_mvsj_url();
     println!("{}", url);
-    let mvs = psedata.create_molviewspec();
 }

@@ -7,6 +7,8 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io::Write;
 
+const TEST_OUTPUT_DIR: &str = "./test_temporary";
+
 #[test]
 fn test_molspecview_json_1cbs() {
     let json_files_component_list = vec![
@@ -122,7 +124,7 @@ fn test_moviewspec_00_builder_basics() {
     // .color(color, color_component);
 
     let pretty_json = serde_json::to_string_pretty(&state).unwrap();
-    let mut file = File::create("test_moviewspec_01.json").unwrap();
+    let mut file = File::create(format!("{}/test_moviewspec_01.json", TEST_OUTPUT_DIR)).unwrap();
     file.write_all(pretty_json.as_bytes()).unwrap();
 }
 
@@ -176,7 +178,11 @@ fn test_moviewspec_01_common_actions_cartoon() {
         .color(color, color_component);
 
     let pretty_json = serde_json::to_string_pretty(&state).unwrap();
-    let mut file = File::create("test_moviewspec_01_common_actions_cartoon.json").unwrap();
+    let mut file = File::create(format!(
+        "{}/test_moviewspec_01_common_actions_cartoon.json",
+        TEST_OUTPUT_DIR
+    ))
+    .unwrap();
     file.write_all(pretty_json.as_bytes()).unwrap();
 }
 
@@ -301,7 +307,11 @@ fn test_moviewspec_01_common_actions_selectors() {
     // focus = structure.component(selector=[mvs.ComponentExpression(label_asym_id='E'), mvs.ComponentExpression(label_asym_id="B", label_seq_id=217), mvs.ComponentExpression(label_asym_id="B", label_seq_id=537)]).focus()
 
     let pretty_json = serde_json::to_string_pretty(&state).unwrap();
-    let mut file = File::create("test_moviewspec_01_common_actions_selectors.json").unwrap();
+    let mut file = File::create(format!(
+        "{}/test_moviewspec_01_common_actions_selectors.json",
+        TEST_OUTPUT_DIR
+    ))
+    .unwrap();
     file.write_all(pretty_json.as_bytes()).unwrap();
 }
 
@@ -345,7 +355,11 @@ fn test_moviewspec_01_common_actions_symmetry() {
         .color(color, color_component);
 
     let pretty_json = serde_json::to_string_pretty(&state).unwrap();
-    let mut file = File::create("test_moviewspec_01_common_actions_cartoon.json").unwrap();
+    let mut file = File::create(format!(
+        "{}/test_moviewspec_01_common_actions_cartoon.json",
+        TEST_OUTPUT_DIR
+    ))
+    .unwrap();
     file.write_all(pretty_json.as_bytes()).unwrap();
 }
 
@@ -390,7 +404,11 @@ fn test_moviewspec_01_common_actions_symmetry_miller() {
         .color(color, color_component);
 
     let pretty_json = serde_json::to_string_pretty(&state).unwrap();
-    let mut file = File::create("test_moviewspec_01_common_actions_symmetry_miller.json").unwrap();
+    let mut file = File::create(format!(
+        "{}/test_moviewspec_01_common_actions_symmetry_miller.json",
+        TEST_OUTPUT_DIR
+    ))
+    .unwrap();
     file.write_all(pretty_json.as_bytes()).unwrap();
 
     println!("{}", state.to_url())

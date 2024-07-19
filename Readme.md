@@ -17,8 +17,18 @@ cargo test -- --nocapture
 
 # build the docs
 cargo clean --doc && cargo doc --no-deps --open
+
+# to look at results
+cargo test # generate an example
+cd test_temporary && python -m http.server
 ```
 
+## Status
+
+- PSE Conversion to Molstar-ready formula.
+- Basic processing of molecules and selections
+
+![](resources/images/pymol_molstar.png)
 
 ## Related
 
