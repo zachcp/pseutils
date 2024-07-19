@@ -7,12 +7,12 @@ use serde_pickle::{from_value, Value};
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SessionName {
     pub name: String,
-    object: i32,
-    visible: i32,
+    pub object: i32,
+    pub visible: i32,
     unused: Option<bool>,
     unused2: i32,
     pub data: PymolSessionObjectData,
-    group: String,
+    pub group: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -64,26 +64,26 @@ impl<'de> Deserialize<'de> for PymolSessionObjectData {
 ///
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PyObjectMolecule {
-    object: PyObject,
-    n_cset: i32,
-    n_bond: i32,
-    n_atom: i32,
+    pub object: PyObject,
+    pub n_cset: i32,
+    pub n_bond: i32,
+    pub n_atom: i32,
     /// Vector of Coordinates
-    coord_set: Vec<CoordSet>,
-    cs_tmpl: Option<Vec<CoordSet>>,
+    pub coord_set: Vec<CoordSet>,
+    pub cs_tmpl: Option<Vec<CoordSet>>,
     // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3037
-    bond: Vec<Bond>,
+    pub bond: Vec<Bond>,
     // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3248
     // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer2/AtomInfo.cpp#L792
-    atom: Vec<AtomInfo>,
-    discrete_flag: i32,
-    n_discrete: i32,
-    symmetry: Option<(([f32; 3], [f32; 3]), String)>, // crystal space group and name
-    cur_cset: i32,
-    bond_counter: i32,
-    atom_counter: i32,
-    discrete_atm_to_idx: Option<Vec<i32>>,
-    dcs: Option<Vec<i32>>,
+    pub atom: Vec<AtomInfo>,
+    pub discrete_flag: i32,
+    pub n_discrete: i32,
+    pub symmetry: Option<(([f32; 3], [f32; 3]), String)>, // crystal space group and name
+    pub cur_cset: i32,
+    pub bond_counter: i32,
+    pub atom_counter: i32,
+    pub discrete_atm_to_idx: Option<Vec<i32>>,
+    pub dcs: Option<Vec<i32>>,
 }
 impl PyObjectMolecule {
     pub fn get_name(&self) -> String {
@@ -322,7 +322,6 @@ pub struct SessionSelector {
     pub atom_index: Vec<i64>,
     pub atom_tag: Vec<i64>,
 }
-
 impl SessionSelector {
     pub fn to_component(&self) -> ComponentSelector {
         let mut expression_list: Vec<ComponentExpression> = vec![];
@@ -365,21 +364,21 @@ pub enum CustomValue {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct PyObject {
-    object_type: i32,
-    name: String,
-    color: i32,
-    vis_rep: i32,
-    extent_min: [f32; 3],
-    extent_max: [f32; 3],
-    extent_flag: i32,
-    ttt_flag: i32,
-    setting: Option<bool>, // this is a hack
-    enabled: i32,
-    render_context: i32,
-    ttt: Vec<f32>,
-    n_frame: i32,
-    view_elem: Option<bool>, //hack
+pub struct PyObject {
+    pub object_type: i32,
+    pub name: String,
+    pub color: i32,
+    pub vis_rep: i32,
+    pub extent_min: [f32; 3],
+    pub extent_max: [f32; 3],
+    pub extent_flag: i32,
+    pub ttt_flag: i32,
+    pub setting: Option<bool>, // this is a hack
+    pub enabled: i32,
+    pub render_context: i32,
+    pub ttt: Vec<f32>,
+    pub n_frame: i32,
+    pub view_elem: Option<bool>, //hack
 }
 
 /// Coord Set
@@ -392,68 +391,69 @@ pub struct CoordSet {
     pub coord: Vec<f32>,      // len -== 4556 ( 1519 *3 )
     pub idx_to_atm: Vec<i32>, // 1 - 1518
     pub atm_to_idx: Option<Vec<i32>>,
-    name: String,
-    setting: Vec<Option<bool>>, // punting on this
-    lab_pos: Option<bool>,      // might be wrong
-    field_9: Option<bool>,      // probably wrong...
+    pub name: String,
+    pub setting: Vec<Option<bool>>, // punting on this
+    pub lab_pos: Option<bool>,      // might be wrong
+    field_9: Option<bool>,          // probably wrong...
     // /// https://github.com/schrodinger/pymol-open-source/blob/master/layer1/CGO.cpp#L220
-    sculpt_cgo: Option<(i32, Vec<f32>)>,           //
-    atom_state_settings: Option<Vec<Option<i32>>>, //
+    pub sculpt_cgo: Option<(i32, Vec<f32>)>,           //
+    pub atom_state_settings: Option<Vec<Option<i32>>>, //
     /// [symettry_settings](https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Symmetry.cpp#L30)
-    symmetry: Option<Vec<(((i32, i32, i32), (i32, i32, i32)), String)>>,
+    pub symmetry: Option<Vec<(((i32, i32, i32), (i32, i32, i32)), String)>>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct AtomInfo {
+pub struct AtomInfo {
     pub resv: i32,
     pub chain: String,
-    alt: String,
-    resi: String,
-    segi: String,
+    pub alt: String,
+    pub resi: String,
+    pub segi: String,
     pub resn: String,
     pub name: String,
     pub elem: String,
-    text_type: String,
-    label: String,
+    pub text_type: String,
+    pub label: String,
     pub ss_type: String,
-    is_hydrogen: i8, // this is a boolean
-    custom_type: i32,
-    priority: i32,
-    b: f64,
-    q: f64,
-    vdw: f64,
-    partial_charge: f64,
-    formal_charge: i32,
-    pub hetatm: i8, // this is a boolean
-    vis_rep: i32,
-    color: i32,
-    id: i32,
-    cartoon: i32,
-    flags: i64,
-    is_bonded: i8,  // this is a boolean
-    chem_flag: i32, // this is a boolean
-    geom: i32,
-    valence: i32,
-    is_masked: i8,    // this is a boolean
-    is_protected: i8, // this is a boolean
-    protons: i32,
-    unique_id: i64,
-    stereo: i8,
-    discrete_state: i32,
-    elec_radius: f64,
-    rank: i32,
-    hb_donor: i8,    // this is a boolean
-    hb_acceptor: i8, // this is a boolean
-    atomic_color: i32,
-    has_setting: i8, // this is a boolean
-    anisou_1: f32,
-    anisou_2: f32,
-    anisou_3: f32,
-    anisou_4: f32,
-    anisou_5: f32,
-    anisou_6: f32,
-    custom: String,
+    pub is_hydrogen: i8,
+    pub custom_type: i32,
+    pub priority: i32,
+    pub b: f64,
+    pub q: f64,
+    pub vdw: f64,
+    pub partial_charge: f64,
+    pub formal_charge: i32,
+    pub hetatm: i8,
+    pub vis_rep: i32,
+    pub color: i32,
+    pub id: i32,
+    pub cartoon: i32,
+    pub flags: i64,
+    pub is_bonded: i8,
+    pub chem_flag: i32,
+    pub geom: i32,
+    pub valence: i32,
+    pub is_masked: i8,
+    pub is_protected: i8,
+    pub protons: i32,
+    pub unique_id: i64,
+    pub stereo: i8,
+    pub discrete_state: i32,
+    pub elec_radius: f64,
+    pub rank: i32,
+    pub hb_donor: i8,
+    pub hb_acceptor: i8,
+    pub atomic_color: i32,
+    pub has_setting: i8,
+    pub anisou_1: f32,
+    pub anisou_2: f32,
+    pub anisou_3: f32,
+    pub anisou_4: f32,
+    pub anisou_5: f32,
+    pub anisou_6: f32,
+    pub custom: String,
 }
+
 impl AtomInfo {
     pub fn is_hetero(&self) -> bool {
         match self.hetatm {
@@ -483,13 +483,13 @@ impl AtomInfo {
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Bond {
-    index_1: i32,
-    index_2: i32,
-    order: i32,
-    id: i32,
-    stereo: i32,
-    unique_id: i32,
-    has_setting: i32,
+    pub index_1: i32,
+    pub index_2: i32,
+    pub order: i32,
+    pub id: i32,
+    pub stereo: i32,
+    pub unique_id: i32,
+    pub has_setting: i32,
     // todo hhandle arrity 7 or arrity 8 with specific symmetry info
     // Symmetry operation of the second atom.
     // symop_2: Option<String>,
