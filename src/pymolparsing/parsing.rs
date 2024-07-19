@@ -235,7 +235,7 @@ pub struct CoordSet {
 ///
 /// needed for the settings triplet.
 ///
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum CustomValue {
     Integer(i64),
@@ -580,7 +580,7 @@ impl SessionSelectorList {
     }
 }
 
-#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug)]
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
 #[repr(u32)]
 pub enum SettingsEnum {
     BondingVdwCutoff = 0,
@@ -1383,12 +1383,11 @@ pub enum SettingsEnum {
     CellColor = 797,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-// #[serde(from = "(SettingsEnum, i32, CustomValue)")]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Settings {
-    setting: SettingsEnum,
-    label: i32,
-    value: CustomValue,
+    pub setting: SettingsEnum,
+    pub label: i32,
+    pub value: CustomValue,
 }
 
 // Todo:

@@ -1,3 +1,4 @@
+use pymol_session_utils::pymolparsing::parsing::{CustomValue, Settings, SettingsEnum};
 use pymol_session_utils::PSEData;
 const TEST_OUTPUT_DIR: &str = "./test_temporary";
 
@@ -8,6 +9,8 @@ fn test_load_pse_data_molecule_only() {
     let deserialized: PSEData = PSEData::load("tests/data/example_molecule_only.pse").unwrap();
     // deserialized.to_json("tests/data/example_molecule_only.json");
     assert!(deserialized.version == 3000000);
+    assert!(deserialized.get(SettingsEnum::Orthoscopic).unwrap().value == CustomValue::Integer(0));
+    // println!("{:?}", deserialized.settings);
 }
 
 #[test]

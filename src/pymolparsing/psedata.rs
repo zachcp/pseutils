@@ -31,7 +31,7 @@
 use crate::molviewspec::nodes::{self as mvsnodes, ColorNamesT, State};
 use crate::pymolparsing::parsing::{
     CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName, SessionSelectorList,
-    Settings, SettingsEnum
+    Settings, SettingsEnum,
 };
 use pdbtbx::PDB;
 use serde::{Deserialize, Serialize};
@@ -41,8 +41,6 @@ use std::fs;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
-
-use super::parsing::SettingsEnum;
 
 /// PSEData represents the structure of a PyMOL Session File (PSE).
 ///
@@ -73,7 +71,7 @@ pub struct PSEData {
     wizard: Vec<u8>,
     moviescenes: Vec<Vec<i32>>,
     // High level state settings: we need to prpogate these..
-    settings: Vec<Settings>,
+    pub settings: Vec<Settings>,
     movie: (
         i32,
         i32,
@@ -87,7 +85,7 @@ pub struct PSEData {
     // session: HashMap<String, Value>,
     cache: Vec<usize>,
     // name is the trickiest bit
-    names: Vec<Option<SessionName>>,
+    pub names: Vec<Option<SessionName>>,
 }
 
 impl PSEData {
@@ -124,8 +122,7 @@ impl PSEData {
     }
 
     pub fn get(&self, setting: SettingsEnum) -> Option<Settings> {
-        let settingvec  =  &self.settings.iter().find(|s| s.setting == setting).cloned()
-        settingvec
+        self.settings.iter().find(|s| s.setting == setting).cloned()
     }
 
     pub fn get_molecule_data(&self) -> Vec<&PyObjectMolecule> {
