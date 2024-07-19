@@ -1,26 +1,31 @@
+//! # PSEData
+//!
 //! PSEData is a struct for loading and serializing pymol PSE data.
 //!
 //! Currently the parsers are working for small test cases of molecules and selections. Additional parser structs would be required for
 //! other PSE data types which include the folloing:
 //!
-//! /// PyObject Serialization
-//!  https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/PyMOLObject.cpp#L681
+//! ## PyObject Serialization
 //!
-//! // - Object:
-//!      - Gadget
-//!      - Molecule
-//!      - Dist
-//!      - Map
-//!      - Mesh
-//!      - Slice
-//!      - Surface
-//!      - CGO
-//!      - Alignment
-//!      - Group
-//!      - Volume
-//!      - Callback
-//!      - Curve
-//!  - Selection
+//! Code:
+//! -[pyobject](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/PyMOLObject.cpp#L681)
+//!
+//! Python Obects:
+//! - Object
+//! - Gadget
+//! - Molecule    ---> WIP.
+//! - Dist
+//! - Map
+//! - Mesh
+//! - Slice
+//! - Surface
+//! - CGO
+//! - Alignment
+//! - Group
+//! - Volume
+//! - Callback
+//! - Curve
+//! - Selection ---> WIP.
 //!
 use crate::molviewspec::nodes::{self as mvsnodes, State};
 use crate::pymolparsing::parsing::{
@@ -34,6 +39,19 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 
+/// PSEData represents the structure of a PyMOL Session File (PSE).
+///
+/// This struct contains various components of a PyMOL session, including:
+/// - Version information
+/// - Color settings
+/// - View settings
+/// - Movie scenes
+/// - Custom settings
+/// - Cached data
+/// - Session names and associated objects
+///
+/// It provides methods for loading PSE files, converting to JSON,
+/// extracting molecule and selection data, and creating PDB files.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PSEData {
     pub version: i32,

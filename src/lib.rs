@@ -1,4 +1,8 @@
+//! This crate is for loading and serializing pymol's PSE filetype
+//!
+//! it is currently a work in progress.
+//!
 pub mod molviewspec;
-mod pymolparsing;
+pub mod pymolparsing;
 
-pub use pymolparsing::psedata::PSEData;
+// pub use crate::pymolparsing::psedata::PSEData;
