@@ -1,3 +1,18 @@
+//! This module provides structures and implementations for handling PyMOL session data.
+//!
+//! It includes definitions for various PyMOL objects such as molecules, selectors,
+//! and atom information. The module also provides functionality for converting
+//! PyMOL data structures to PDB format using the `pdbtbx` crate.
+//!
+//! Key structures:
+//! - `SessionName`: Represents a named session object
+//! - `PyObjectMolecule`: Represents a molecule in a PyMOL session
+//! - `SessionSelector`: Represents a selection in a PyMOL session
+//! - `AtomInfo`: Contains detailed information about individual atoms
+//!
+//! This module is designed to work with serialized PyMOL session data and
+//! provides methods for deserializing and manipulating this data.
+//!
 use crate::molviewspec::nodes::{ComponentExpression, ComponentSelector};
 use itertools::Itertools;
 use pdbtbx::{self, Residue, PDB};
@@ -59,8 +74,31 @@ impl<'de> Deserialize<'de> for PymolSessionObjectData {
 
 /// PyObjectMolecule:
 ///
+/// Represents a molecule object in PyMOL.
+///
+/// ## Link
+///
 /// - [pymol code](https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3524)
 /// - [ObjectMolecule](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/ObjectMolecule.h#L58)
+///
+/// ## Fields
+///
+/// * `object` - The base PyObject information
+/// * `n_cset` - Number of coordinate sets
+/// * `n_bond` - Number of bonds
+/// * `n_atom` - Number of atoms
+/// * `coord_set` - Vector of coordinate sets
+/// * `cs_tmpl` - Optional template coordinate set
+/// * `bond` - Vector of bonds
+/// * `atom` - Vector of atom information
+/// * `discrete_flag` - Flag for discrete representation
+/// * `n_discrete` - Number of discrete objects
+/// * `symmetry` - Optional symmetry information
+/// * `cur_cset` - Current coordinate set index
+/// * `bond_counter` - Counter for bonds
+/// * `atom_counter` - Counter for atoms
+/// * `discrete_atm_to_idx` - Optional mapping of discrete atoms to indices
+/// * `dcs` - Optional discrete coordinate set information
 ///
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PyObjectMolecule {
@@ -403,6 +441,56 @@ pub struct CoordSet {
     pub symmetry: Option<Vec<(((i32, i32, i32), (i32, i32, i32)), String)>>,
 }
 
+/// AtomInfor
+///
+/// This struct contains various properties of an atom, including its position,
+/// chemical properties, and visualization settings.
+///
+/// # Fields
+///
+/// * `resv` - Residue sequence number
+/// * `chain` - Chain identifier
+/// * `alt` - Alternate location indicator
+/// * `resi` - Residue identifier
+/// * `segi` - Segment identifier
+/// * `resn` - Residue name
+/// * `name` - Atom name
+/// * `elem` - Element symbol
+/// * `text_type` - Text type
+/// * `label` - Label text
+/// * `ss_type` - Secondary structure type
+/// * `is_hydrogen` - Flag indicating if the atom is hydrogen
+/// * `custom_type` - Custom type identifier
+/// * `priority` - Priority value
+/// * `b` - B-factor (temperature factor)
+/// * `q` - Occupancy
+/// * `vdw` - Van der Waals radius
+/// * `partial_charge` - Partial charge
+/// * `formal_charge` - Formal charge
+/// * `hetatm` - Flag indicating if the atom is a heteroatom
+/// * `vis_rep` - Visualization representation
+/// * `color` - Color index
+/// * `id` - Atom ID
+/// * `cartoon` - Cartoon representation type
+/// * `flags` - Various flags
+/// * `is_bonded` - Flag indicating if the atom is bonded
+/// * `chem_flag` - Chemical flag
+/// * `geom` - Geometry type
+/// * `valence` - Valence
+/// * `is_masked` - Flag indicating if the atom is masked
+/// * `is_protected` - Flag indicating if the atom is protected
+/// * `protons` - Number of protons
+/// * `unique_id` - Unique identifier
+/// * `stereo` - Stereochemistry indicator
+/// * `discrete_state` - Discrete state
+/// * `elec_radius` - Electronic radius
+/// * `rank` - Rank
+/// * `hb_donor` - Hydrogen bond donor flag
+/// * `hb_acceptor` - Hydrogen bond acceptor flag
+/// * `atomic_color` - Atomic color
+/// * `has_setting` - Flag indicating if the atom has custom settings
+/// * `anisou_1` to `anisou_6` - Anisotropic temperature factors
+/// * `custom` - Custom data string
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AtomInfo {
     pub resv: i32,
@@ -482,6 +570,19 @@ impl AtomInfo {
     }
 }
 
+/// Bond Structure
+///
+/// Represents a chemical bond between two atoms in a molecule.
+///
+/// # Fields
+///
+/// * `index_1` - Index of the first atom in the bond
+/// * `index_2` - Index of the second atom in the bond
+/// * `order` - Bond order (e.g., single, double, triple)
+/// * `id` - Unique identifier for the bond
+/// * `stereo` - Stereochemistry information for the bond
+/// * `unique_id` - Another unique identifier for the bond
+/// * `has_setting` - Flag indicating if the bond has custom settings
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Bond {
     pub index_1: i32,
