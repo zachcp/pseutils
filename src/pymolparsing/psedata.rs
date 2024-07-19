@@ -30,8 +30,8 @@
 
 use crate::molviewspec::nodes::{self as mvsnodes, ColorNamesT, State};
 use crate::pymolparsing::parsing::{
-    CustomValue, PyObjectMolecule, PymolSessionObjectData, SessionName, SessionSelectorList,
-    Settings, SettingsEnum,
+    CustomValue, PyObjectMolecule, PymolSessionObjectData, SceneView, SessionName,
+    SessionSelectorList, Settings, SettingsEnum,
 };
 use pdbtbx::PDB;
 use serde::{Deserialize, Serialize};
@@ -64,25 +64,8 @@ pub struct PSEData {
     unique_settings: Vec<i32>,
     selector_secrets: Vec<i32>,
     editor: Vec<i32>,
-    /// pymol view of 25 floats is likely to be from the `SceneGetView`
-    ///
-    /// [pymol](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/Scene.cpp#L872C1-L883C35)
-    ///
-    /// /**
-    /// Get information required to define the geometry
-    /// of a particular view, for shipping to and from python
-    /// as a list of floats
-    /// @verbatim
-    /// 0-15 = 4x4 rotation matrix
-    /// 16-18 = position
-    /// 19-21 = origin
-    /// 22    = front plane
-    /// 23    = rear plane
-    /// 24    = orthoscopic flag
-    /// @endverbatim
-    /// @param[out] view buffer to fill
-    /// */
-    pub view: [f32; 25],
+    // pub view: [f32; 25],
+    pub view: SceneView,
     view_dict: HashMap<String, String>,
     #[serde(with = "serde_bytes")]
     wizard: Vec<u8>,

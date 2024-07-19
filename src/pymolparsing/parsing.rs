@@ -518,6 +518,112 @@ impl<'de> Deserialize<'de> for PymolSessionObjectData {
     }
 }
 
+/// pymol view of 25 floats is likely to be from the `SceneGetView`
+///
+/// [pymol](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/Scene.cpp#L872C1-L883C35)
+///
+/// /**
+/// Get information required to define the geometry
+/// of a particular view, for shipping to and from python
+/// as a list of floats
+/// @verbatim
+/// 0-15 = 4x4 rotation matrix
+/// 16-18 = position
+/// 19-21 = origin
+/// 22    = front plane
+/// 23    = rear plane
+/// 24    = orthoscopic flag
+/// @endverbatim
+/// @param[out] view buffer to fill
+/// */
+///
+#[derive(Debug, Serialize)]
+pub struct SceneView {
+    pub rotation_matrix: [[f64; 4]; 4],
+    pub position: [f64; 3],
+    pub origin: [f64; 3],
+    pub front_plane: f64,
+    pub rear_plane: f64,
+    pub orthoscopic_flag: f64,
+}
+
+impl SceneView {
+    pub fn from_json_value(value: Value) -> Result<Self, serde_pickle::Error> {
+        let array: [f64; 25] = serde_pickle::from_value(value)?;
+        Ok(Self::from_array(array))
+    }
+
+    pub fn from_array(view: [f64; 25]) -> Self {
+        SceneView {
+            rotation_matrix: [
+                [view[0], view[1], view[2], view[3]],
+                [view[4], view[5], view[6], view[7]],
+                [view[8], view[9], view[10], view[11]],
+                [view[12], view[13], view[14], view[15]],
+            ],
+            position: [view[16], view[17], view[18]],
+            origin: [view[19], view[20], view[21]],
+            front_plane: view[22],
+            rear_plane: view[23],
+            orthoscopic_flag: view[24],
+        }
+    }
+
+    pub fn to_array(&self) -> [f64; 25] {
+        let mut array = [0.0; 25];
+        for i in 0..4 {
+            for j in 0..4 {
+                array[i * 4 + j] = self.rotation_matrix[i][j];
+            }
+        }
+        array[16..19].copy_from_slice(&self.position);
+        array[19..22].copy_from_slice(&self.origin);
+        array[22] = self.front_plane;
+        array[23] = self.rear_plane;
+        array[24] = self.orthoscopic_flag;
+        array
+    }
+}
+impl<'de> Deserialize<'de> for SceneView {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let pickle_value = Value::deserialize(deserializer)?;
+
+        if let Value::List(values) = pickle_value {
+            if values.len() != 25 {
+                return Err(serde::de::Error::custom("Expected 25 float values"));
+            }
+
+            let mut floats = [0.0; 25];
+            for (i, value) in values.into_iter().enumerate() {
+                if let Value::F64(f) = value {
+                    floats[i] = f;
+                } else {
+                    return Err(serde::de::Error::custom("Expected float values"));
+                }
+            }
+
+            Ok(SceneView {
+                rotation_matrix: [
+                    [floats[0], floats[1], floats[2], floats[3]],
+                    [floats[4], floats[5], floats[6], floats[7]],
+                    [floats[8], floats[9], floats[10], floats[11]],
+                    [floats[12], floats[13], floats[14], floats[15]],
+                ],
+                position: [floats[16], floats[17], floats[18]],
+                origin: [floats[19], floats[20], floats[21]],
+                front_plane: floats[22],
+                rear_plane: floats[23],
+                orthoscopic_flag: floats[24],
+            })
+        } else {
+            Err(serde::de::Error::custom("Expected a list of float values"))
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SessionName {
     pub name: String,
