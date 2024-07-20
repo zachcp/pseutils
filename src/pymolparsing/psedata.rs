@@ -30,8 +30,8 @@
 
 use crate::molviewspec::nodes::{self as mvsnodes, CameraParams, ColorNamesT, State};
 use crate::pymolparsing::parsing::{
-    CustomValue, PyObjectMolecule, PymolSessionObjectData, SceneView, SessionName,
-    SessionSelectorList, Settings, SettingsEnum,
+    PyObjectMolecule, PymolSessionObjectData, SceneView, SessionName, SessionSelectorList,
+    Settings, SettingsEnum,
 };
 use pdbtbx::PDB;
 use serde::{Deserialize, Serialize};
@@ -161,7 +161,7 @@ impl PSEData {
         let pdb_folder = path.join("pdb");
         std::fs::create_dir_all(&pdb_folder)?;
         let mut file_list = Vec::new();
-        for (index, molecule) in self.get_molecule_data().iter().enumerate() {
+        for molecule in self.get_molecule_data().iter() {
             let pdb = molecule.to_pdb();
             let filename = format!("{}.pdb", molecule.get_name());
             let file_path = pdb_folder.join(&filename);

@@ -2,6 +2,3 @@
 // it may be advisable down the line to split these out
 pub mod parsing;
 pub mod psedata;
-pub mod settings;
-
-use crate::molviewspec;
