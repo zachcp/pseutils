@@ -1,5 +1,5 @@
 [package]
-name = "pymol_session_utils"
+name = "pseutils"
 version = "0.1.0"
 edition = "2021"
 
