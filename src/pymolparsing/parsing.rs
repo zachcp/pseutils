@@ -15,7 +15,8 @@
 //!
 //! ## Links
 //!
-//! - [Molecule Experter](https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L1627)
+//! - [pymol-open-source](https://github.com/schrodinger/pymol-open-source). Pymol Source code.
+//! - [Molecule Exporter](https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L1627)
 //! - [PymolMoleculeExporter](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer4/Cmd.cpp#L3877)
 //! - [PDB Exporter](https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L1627)
 //! - [MoleculeExporterPDB](https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L439)
@@ -477,6 +478,10 @@ impl PyObjectMolecule {
     }
 }
 
+/// PymolSessionObjectData
+///
+/// Differentiate between serializing an object or a selection
+/// They have different `shapes` and require custom deserialization.
 #[derive(Debug, Serialize)]
 #[serde(untagged)]
 pub enum PymolSessionObjectData {
@@ -623,7 +628,11 @@ impl<'de> Deserialize<'de> for SceneView {
         }
     }
 }
-
+/// SessionName
+///
+/// High level info about a session obeject.
+/// Can be an object/molecule or a selection
+///
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SessionName {
     pub name: String,
@@ -635,6 +644,10 @@ pub struct SessionName {
     pub group: String,
 }
 
+/// Session Selector
+///
+/// Defines a pymole seleciton in terms of names and
+/// atom indices.
 #[derive(Debug, Serialize)]
 pub struct SessionSelector {
     // SelectorAsPyList
@@ -686,6 +699,11 @@ impl SessionSelectorList {
     }
 }
 
+/// Global Pymol Settings
+///
+/// This enum is derived from [SettingInfo.h](https://github.com/schrodinger/pymol-open-source/blob/master/layer1/SettingInfo.h),
+/// pymol's setting specification
+///
 #[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
 #[repr(u32)]
 pub enum SettingsEnum {

@@ -1,6 +1,26 @@
-//! This crate is for loading and serializing pymol's PSE filetype
+//! # PyMOL PSE Parser
 //!
-//! it is currently a work in progress.
+//! A Rust crate for working with PyMOL PSE (PyMOL Session) files.
+//!
+//! ## Features
+//!
+//! - Load and parse PSE files
+//! - Serialize PSE data
+//! - Access molecular structures and visualization settings
+//!
+//! ## Usage
+//!
+//! ```rust
+//! use pymolparsing::psedata::PSEData;
+//! let pse_data = PSEData::load("path/to/file.pse");
+//! // Work with the loaded PSE data
+//! psedata.to_disk_full("my_output_directory");
+//! ```
+//!
+//! ## Modules
+//!
+//! - `molviewspec`: Handles molecular viewing specifications
+//! - `pymolparsing`: Core parsing functionality for PSE files
 //!
 pub mod molviewspec;
 pub mod pymolparsing;
