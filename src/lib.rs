@@ -10,9 +10,9 @@
 //!
 //! ## Usage
 //!
-//! ```rust
-//! use pymolparsing::psedata::PSEData;
-//! let pse_data = PSEData::load("path/to/file.pse");
+//! ```no_run
+//! use pseutils::pymolparsing::psedata::PSEData;
+//! let psedata = PSEData::load("path/to/file.pse").expect("local pse path");
 //! // Work with the loaded PSE data
 //! psedata.to_disk_full("my_output_directory");
 //! ```

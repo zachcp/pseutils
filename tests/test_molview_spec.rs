@@ -1,4 +1,4 @@
-use pymol_session_utils::molviewspec::nodes::{
+use pseutils::molviewspec::nodes::{
     ColorT, ComponentExpression, ComponentSelector, ComponentSelectorT, ParseFormatT, ParseParams,
     RepresentationTypeT, State, StructureParams, StructureTypeT,
 };
