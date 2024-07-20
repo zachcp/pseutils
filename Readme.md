@@ -21,6 +21,23 @@ cargo clean --doc && cargo doc --no-deps --open
 # to look at results
 cargo test # generate an example
 cd test_temporary && python -m http.server
+
+# build the binary and test
+cargo build --release
+./target/release/pseutils  --psefile tests/data/example.pse --outputdir binary_test
+
+# outputs a complete directory
+> tree binary_test
+binary_test
+├── index.html
+├── molstar.css
+├── molstar.js
+├── pdb
+│   └── 1pdb.pdb
+├── pdb_contents.txt
+└── state.mvsj
+
+
 ```
 
 ## Status
