@@ -1,3 +1,21 @@
+//! This module has functionality to build up MolViewSpec.
+//!
+//! MolViewSpec (MVS) is a lightweight, JSON-based specification for describing molecular structures and their visual representation.
+//! It is designed to be human-readable, easily shareable, and compatible with various molecular visualization tools.
+//!
+//! - MolViewSpec GitHub repository: https://github.com/molstar/mol-view-spec
+//! - MolViewSpec documentation: https://molstar.org/viewer/molviewspec/
+//! - MolStar Viewer (which supports MVS): https://molstar.org/viewer/
+//!
+//! We try to adhere very closely to the python library API. Almost all of the action happens
+//! on the `Nodes`. Because we are building a nested tree of data, we need most of the parts to
+//! be mutable and you can see almost all of the function calls:
+//!
+//! 1. check the type and the params and act only on correct parent nodes
+//! 2. beacuse of 1, we return `Option<>`
+//! 3. If a node is returned is it `&mut Node`
+//!
+//!
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_json;
