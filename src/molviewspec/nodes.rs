@@ -4,6 +4,10 @@ use serde_json;
 use urlencoding;
 use validator::Validate;
 
+// KindT
+//
+// Enum of node types corresponding to the MolViewSpec Nodes
+//
 #[derive(PartialEq, Serialize, Deserialize, Debug, Default, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum KindT {
@@ -34,6 +38,10 @@ pub enum KindT {
     Transform,
 }
 
+// NodeParams
+//
+// Enum of params per node type. Each of the variants are typed.
+//
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum NodeParams {
@@ -68,6 +76,7 @@ pub enum NodeParams {
 /// This is the core datastructure for generating MSVJ files. Each node type can have a type, params, and children.
 ///
 /// Methods derived from the Python API found [here](https://github.com/molstar/mol-view-spec/blob/master/molviewspec/molviewspec/builder.py)
+///
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct Node {
     pub kind: KindT,
@@ -317,6 +326,11 @@ pub enum DescriptionFormatT {
     Plaintext,
 }
 
+/// Metadata
+///
+/// The molviewspec metadata. High level info unrelated to
+/// structure visualization.
+///
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Metadata {
     pub version: String,
@@ -329,6 +343,11 @@ pub struct Metadata {
     pub timestamp: String,
 }
 
+/// This is the base MolViewSpec object containing
+/// the root node and the metadata
+///
+/// Holds methods that modify the root node.
+///
 #[derive(Serialize, Deserialize, Debug)]
 pub struct State {
     pub root: Node,
@@ -370,7 +389,6 @@ impl State {
     pub fn generic_visuals() {
         unimplemented!()
     }
-
     pub fn to_url(&self) -> String {
         let json = serde_json::to_string(&self).expect("Json conversion");
         let encoded = urlencoding::encode(&json);
@@ -382,6 +400,7 @@ impl State {
     }
 }
 
+/// Types of coumpounds: for pse I am only using PDB
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum ParseFormatT {
@@ -396,6 +415,7 @@ pub struct ParseParams {
     pub format: ParseFormatT,
 }
 
+/// StructureType. Useful for specifying more complicated sets of structures
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum StructureTypeT {
@@ -410,6 +430,7 @@ impl Default for StructureTypeT {
     }
 }
 
+/// Structure Params
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct StructureParams {
     #[serde(rename = "type")]
@@ -432,6 +453,10 @@ pub struct StructureParams {
     pub ijk_max: Option<(i32, i32, i32)>,
 }
 
+/// Component Selector Type
+///
+/// Useful for specifying broad groups like 'all',
+/// 'protein', etc.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum ComponentSelectorT {
@@ -444,7 +469,7 @@ pub enum ComponentSelectorT {
     Ion,
     Water,
 }
-
+/// Component Expresssion
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct ComponentExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -481,6 +506,7 @@ pub struct ComponentExpression {
     pub atom_index: Option<i32>,
 }
 
+/// Representation Type
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum RepresentationTypeT {
@@ -489,6 +515,7 @@ pub enum RepresentationTypeT {
     Surface,
 }
 
+/// Color Names
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum ColorNamesT {
@@ -641,6 +668,7 @@ pub enum ColorNamesT {
     Yellowgreen,
 }
 
+/// Color Type: Named or Hex
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum ColorT {

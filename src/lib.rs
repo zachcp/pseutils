@@ -12,7 +12,6 @@
 //!
 //! ```rust
 //! use pymolparsing::psedata::PSEData;
-//!
 //! let pse_data = PSEData::load("path/to/file.pse");
 //! // Work with the loaded PSE data
 //! psedata.to_disk_full("my_output_directory");
