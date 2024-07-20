@@ -1,4 +1,4 @@
-use pymol_session_utils::pymolparsing::parsing::{CustomValue, Settings, SettingsEnum};
+use pymol_session_utils::pymolparsing::parsing::{CustomValue, SettingsEnum};
 use pymol_session_utils::PSEData;
 const TEST_OUTPUT_DIR: &str = "./test_temporary";
 

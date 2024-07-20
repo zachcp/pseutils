@@ -3,5 +3,3 @@
 pub mod parsing;
 pub mod psedata;
 pub mod settings;
-
-use crate::molviewspec;
