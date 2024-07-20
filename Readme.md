@@ -1,6 +1,6 @@
 # pymol_session_utils
 
-**WIP: Currently not working**
+**Note: Work In Progress. Feature Incomplete**
 
 
 ## Goal
