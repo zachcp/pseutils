@@ -5,28 +5,6 @@
 //! Currently the parsers are working for small test cases of molecules and selections. Additional parser structs would be required for
 //! other PSE data types which include the folloing:
 //!
-//! ## PyObject Serialization
-//!
-//! Code:
-//! -[pyobject](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/PyMOLObject.cpp#L681)
-//!
-//! Python Obects:
-//! - Object
-//! - Gadget
-//! - Molecule    ---> WIP.
-//! - Dist
-//! - Map
-//! - Mesh
-//! - Slice
-//! - Surface
-//! - CGO
-//! - Alignment
-//! - Group
-//! - Volume
-//! - Callback
-//! - Curve
-//! - Selection ---> WIP.
-//!
 
 use crate::molviewspec::nodes::{self as mvsnodes, CameraParams, ColorNamesT, State};
 use crate::pymolparsing::parsing::{
@@ -44,7 +22,11 @@ use std::path::Path;
 
 /// PSEData represents the structure of a PyMOL Session File (PSE).
 ///
-/// This struct contains various components of a PyMOL session, including:
+/// We lean heavily on `serde_pickle` to deserialize the PSE binary
+/// file into named structs, of which `PSEData` is the highlest level object containing
+/// most of the required methods for operating on PSE files.
+///
+///  This struct contains various components of a PyMOL session, including:
 /// - Version information
 /// - Color settings
 /// - View settings
@@ -53,8 +35,28 @@ use std::path::Path;
 /// - Cached data
 /// - Session names and associated objects
 ///
-/// It provides methods for loading PSE files, converting to JSON,
-/// extracting molecule and selection data, and creating PDB files.
+/// To be implemented in time:
+///
+/// PyObject :
+/// -[pyobject](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/PyMOLObject.cpp#L681)
+///
+/// Python Obects:
+/// - Object
+/// - Gadget
+/// - Molecule    ---> WIP.
+/// - Dist
+/// - Map
+/// - Mesh
+/// - Slice
+/// - Surface
+/// - CGO
+/// - Alignment
+/// - Group
+/// - Volume
+/// - Callback
+/// - Curve
+/// - Selection ---> WIP.
+///
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PSEData {
     pub version: i32,
@@ -72,7 +74,7 @@ pub struct PSEData {
     moviescenes: Vec<Vec<i32>>,
     // High level state settings: we need to prpogate these..
     pub settings: Vec<Settings>,
-    movie: (
+    pub movie: (
         i32,
         i32,
         Vec<f32>,
