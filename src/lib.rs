@@ -10,7 +10,7 @@
 //!
 //! ## Usage
 //!
-//! ```rust
+//! ```no_run
 //! use pseutils::psedata::PSEData;
 //! let psedata = PSEData::load("path/to/file.pse");
 //! // Work with the loaded PSE data
