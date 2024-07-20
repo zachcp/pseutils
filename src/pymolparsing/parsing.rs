@@ -15,6 +15,7 @@
 //!
 //! ## Links
 //!
+//! - [pymol-open-source](https://github.com/schrodinger/pymol-open-source). Pymol Source code.
 //! - [Molecule Exporter](https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L1627)
 //! - [PymolMoleculeExporter](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer4/Cmd.cpp#L3877)
 //! - [PDB Exporter](https://github.com/schrodinger/pymol-open-source/blob/master/layer3/MoleculeExporter.cpp#L1627)
@@ -700,6 +701,8 @@ impl SessionSelectorList {
 
 /// Global Pymol Settings
 ///
+/// This enum is derived from [SettingInfo.h](https://github.com/schrodinger/pymol-open-source/blob/master/layer1/SettingInfo.h),
+/// pymol's setting specification
 ///
 #[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
 #[repr(u32)]
