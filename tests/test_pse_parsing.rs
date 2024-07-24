@@ -227,4 +227,52 @@ fn test_colors() {
             name, value, value, value
         );
     }
+
+    let spectrum_o: [[f32; 3]; 29] = [
+        /* a rainbow with perceptive color balancing and extra blue/red at the ends */
+        [1.0, 0.0, 1.0], /* violet */
+        [0.8, 0.0, 1.0],
+        [0.5, 0.0, 1.0], /* blend */
+        [0.0, 0.0, 1.0], /* blue */
+        [0.0, 0.0, 1.0], /* blue */
+        [0.0, 0.2, 1.0],
+        [0.0, 0.5, 1.0], /* blend */
+        [0.0, 0.8, 1.0],
+        [0.0, 1.0, 1.0], /* cyan */
+        [0.0, 1.0, 0.8],
+        [0.0, 1.0, 0.5], /* blend */
+        [0.0, 1.0, 0.2],
+        [0.0, 1.0, 0.0], /* green */
+        [0.2, 1.0, 0.0],
+        [0.5, 1.0, 0.0], /* blend */
+        [0.8, 1.0, 0.0],
+        [1.0, 1.0, 0.0], /* yellow */
+        [1.0, 0.9, 0.0],
+        [1.0, 0.75, 0.0], /* blend */
+        [1.0, 0.6, 0.0],
+        [1.0, 0.5, 0.0], /* orange */
+        [1.0, 0.4, 0.0],
+        [1.0, 0.3, 0.0], /* blend */
+        [1.0, 0.2, 0.0],
+        [1.0, 0.0, 0.0], /* red */
+        [1.0, 0.0, 0.0], /* red */
+        [1.0, 0.0, 0.5], /* blend */
+        [1.0, 0.0, 0.8], /* violet */
+        [1.0, 0.0, 1.0], /* violet */
+    ];
+
+    const B_DIV: f32 = 35.7143;
+
+    for a in 0..1000 {
+        let set1 = (a as f32 / B_DIV) as usize;
+        let name = format!("o{:03}", a);
+        let f = 1.0 - (a as f32 - (set1 as f32 * B_DIV)) / B_DIV;
+        let r = f * spectrum_o[set1][0] + (1.0 - f) * spectrum_o[set1 + 1][0];
+        let g = f * spectrum_o[set1][1] + (1.0 - f) * spectrum_o[set1 + 1][1];
+        let b = f * spectrum_o[set1][2] + (1.0 - f) * spectrum_o[set1 + 1][2];
+        println!(
+            " Color {{ name: \"{}\", r: {:?}, g: {:?}, b: {:?} }},",
+            name, r, g, b
+        );
+    }
 }
