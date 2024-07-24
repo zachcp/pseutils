@@ -57,7 +57,12 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 /// This struct contains various properties of an atom, including its position,
 /// chemical properties, and visualization settings.
 ///
-/// # Fields
+/// ## Pymol Source
+///
+/// - [AtomInfo.h](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.h)
+/// - [AtomInfo.cpp](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp)
+///
+/// ## Fields
 ///
 /// * `resv` - Residue sequence number
 /// * `chain` - Chain identifier
@@ -128,15 +133,21 @@ pub struct AtomInfo {
     pub vis_rep: i32,
     pub color: i32,
     pub id: i32,
-    pub cartoon: i32,
+    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.h#L292C33-L292C77
+    pub cartoon: i32, //  /* 0 = default which is auto (use ssType) */
     pub flags: i64,
     pub is_bonded: i8,
     pub chem_flag: i32,
-    pub geom: i32,
-    pub valence: i32,
+    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp#L44
+    pub geom: i32, // cAtomInfo*
+    // "valence" should be renamed to "degree" (or "total_degree"). It's the
+    // number of explicit and implicit neighbors, independent of bond order.
+    // Should be equivalent to RDKit::Atom::getTotalDegree() and
+    // OBAtom::GetTotalDegree().
+    pub valence: i32, //
     pub is_masked: i8,
     pub is_protected: i8,
-    pub protons: i32,
+    pub protons: i32, // atomic number
     pub unique_id: i64,
     pub stereo: i8,
     pub discrete_state: i32,
@@ -144,6 +155,7 @@ pub struct AtomInfo {
     pub rank: i32,
     pub hb_donor: i8,
     pub hb_acceptor: i8,
+    // color and secondary structure
     pub atomic_color: i32,
     pub has_setting: i8,
     pub anisou_1: f32,
@@ -162,6 +174,13 @@ impl AtomInfo {
             0 => false,
             _ => false,
         }
+    }
+    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.h#L319
+    pub fn is_metal() {
+        unimplemented!()
+    }
+    pub fn is_visible() {
+        unimplemented!()
     }
     pub fn to_pdbtbx_atom(&self) -> pdbtbx::Atom {
         let formal_charge = self.formal_charge as isize;
