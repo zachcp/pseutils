@@ -172,4 +172,50 @@ fn test_colors() {
             name, r, g, b
         );
     }
+
+    let spectrum_w: [[f32; 3]; 25] = [
+        [1.0, 1.0, 0.0], // yellow - 0
+        [1.0, 1.0, 1.0], // white
+        [0.0, 0.0, 1.0], // blue  - 83.333
+        [1.0, 1.0, 1.0], // white
+        [1.0, 0.0, 0.0], // red - 166.67
+        [1.0, 1.0, 1.0], // white
+        [0.0, 1.0, 0.0], // green - 250.00
+        [1.0, 1.0, 1.0], // white
+        [1.0, 0.0, 1.0], // magenta - 333.33
+        [1.0, 1.0, 1.0], // white
+        [0.0, 1.0, 1.0], // cyan - 416.67
+        [1.0, 1.0, 1.0], // white
+        [1.0, 1.0, 0.0], // yellow - 500.00
+        [1.0, 1.0, 1.0], // white
+        [0.0, 1.0, 0.0], // green - 583.33
+        [1.0, 1.0, 1.0], // white
+        [0.0, 0.0, 1.0], // blue - 666.67
+        [1.0, 1.0, 1.0], // white
+        [1.0, 0.0, 1.0], // magenta - 750.00
+        [1.0, 1.0, 1.0], // white
+        [1.0, 1.0, 0.0], // yellow - 833.33
+        [1.0, 1.0, 1.0], // white
+        [1.0, 0.0, 0.0], // red - 916.67
+        [1.0, 1.0, 1.0], // white
+        [0.0, 1.0, 1.0], // cyan - 999
+    ];
+
+    const W_DIV: f32 = 41.666666667;
+
+    // complementary spectra separated by white (w000-w999)
+
+    let mut name = String::from("w000");
+    for a in 0..1000 {
+        let set1 = (a as f32 / W_DIV) as usize;
+        name = format!("w{:03}", a);
+        let f = 1.0 - (a as f32 - (set1 as f32 * W_DIV)) / W_DIV;
+        let r = f * spectrum_w[set1][0] + (1.0 - f) * spectrum_w[set1 + 1][0];
+        let g = f * spectrum_w[set1][1] + (1.0 - f) * spectrum_w[set1 + 1][1];
+        let b = f * spectrum_w[set1][2] + (1.0 - f) * spectrum_w[set1 + 1][2];
+        println!(
+            " Color {{ name: \"{}\", r: {:?}, g: {:?}, b: {:?} }},",
+            name, r, g, b
+        );
+    }
 }
