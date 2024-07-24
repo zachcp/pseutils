@@ -18,7 +18,7 @@ pub struct Color {
 /// - [Reversed Spectrum](https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Color.cpp#L1111)
 /// - [Complimentary Spectrum](https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Color.cpp#L1125)
 /// - [complementary spectra separated by white (w000-w999)](/* complementary spectra separated by white (w000-w999) */)
-pub static COLOR_SET: Lazy<[Color; 4155]> = Lazy::new(|| {
+pub static COLOR_SET: Lazy<[Color; 4256]> = Lazy::new(|| {
     [
         Color {
             name: "white",
@@ -14950,17 +14950,129 @@ pub static COLOR_SET: Lazy<[Color; 4155]> = Lazy::new(|| {
         Color { name: "w997", r: 0.07200098, g: 1.0, b: 1.0 },
         Color { name: "w998", r: 0.04800099, g: 1.0, b: 1.0 },
         Color { name: "w999", r: 0.024001002, g: 1.0, b: 1.0 },
-
+        Color { name: "density", r: 0.1, g: 0.1, b: 0.1 },
+        Color { name: "gray00", r: 0.0, g: 0.0, b: 0.0 },
+        Color { name: "gray01", r: 0.01010101, g: 0.01010101, b: 0.01010101 },
+        Color { name: "gray02", r: 0.02020202, g: 0.02020202, b: 0.02020202 },
+        Color { name: "gray03", r: 0.030303031, g: 0.030303031, b: 0.030303031 },
+        Color { name: "gray04", r: 0.04040404, g: 0.04040404, b: 0.04040404 },
+        Color { name: "gray05", r: 0.05050505, g: 0.05050505, b: 0.05050505 },
+        Color { name: "gray06", r: 0.060606062, g: 0.060606062, b: 0.060606062 },
+        Color { name: "gray07", r: 0.07070707, g: 0.07070707, b: 0.07070707 },
+        Color { name: "gray08", r: 0.08080808, g: 0.08080808, b: 0.08080808 },
+        Color { name: "gray09", r: 0.09090909, g: 0.09090909, b: 0.09090909 },
+        Color { name: "gray10", r: 0.1010101, g: 0.1010101, b: 0.1010101 },
+        Color { name: "gray11", r: 0.11111111, g: 0.11111111, b: 0.11111111 },
+        Color { name: "gray12", r: 0.121212125, g: 0.121212125, b: 0.121212125 },
+        Color { name: "gray13", r: 0.13131313, g: 0.13131313, b: 0.13131313 },
+        Color { name: "gray14", r: 0.14141414, g: 0.14141414, b: 0.14141414 },
+        Color { name: "gray15", r: 0.15151516, g: 0.15151516, b: 0.15151516 },
+        Color { name: "gray16", r: 0.16161616, g: 0.16161616, b: 0.16161616 },
+        Color { name: "gray17", r: 0.17171717, g: 0.17171717, b: 0.17171717 },
+        Color { name: "gray18", r: 0.18181819, g: 0.18181819, b: 0.18181819 },
+        Color { name: "gray19", r: 0.1919192, g: 0.1919192, b: 0.1919192 },
+        Color { name: "gray20", r: 0.2020202, g: 0.2020202, b: 0.2020202 },
+        Color { name: "gray21", r: 0.21212122, g: 0.21212122, b: 0.21212122 },
+        Color { name: "gray22", r: 0.22222222, g: 0.22222222, b: 0.22222222 },
+        Color { name: "gray23", r: 0.23232323, g: 0.23232323, b: 0.23232323 },
+        Color { name: "gray24", r: 0.24242425, g: 0.24242425, b: 0.24242425 },
+        Color { name: "gray25", r: 0.25252524, g: 0.25252524, b: 0.25252524 },
+        Color { name: "gray26", r: 0.26262626, g: 0.26262626, b: 0.26262626 },
+        Color { name: "gray27", r: 0.27272728, g: 0.27272728, b: 0.27272728 },
+        Color { name: "gray28", r: 0.28282827, g: 0.28282827, b: 0.28282827 },
+        Color { name: "gray29", r: 0.2929293, g: 0.2929293, b: 0.2929293 },
+        Color { name: "gray30", r: 0.3030303, g: 0.3030303, b: 0.3030303 },
+        Color { name: "gray31", r: 0.3131313, g: 0.3131313, b: 0.3131313 },
+        Color { name: "gray32", r: 0.32323232, g: 0.32323232, b: 0.32323232 },
+        Color { name: "gray33", r: 0.33333334, g: 0.33333334, b: 0.33333334 },
+        Color { name: "gray34", r: 0.34343433, g: 0.34343433, b: 0.34343433 },
+        Color { name: "gray35", r: 0.35353535, g: 0.35353535, b: 0.35353535 },
+        Color { name: "gray36", r: 0.36363637, g: 0.36363637, b: 0.36363637 },
+        Color { name: "gray37", r: 0.37373737, g: 0.37373737, b: 0.37373737 },
+        Color { name: "gray38", r: 0.3838384, g: 0.3838384, b: 0.3838384 },
+        Color { name: "gray39", r: 0.3939394, g: 0.3939394, b: 0.3939394 },
+        Color { name: "gray40", r: 0.4040404, g: 0.4040404, b: 0.4040404 },
+        Color { name: "gray41", r: 0.41414142, g: 0.41414142, b: 0.41414142 },
+        Color { name: "gray42", r: 0.42424244, g: 0.42424244, b: 0.42424244 },
+        Color { name: "gray43", r: 0.43434343, g: 0.43434343, b: 0.43434343 },
+        Color { name: "gray44", r: 0.44444445, g: 0.44444445, b: 0.44444445 },
+        Color { name: "gray45", r: 0.45454547, g: 0.45454547, b: 0.45454547 },
+        Color { name: "gray46", r: 0.46464646, g: 0.46464646, b: 0.46464646 },
+        Color { name: "gray47", r: 0.47474748, g: 0.47474748, b: 0.47474748 },
+        Color { name: "gray48", r: 0.4848485, g: 0.4848485, b: 0.4848485 },
+        Color { name: "gray49", r: 0.4949495, g: 0.4949495, b: 0.4949495 },
+        Color { name: "gray50", r: 0.5050505, g: 0.5050505, b: 0.5050505 },
+        Color { name: "gray51", r: 0.5151515, g: 0.5151515, b: 0.5151515 },
+        Color { name: "gray52", r: 0.5252525, g: 0.5252525, b: 0.5252525 },
+        Color { name: "gray53", r: 0.53535354, g: 0.53535354, b: 0.53535354 },
+        Color { name: "gray54", r: 0.54545456, g: 0.54545456, b: 0.54545456 },
+        Color { name: "gray55", r: 0.5555556, g: 0.5555556, b: 0.5555556 },
+        Color { name: "gray56", r: 0.56565654, g: 0.56565654, b: 0.56565654 },
+        Color { name: "gray57", r: 0.57575756, g: 0.57575756, b: 0.57575756 },
+        Color { name: "gray58", r: 0.5858586, g: 0.5858586, b: 0.5858586 },
+        Color { name: "gray59", r: 0.5959596, g: 0.5959596, b: 0.5959596 },
+        Color { name: "gray60", r: 0.6060606, g: 0.6060606, b: 0.6060606 },
+        Color { name: "gray61", r: 0.61616164, g: 0.61616164, b: 0.61616164 },
+        Color { name: "gray62", r: 0.6262626, g: 0.6262626, b: 0.6262626 },
+        Color { name: "gray63", r: 0.6363636, g: 0.6363636, b: 0.6363636 },
+        Color { name: "gray64", r: 0.64646465, g: 0.64646465, b: 0.64646465 },
+        Color { name: "gray65", r: 0.65656567, g: 0.65656567, b: 0.65656567 },
+        Color { name: "gray66", r: 0.6666667, g: 0.6666667, b: 0.6666667 },
+        Color { name: "gray67", r: 0.67676765, g: 0.67676765, b: 0.67676765 },
+        Color { name: "gray68", r: 0.68686867, g: 0.68686867, b: 0.68686867 },
+        Color { name: "gray69", r: 0.6969697, g: 0.6969697, b: 0.6969697 },
+        Color { name: "gray70", r: 0.7070707, g: 0.7070707, b: 0.7070707 },
+        Color { name: "gray71", r: 0.7171717, g: 0.7171717, b: 0.7171717 },
+        Color { name: "gray72", r: 0.72727275, g: 0.72727275, b: 0.72727275 },
+        Color { name: "gray73", r: 0.7373737, g: 0.7373737, b: 0.7373737 },
+        Color { name: "gray74", r: 0.74747473, g: 0.74747473, b: 0.74747473 },
+        Color { name: "gray75", r: 0.75757575, g: 0.75757575, b: 0.75757575 },
+        Color { name: "gray76", r: 0.7676768, g: 0.7676768, b: 0.7676768 },
+        Color { name: "gray77", r: 0.7777778, g: 0.7777778, b: 0.7777778 },
+        Color { name: "gray78", r: 0.7878788, g: 0.7878788, b: 0.7878788 },
+        Color { name: "gray79", r: 0.7979798, g: 0.7979798, b: 0.7979798 },
+        Color { name: "gray80", r: 0.8080808, g: 0.8080808, b: 0.8080808 },
+        Color { name: "gray81", r: 0.8181818, g: 0.8181818, b: 0.8181818 },
+        Color { name: "gray82", r: 0.82828283, g: 0.82828283, b: 0.82828283 },
+        Color { name: "gray83", r: 0.83838385, g: 0.83838385, b: 0.83838385 },
+        Color { name: "gray84", r: 0.8484849, g: 0.8484849, b: 0.8484849 },
+        Color { name: "gray85", r: 0.85858583, g: 0.85858583, b: 0.85858583 },
+        Color { name: "gray86", r: 0.86868685, g: 0.86868685, b: 0.86868685 },
+        Color { name: "gray87", r: 0.8787879, g: 0.8787879, b: 0.8787879 },
+        Color { name: "gray88", r: 0.8888889, g: 0.8888889, b: 0.8888889 },
+        Color { name: "gray89", r: 0.8989899, g: 0.8989899, b: 0.8989899 },
+        Color { name: "gray90", r: 0.90909094, g: 0.90909094, b: 0.90909094 },
+        Color { name: "gray91", r: 0.9191919, g: 0.9191919, b: 0.9191919 },
+        Color { name: "gray92", r: 0.9292929, g: 0.9292929, b: 0.9292929 },
+        Color { name: "gray93", r: 0.93939394, g: 0.93939394, b: 0.93939394 },
+        Color { name: "gray94", r: 0.94949496, g: 0.94949496, b: 0.94949496 },
+        Color { name: "gray95", r: 0.959596, g: 0.959596, b: 0.959596 },
+        Color { name: "gray96", r: 0.969697, g: 0.969697, b: 0.969697 },
+        Color { name: "gray97", r: 0.97979796, g: 0.97979796, b: 0.97979796 },
+        Color { name: "gray98", r: 0.989899, g: 0.989899, b: 0.989899 },
+        Color { name: "gray99", r: 1.0, g: 1.0, b: 1.0 },
     ]
 });
 
+
+// reg_named_color("density", 0.1F, 0.1F, 0.6F);
+
+// strcpy(name, "gray00");       /* american */
+// for(a = 0; a < 100; a = a + 1) {
+//   name[5] = (a % 10) + '0';
+//   name[4] = ((a % 100) / 10) + '0';
+//   /* sprintf(color->Name,"gray%02d",a); */
+//   reg_named_color(name, a / 99.F, a / 99.F, a / 99.F);
+// }
 #[test]
 fn test_first_color_name() {
     assert_eq!(COLOR_SET[0].name, "white");
     assert_eq!(COLOR_SET[20].name, "teal");
     assert_eq!(COLOR_SET[53].name, "violet");
+
     assert_eq!(COLOR_SET[54].name, "grey00");
     assert_eq!(COLOR_SET[153].name, "grey99");
+
     assert_eq!(COLOR_SET[154].name, "lightmagenta");
 
     assert_eq!(COLOR_SET[155].name, "s000");
@@ -14975,4 +15087,10 @@ fn test_first_color_name() {
 
     assert_eq!(COLOR_SET[3155].name, "w000");
     assert_eq!(COLOR_SET[4154].name, "w999");
+
+    assert_eq!(COLOR_SET[4155].name, "density");
+
+    assert_eq!(COLOR_SET[4156].name, "gray00");
+    assert_eq!(COLOR_SET[4255].name, "gray99");
+
 }

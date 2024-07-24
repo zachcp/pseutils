@@ -218,4 +218,13 @@ fn test_colors() {
             name, r, g, b
         );
     }
+
+    for a in 0..100 {
+        let name = format!("gray{:02}", a);
+        let value = a as f32 / 99.0;
+        println!(
+            " Color {{ name: \"{}\", r: {:?}, g: {:?}, b: {:?} }},",
+            name, value, value, value
+        );
+    }
 }
