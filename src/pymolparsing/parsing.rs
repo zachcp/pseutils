@@ -60,7 +60,10 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 /// ## Pymol Source
 ///
 /// - [AtomInfo.h](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.h)
+///     - Lots of goodies in here including constants defined for Atom type; Atom Geometry; VDW Radius; Chirality.
 /// - [AtomInfo.cpp](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp)
+/// - [AtomInforAsPyList](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp#L792)
+/// - [VDW Radius of Elements](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp#L1752)
 ///
 /// ## Fields
 ///
@@ -180,6 +183,12 @@ impl AtomInfo {
         unimplemented!()
     }
     pub fn is_visible() {
+        unimplemented!()
+    }
+    pub fn atomInfoBrackResidue() {
+        // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp#L1256C6-L1256C28
+        //inefficient but reliable way to find where residue atoms are located in an object
+        // for purpose of residue-based operations
         unimplemented!()
     }
     pub fn to_pdbtbx_atom(&self) -> pdbtbx::Atom {
