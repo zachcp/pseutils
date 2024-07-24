@@ -1,3 +1,4 @@
+use pseutils::pymolparsing::colors::Color;
 use pseutils::pymolparsing::parsing::{CustomValue, SettingsEnum};
 use pseutils::PSEData;
 const TEST_OUTPUT_DIR: &str = "./test_temporary";
@@ -74,4 +75,70 @@ fn test_pdb_01() {
     let _ = psedata.to_disk_full(TEST_OUTPUT_DIR);
     let url = psedata.to_mvsj_url();
     println!("{}", url);
+}
+
+#[test]
+fn test_colors() {
+    // https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Color.cpp#L880
+    let spectrum_s: [[f32; 3]; 13] = [
+        [1.0, 0.0, 1.0], // magenta - 0
+        [0.5, 0.0, 1.0],
+        [0.0, 0.0, 1.0], // blue - 166.66
+        [0.0, 0.5, 1.0],
+        [0.0, 1.0, 1.0], // cyan - 333.33
+        [0.0, 1.0, 0.5],
+        [0.0, 1.0, 0.0], // green - 500
+        [0.5, 1.0, 0.0],
+        [1.0, 1.0, 0.0], // yellow - 666.66
+        [1.0, 0.5, 0.0],
+        [1.0, 0.0, 0.0], // red - 833.33
+        [1.0, 0.0, 0.5],
+        [1.0, 0.0, 1.0], // magenta - 999
+    ];
+
+    const A_DIV: f32 = 83.333333333;
+
+    // Full spectrum (s000-s999)
+    for a in 0..1000 {
+        let set1 = (a as f32 / A_DIV) as usize;
+        let name = format!("s{:03}", a);
+        let f = 1.0 - (a as f32 - (set1 as f32 * A_DIV)) / A_DIV;
+        let r = f * spectrum_s[set1][0] + (1.0 - f) * spectrum_s[set1 + 1][0];
+        let g = f * spectrum_s[set1][1] + (1.0 - f) * spectrum_s[set1 + 1][1];
+        let b = f * spectrum_s[set1][2] + (1.0 - f) * spectrum_s[set1 + 1][2];
+        println!(
+            " Color {{ name: \"{}\", r: {:?}, g: {:?}, b: {:?} }},",
+            name, r, g, b
+        );
+    }
+
+    let spectrum_r: [[f32; 3]; 13] = [
+        [1.0, 1.0, 0.0], // yellow - 0
+        [0.5, 1.0, 0.0], // chartreuse
+        [0.0, 1.0, 0.0], // green - 166.66
+        [0.0, 1.0, 0.5], // limegreen
+        [0.0, 1.0, 1.0], // cyan - 333.33
+        [0.0, 0.5, 1.0], // marine
+        [0.0, 0.0, 1.0], // blue - 500
+        [0.5, 0.0, 1.0], // purpleblue
+        [1.0, 0.0, 1.0], // magenta - 666.66
+        [1.0, 0.0, 0.5], // hotpink
+        [1.0, 0.0, 0.0], // red - 833.33
+        [1.0, 0.5, 0.0], // orange
+        [1.0, 1.0, 0.0], // yellow - 999
+    ];
+
+    for a in 0..1000 {
+        let set1 = (a as f32 / A_DIV) as usize;
+        let name = format!("r{:03}", a);
+        let f = 1.0 - (a as f32 - (set1 as f32 * A_DIV)) / A_DIV;
+        let r = f * spectrum_r[set1][0] + (1.0 - f) * spectrum_r[set1 + 1][0];
+        let g = f * spectrum_r[set1][1] + (1.0 - f) * spectrum_r[set1 + 1][1];
+        let b = f * spectrum_r[set1][2] + (1.0 - f) * spectrum_r[set1 + 1][2];
+        // Assuming reg_named_color is implemented elsewhere
+        println!(
+            " Color {{ name: \"{}\", r: {:?}, g: {:?}, b: {:?} }},",
+            name, r, g, b
+        );
+    }
 }
