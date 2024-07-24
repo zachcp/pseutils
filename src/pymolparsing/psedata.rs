@@ -110,7 +110,11 @@ impl PSEData {
         std::fs::write(file_path, json)?;
         Ok(())
     }
-
+    // adds custom colors to auto colors to get the index of colors
+    pub fn get_full_colorlist() {
+        // https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Color.cpp#L415
+        unimplemented!()
+    }
     /// session is where all the action happens
     pub fn get_session_names(&self) -> Vec<String> {
         self.names

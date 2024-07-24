@@ -293,6 +293,7 @@ pub enum ObjectType {
     CObjectCurve = 14,
 }
 
+/// Named colors.
 #[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
 #[repr(i32)]
 pub enum AutoColor {
