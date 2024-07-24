@@ -141,4 +141,35 @@ fn test_colors() {
             name, r, g, b
         );
     }
+
+    let spectrum_c: [[f32; 3]; 13] = [
+        [1.0, 1.0, 0.0], // yellow - 0
+        [0.0, 0.0, 1.0], // blue - 83.333
+        [1.0, 0.0, 0.0], // red - 167.67
+        [0.0, 1.0, 0.0], // green - 250.00
+        [1.0, 0.0, 1.0], // magenta - 333.33
+        [0.0, 1.0, 1.0], // cyan - 416.67
+        [1.0, 1.0, 0.0], // yellow - 500.00
+        [0.0, 1.0, 0.0], // green - 583.33
+        [0.0, 0.0, 1.0], // blue - 666.67
+        [1.0, 0.0, 1.0], // magenta - 750.00
+        [1.0, 1.0, 0.0], // yellow - 833.33
+        [1.0, 0.0, 0.0], // red - 916.67
+        [0.0, 1.0, 1.0], // cyan - 999
+    ];
+
+    let mut name = String::from("c000");
+    for a in 0..1000 {
+        let set1 = (a as f32 / A_DIV) as usize;
+        // sprintf(color->Name,"c%03d",a);
+        name = format!("c{:03}", a);
+        let f = 1.0 - (a as f32 - (set1 as f32 * A_DIV)) / A_DIV;
+        let r = f * spectrum_c[set1][0] + (1.0 - f) * spectrum_c[set1 + 1][0];
+        let g = f * spectrum_c[set1][1] + (1.0 - f) * spectrum_c[set1 + 1][1];
+        let b = f * spectrum_c[set1][2] + (1.0 - f) * spectrum_c[set1 + 1][2];
+        println!(
+            " Color {{ name: \"{}\", r: {:?}, g: {:?}, b: {:?} }},",
+            name, r, g, b
+        );
+    }
 }
