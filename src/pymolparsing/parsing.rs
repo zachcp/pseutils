@@ -273,6 +273,71 @@ pub enum CustomValue {
     Boolean(bool),
 }
 
+// https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/PyMOLObject.h#L39
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
+#[repr(i32)]
+pub enum ObjectType {
+    CObjectMolecule = 1,
+    CObjectMap = 2,
+    CObjectMesh = 3,
+    CObjectMeasurement = 4,
+    CObjectCallback = 5,
+    CObjectCGO = 6,
+    CObjectSurface = 7,
+    CObjectGadget = 8,
+    CObjectCalculator = 9,
+    CObjectSlice = 10,
+    CObjectAlignment = 11,
+    CObjectGroup = 12,
+    CObjectVolume = 13,
+    CObjectCurve = 14,
+}
+
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[repr(i32)]
+pub enum AutoColor {
+    Aquamarine = 5257,
+    Bluewhite = 5278,
+    Brown = 51,
+    Carbon = 26,
+    Cyan = 5,
+    Darksalmon = 5280,
+    Deepblue = 23,
+    Deepsalmon = 5258,
+    Deepteal = 5262,
+    Dirtyviolet = 5272,
+    Forest = 22,
+    Greencyan = 5275,
+    Grey50 = 104,
+    Grey70 = 124,
+    Hotpink = 12,
+    Hydrogen = 29,
+    Lightmagenta = 154,
+    Lightpink = 5274,
+    Lightteal = 5266,
+    Lime = 10,
+    Limegreen = 15,
+    Limon = 5276,
+    Marine = 17,
+    Olive = 18,
+    Orange = 13,
+    Paleyellow = 5256,
+    Raspberry = 5268,
+    Salmon = 9,
+    Sand = 5269,
+    Skyblue = 5277,
+    Slate = 11,
+    Smudge = 5270,
+    Splitpea = 5267,
+    Teal = 20,
+    Violet = 53,
+    Violetpurple = 5271,
+    Warmpink = 5279,
+    Wheat = 52,
+    Yellow = 6,
+    Yelloworange = 36,
+}
+
 /// PyObject
 ///
 /// General Object-Level settings object
@@ -282,11 +347,10 @@ pub enum CustomValue {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PyObject {
     // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/PyMOLObject.h#L39
-    pub object_type: i32,
-
+    pub object_type: ObjectType, // cObject_t
     pub name: String,
     //
-    pub color: i32,
+    pub color: i32, // represents a pointer into an array of colors.
     pub vis_rep: i32,
     pub extent_min: [f32; 3],
     pub extent_max: [f32; 3],
@@ -297,7 +361,7 @@ pub struct PyObject {
     pub render_context: i32,
     pub ttt: [f32; 16], //  float TTT[16]{}; /* translate, transform, translate matrix (to apply when rendering)
     pub n_frame: i32,
-    pub view_elem: Option<bool>, //hack
+    pub view_elem: Option<bool>, // /* for animating objects via the TTT */
 }
 
 /// PyObjectMolecule: Represents a molecule in PyMOL.
