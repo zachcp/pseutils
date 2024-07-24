@@ -275,12 +275,17 @@ pub enum CustomValue {
 
 /// PyObject
 ///
-/// General settings object
+/// General Object-Level settings object
+///
+/// - [PyMOLObject](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/PyMOLObject.h#L189)
 ///
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PyObject {
+    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/PyMOLObject.h#L39
     pub object_type: i32,
+
     pub name: String,
+    //
     pub color: i32,
     pub vis_rep: i32,
     pub extent_min: [f32; 3],
@@ -290,7 +295,7 @@ pub struct PyObject {
     pub setting: Option<bool>, // this is a hack
     pub enabled: i32,
     pub render_context: i32,
-    pub ttt: Vec<f32>,
+    pub ttt: [f32; 16], //  float TTT[16]{}; /* translate, transform, translate matrix (to apply when rendering)
     pub n_frame: i32,
     pub view_elem: Option<bool>, //hack
 }
