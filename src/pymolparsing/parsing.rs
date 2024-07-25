@@ -46,6 +46,8 @@
 //! m_id = m_retain_ids ? m_iter.getAtomInfo()->id : (m_id + 1);
 //!  m_tmpids[m_iter.getAtm()] = m_id;
 use crate::molviewspec::nodes::{ComponentExpression, ComponentSelector};
+use crate::pymolparsing::colors::{Color, COLOR_SET};
+
 use itertools::Itertools;
 use pdbtbx::{self, Residue, PDB};
 use serde::{Deserialize, Deserializer, Serialize};
@@ -364,7 +366,16 @@ pub struct PyObject {
     pub n_frame: i32,
     pub view_elem: Option<bool>, // /* for animating objects via the TTT */
 }
-
+impl PyObject {
+    /// get_color - note this currently works if there are
+    /// no custom colors.
+    pub fn get_color(self) -> Color {
+        COLOR_SET
+            .get(self.color as usize)
+            .expect("Index within bounds")
+            .clone()
+    }
+}
 /// PyObjectMolecule: Represents a molecule in PyMOL.
 ///
 /// ## Link

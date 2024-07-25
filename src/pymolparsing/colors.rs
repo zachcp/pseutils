@@ -1,5 +1,6 @@
 use once_cell::sync::Lazy;
 
+#[derive(Clone)]
 pub struct Color {
     name: &'static str, // Changed from String to &'static str,
     r: f32,
