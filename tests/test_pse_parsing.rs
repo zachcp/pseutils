@@ -1,3 +1,4 @@
+use pseutils::pymolparsing::colors::Color;
 use pseutils::pymolparsing::parsing::{CustomValue, SettingsEnum};
 use pseutils::PSEData;
 const TEST_OUTPUT_DIR: &str = "./test_temporary";
@@ -74,4 +75,204 @@ fn test_pdb_01() {
     let _ = psedata.to_disk_full(TEST_OUTPUT_DIR);
     let url = psedata.to_mvsj_url();
     println!("{}", url);
+}
+
+#[test]
+fn test_colors() {
+    // https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Color.cpp#L880
+    let spectrum_s: [[f32; 3]; 13] = [
+        [1.0, 0.0, 1.0], // magenta - 0
+        [0.5, 0.0, 1.0],
+        [0.0, 0.0, 1.0], // blue - 166.66
+        [0.0, 0.5, 1.0],
+        [0.0, 1.0, 1.0], // cyan - 333.33
+        [0.0, 1.0, 0.5],
+        [0.0, 1.0, 0.0], // green - 500
+        [0.5, 1.0, 0.0],
+        [1.0, 1.0, 0.0], // yellow - 666.66
+        [1.0, 0.5, 0.0],
+        [1.0, 0.0, 0.0], // red - 833.33
+        [1.0, 0.0, 0.5],
+        [1.0, 0.0, 1.0], // magenta - 999
+    ];
+
+    const A_DIV: f32 = 83.333333333;
+
+    // Full spectrum (s000-s999)
+    for a in 0..1000 {
+        let set1 = (a as f32 / A_DIV) as usize;
+        let name = format!("s{:03}", a);
+        let f = 1.0 - (a as f32 - (set1 as f32 * A_DIV)) / A_DIV;
+        let r = f * spectrum_s[set1][0] + (1.0 - f) * spectrum_s[set1 + 1][0];
+        let g = f * spectrum_s[set1][1] + (1.0 - f) * spectrum_s[set1 + 1][1];
+        let b = f * spectrum_s[set1][2] + (1.0 - f) * spectrum_s[set1 + 1][2];
+        println!(
+            " Color {{ name: \"{}\", r: {:?}, g: {:?}, b: {:?} }},",
+            name, r, g, b
+        );
+    }
+
+    let spectrum_r: [[f32; 3]; 13] = [
+        [1.0, 1.0, 0.0], // yellow - 0
+        [0.5, 1.0, 0.0], // chartreuse
+        [0.0, 1.0, 0.0], // green - 166.66
+        [0.0, 1.0, 0.5], // limegreen
+        [0.0, 1.0, 1.0], // cyan - 333.33
+        [0.0, 0.5, 1.0], // marine
+        [0.0, 0.0, 1.0], // blue - 500
+        [0.5, 0.0, 1.0], // purpleblue
+        [1.0, 0.0, 1.0], // magenta - 666.66
+        [1.0, 0.0, 0.5], // hotpink
+        [1.0, 0.0, 0.0], // red - 833.33
+        [1.0, 0.5, 0.0], // orange
+        [1.0, 1.0, 0.0], // yellow - 999
+    ];
+
+    for a in 0..1000 {
+        let set1 = (a as f32 / A_DIV) as usize;
+        let name = format!("r{:03}", a);
+        let f = 1.0 - (a as f32 - (set1 as f32 * A_DIV)) / A_DIV;
+        let r = f * spectrum_r[set1][0] + (1.0 - f) * spectrum_r[set1 + 1][0];
+        let g = f * spectrum_r[set1][1] + (1.0 - f) * spectrum_r[set1 + 1][1];
+        let b = f * spectrum_r[set1][2] + (1.0 - f) * spectrum_r[set1 + 1][2];
+        // Assuming reg_named_color is implemented elsewhere
+        println!(
+            " Color {{ name: \"{}\", r: {:?}, g: {:?}, b: {:?} }},",
+            name, r, g, b
+        );
+    }
+
+    let spectrum_c: [[f32; 3]; 13] = [
+        [1.0, 1.0, 0.0], // yellow - 0
+        [0.0, 0.0, 1.0], // blue - 83.333
+        [1.0, 0.0, 0.0], // red - 167.67
+        [0.0, 1.0, 0.0], // green - 250.00
+        [1.0, 0.0, 1.0], // magenta - 333.33
+        [0.0, 1.0, 1.0], // cyan - 416.67
+        [1.0, 1.0, 0.0], // yellow - 500.00
+        [0.0, 1.0, 0.0], // green - 583.33
+        [0.0, 0.0, 1.0], // blue - 666.67
+        [1.0, 0.0, 1.0], // magenta - 750.00
+        [1.0, 1.0, 0.0], // yellow - 833.33
+        [1.0, 0.0, 0.0], // red - 916.67
+        [0.0, 1.0, 1.0], // cyan - 999
+    ];
+
+    let mut name = String::from("c000");
+    for a in 0..1000 {
+        let set1 = (a as f32 / A_DIV) as usize;
+        // sprintf(color->Name,"c%03d",a);
+        name = format!("c{:03}", a);
+        let f = 1.0 - (a as f32 - (set1 as f32 * A_DIV)) / A_DIV;
+        let r = f * spectrum_c[set1][0] + (1.0 - f) * spectrum_c[set1 + 1][0];
+        let g = f * spectrum_c[set1][1] + (1.0 - f) * spectrum_c[set1 + 1][1];
+        let b = f * spectrum_c[set1][2] + (1.0 - f) * spectrum_c[set1 + 1][2];
+        println!(
+            " Color {{ name: \"{}\", r: {:?}, g: {:?}, b: {:?} }},",
+            name, r, g, b
+        );
+    }
+
+    let spectrum_w: [[f32; 3]; 25] = [
+        [1.0, 1.0, 0.0], // yellow - 0
+        [1.0, 1.0, 1.0], // white
+        [0.0, 0.0, 1.0], // blue  - 83.333
+        [1.0, 1.0, 1.0], // white
+        [1.0, 0.0, 0.0], // red - 166.67
+        [1.0, 1.0, 1.0], // white
+        [0.0, 1.0, 0.0], // green - 250.00
+        [1.0, 1.0, 1.0], // white
+        [1.0, 0.0, 1.0], // magenta - 333.33
+        [1.0, 1.0, 1.0], // white
+        [0.0, 1.0, 1.0], // cyan - 416.67
+        [1.0, 1.0, 1.0], // white
+        [1.0, 1.0, 0.0], // yellow - 500.00
+        [1.0, 1.0, 1.0], // white
+        [0.0, 1.0, 0.0], // green - 583.33
+        [1.0, 1.0, 1.0], // white
+        [0.0, 0.0, 1.0], // blue - 666.67
+        [1.0, 1.0, 1.0], // white
+        [1.0, 0.0, 1.0], // magenta - 750.00
+        [1.0, 1.0, 1.0], // white
+        [1.0, 1.0, 0.0], // yellow - 833.33
+        [1.0, 1.0, 1.0], // white
+        [1.0, 0.0, 0.0], // red - 916.67
+        [1.0, 1.0, 1.0], // white
+        [0.0, 1.0, 1.0], // cyan - 999
+    ];
+
+    const W_DIV: f32 = 41.666666667;
+
+    // complementary spectra separated by white (w000-w999)
+
+    let mut name = String::from("w000");
+    for a in 0..1000 {
+        let set1 = (a as f32 / W_DIV) as usize;
+        name = format!("w{:03}", a);
+        let f = 1.0 - (a as f32 - (set1 as f32 * W_DIV)) / W_DIV;
+        let r = f * spectrum_w[set1][0] + (1.0 - f) * spectrum_w[set1 + 1][0];
+        let g = f * spectrum_w[set1][1] + (1.0 - f) * spectrum_w[set1 + 1][1];
+        let b = f * spectrum_w[set1][2] + (1.0 - f) * spectrum_w[set1 + 1][2];
+        println!(
+            " Color {{ name: \"{}\", r: {:?}, g: {:?}, b: {:?} }},",
+            name, r, g, b
+        );
+    }
+
+    for a in 0..100 {
+        let name = format!("gray{:02}", a);
+        let value = a as f32 / 99.0;
+        println!(
+            " Color {{ name: \"{}\", r: {:?}, g: {:?}, b: {:?} }},",
+            name, value, value, value
+        );
+    }
+
+    let spectrum_o: [[f32; 3]; 29] = [
+        /* a rainbow with perceptive color balancing and extra blue/red at the ends */
+        [1.0, 0.0, 1.0], /* violet */
+        [0.8, 0.0, 1.0],
+        [0.5, 0.0, 1.0], /* blend */
+        [0.0, 0.0, 1.0], /* blue */
+        [0.0, 0.0, 1.0], /* blue */
+        [0.0, 0.2, 1.0],
+        [0.0, 0.5, 1.0], /* blend */
+        [0.0, 0.8, 1.0],
+        [0.0, 1.0, 1.0], /* cyan */
+        [0.0, 1.0, 0.8],
+        [0.0, 1.0, 0.5], /* blend */
+        [0.0, 1.0, 0.2],
+        [0.0, 1.0, 0.0], /* green */
+        [0.2, 1.0, 0.0],
+        [0.5, 1.0, 0.0], /* blend */
+        [0.8, 1.0, 0.0],
+        [1.0, 1.0, 0.0], /* yellow */
+        [1.0, 0.9, 0.0],
+        [1.0, 0.75, 0.0], /* blend */
+        [1.0, 0.6, 0.0],
+        [1.0, 0.5, 0.0], /* orange */
+        [1.0, 0.4, 0.0],
+        [1.0, 0.3, 0.0], /* blend */
+        [1.0, 0.2, 0.0],
+        [1.0, 0.0, 0.0], /* red */
+        [1.0, 0.0, 0.0], /* red */
+        [1.0, 0.0, 0.5], /* blend */
+        [1.0, 0.0, 0.8], /* violet */
+        [1.0, 0.0, 1.0], /* violet */
+    ];
+
+    const B_DIV: f32 = 35.7143;
+
+    for a in 0..1000 {
+        let set1 = (a as f32 / B_DIV) as usize;
+        let name = format!("o{:03}", a);
+        let f = 1.0 - (a as f32 - (set1 as f32 * B_DIV)) / B_DIV;
+        let r = f * spectrum_o[set1][0] + (1.0 - f) * spectrum_o[set1 + 1][0];
+        let g = f * spectrum_o[set1][1] + (1.0 - f) * spectrum_o[set1 + 1][1];
+        let b = f * spectrum_o[set1][2] + (1.0 - f) * spectrum_o[set1 + 1][2];
+        println!(
+            " Color {{ name: \"{}\", r: {:?}, g: {:?}, b: {:?} }},",
+            name, r, g, b
+        );
+    }
 }

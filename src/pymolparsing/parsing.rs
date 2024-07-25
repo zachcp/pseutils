@@ -46,6 +46,8 @@
 //! m_id = m_retain_ids ? m_iter.getAtomInfo()->id : (m_id + 1);
 //!  m_tmpids[m_iter.getAtm()] = m_id;
 use crate::molviewspec::nodes::{ComponentExpression, ComponentSelector};
+use crate::pymolparsing::colors::{Color, COLOR_SET};
+
 use itertools::Itertools;
 use pdbtbx::{self, Residue, PDB};
 use serde::{Deserialize, Deserializer, Serialize};
@@ -57,7 +59,15 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 /// This struct contains various properties of an atom, including its position,
 /// chemical properties, and visualization settings.
 ///
-/// # Fields
+/// ## Pymol Source
+///
+/// - [AtomInfo.h](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.h)
+///     - Lots of goodies in here including constants defined for Atom type; Atom Geometry; VDW Radius; Chirality.
+/// - [AtomInfo.cpp](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp)
+/// - [AtomInforAsPyList](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp#L792)
+/// - [VDW Radius of Elements](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp#L1752)
+///
+/// ## Fields
 ///
 /// * `resv` - Residue sequence number
 /// * `chain` - Chain identifier
@@ -128,15 +138,21 @@ pub struct AtomInfo {
     pub vis_rep: i32,
     pub color: i32,
     pub id: i32,
-    pub cartoon: i32,
+    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.h#L292C33-L292C77
+    pub cartoon: i32, //  /* 0 = default which is auto (use ssType) */
     pub flags: i64,
     pub is_bonded: i8,
     pub chem_flag: i32,
-    pub geom: i32,
-    pub valence: i32,
+    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp#L44
+    pub geom: i32, // cAtomInfo*
+    // "valence" should be renamed to "degree" (or "total_degree"). It's the
+    // number of explicit and implicit neighbors, independent of bond order.
+    // Should be equivalent to RDKit::Atom::getTotalDegree() and
+    // OBAtom::GetTotalDegree().
+    pub valence: i32, //
     pub is_masked: i8,
     pub is_protected: i8,
-    pub protons: i32,
+    pub protons: i32, // atomic number
     pub unique_id: i64,
     pub stereo: i8,
     pub discrete_state: i32,
@@ -144,6 +160,7 @@ pub struct AtomInfo {
     pub rank: i32,
     pub hb_donor: i8,
     pub hb_acceptor: i8,
+    // color and secondary structure
     pub atomic_color: i32,
     pub has_setting: i8,
     pub anisou_1: f32,
@@ -162,6 +179,19 @@ impl AtomInfo {
             0 => false,
             _ => false,
         }
+    }
+    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.h#L319
+    pub fn is_metal() {
+        unimplemented!()
+    }
+    pub fn is_visible() {
+        unimplemented!()
+    }
+    pub fn atomInfoBrackResidue() {
+        // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp#L1256C6-L1256C28
+        //inefficient but reliable way to find where residue atoms are located in an object
+        // for purpose of residue-based operations
+        unimplemented!()
     }
     pub fn to_pdbtbx_atom(&self) -> pdbtbx::Atom {
         let formal_charge = self.formal_charge as isize;
@@ -245,16 +275,90 @@ pub enum CustomValue {
     Boolean(bool),
 }
 
+// https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/PyMOLObject.h#L39
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
+#[repr(i32)]
+pub enum ObjectType {
+    CObjectMolecule = 1,
+    CObjectMap = 2,
+    CObjectMesh = 3,
+    CObjectMeasurement = 4,
+    CObjectCallback = 5,
+    CObjectCGO = 6,
+    CObjectSurface = 7,
+    CObjectGadget = 8,
+    CObjectCalculator = 9,
+    CObjectSlice = 10,
+    CObjectAlignment = 11,
+    CObjectGroup = 12,
+    CObjectVolume = 13,
+    CObjectCurve = 14,
+}
+
+/// Named colors.
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[repr(i32)]
+pub enum AutoColor {
+    Aquamarine = 5257,
+    Bluewhite = 5278,
+    Brown = 51,
+    Carbon = 26,
+    Cyan = 5,
+    Darksalmon = 5280,
+    Deepblue = 23,
+    Deepsalmon = 5258,
+    Deepteal = 5262,
+    Dirtyviolet = 5272,
+    Forest = 22,
+    Greencyan = 5275,
+    Grey50 = 104,
+    Grey70 = 124,
+    Hotpink = 12,
+    Hydrogen = 29,
+    Lightmagenta = 154,
+    Lightpink = 5274,
+    Lightteal = 5266,
+    Lime = 10,
+    Limegreen = 15,
+    Limon = 5276,
+    Marine = 17,
+    Olive = 18,
+    Orange = 13,
+    Paleyellow = 5256,
+    Raspberry = 5268,
+    Salmon = 9,
+    Sand = 5269,
+    Skyblue = 5277,
+    Slate = 11,
+    Smudge = 5270,
+    Splitpea = 5267,
+    Teal = 20,
+    Violet = 53,
+    Violetpurple = 5271,
+    Warmpink = 5279,
+    Wheat = 52,
+    Yellow = 6,
+    Yelloworange = 36,
+}
+
 /// PyObject
 ///
-/// General settings object
+/// General Object-Level settings object
+///
+/// - [PyMOLObject](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/PyMOLObject.h#L189)
 ///
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PyObject {
-    pub object_type: i32,
+    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/PyMOLObject.h#L39
+    pub object_type: ObjectType, // cObject_t
     pub name: String,
-    pub color: i32,
-    pub vis_rep: i32,
+    pub color: i32, // represents a pointer into an array of colors.
+    //
+    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/Rep.h
+    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/modules/pymol/constants.py#L155-L177
+    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/modules/pymol/viewing.py#L51C1-L53C71
+    pub vis_rep: i32, //
+
     pub extent_min: [f32; 3],
     pub extent_max: [f32; 3],
     pub extent_flag: i32,
@@ -262,11 +366,20 @@ pub struct PyObject {
     pub setting: Option<bool>, // this is a hack
     pub enabled: i32,
     pub render_context: i32,
-    pub ttt: Vec<f32>,
+    pub ttt: [f32; 16], //  float TTT[16]{}; /* translate, transform, translate matrix (to apply when rendering)
     pub n_frame: i32,
-    pub view_elem: Option<bool>, //hack
+    pub view_elem: Option<bool>, // /* for animating objects via the TTT */
 }
-
+impl PyObject {
+    /// get_color - note this currently works if there are
+    /// no custom colors.
+    pub fn get_color(self) -> Color {
+        COLOR_SET
+            .get(self.color as usize)
+            .expect("Index within bounds")
+            .clone()
+    }
+}
 /// PyObjectMolecule: Represents a molecule in PyMOL.
 ///
 /// ## Link
