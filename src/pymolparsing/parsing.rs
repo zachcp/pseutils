@@ -134,7 +134,8 @@ pub struct AtomInfo {
     pub vdw: f64,
     pub partial_charge: f64,
     pub formal_charge: i32,
-    pub hetatm: i8,
+    #[serde(deserialize_with = "int_to_bool")]
+    pub hetatm: bool,
     pub vis_rep: i32,
     pub color: i32,
     pub id: i32,
@@ -173,13 +174,13 @@ pub struct AtomInfo {
 }
 
 impl AtomInfo {
-    pub fn is_hetero(&self) -> bool {
-        match self.hetatm {
-            1 => true,
-            0 => false,
-            _ => false,
-        }
-    }
+    // pub fn is_hetero(&self) -> bool {
+    //     match self.hetatm {
+    //         1 => true,
+    //         0 => false,
+    //         _ => false,
+    //     }
+    // }
     // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.h#L319
     pub fn is_metal() {
         unimplemented!()
@@ -196,16 +197,16 @@ impl AtomInfo {
     pub fn to_pdbtbx_atom(&self) -> pdbtbx::Atom {
         let formal_charge = self.formal_charge as isize;
         let atom = pdbtbx::Atom::new(
-            self.is_hetero(), // hetero
-            0,                // serial_number
-            &self.name,       // atom_name
-            0.0,              // x Todo
-            0.0,              // y Todo
-            0.0,              // z Todo
-            0.0,              // occupancy? Todo
-            self.b,           // b-factor
-            &self.elem,       // element
-            formal_charge,    // charge: todo: is this the right charge?
+            self.hetatm,   // hetero
+            0,             // serial_number
+            &self.name,    // atom_name
+            0.0,           // x Todo
+            0.0,           // y Todo
+            0.0,           // z Todo
+            0.0,           // occupancy? Todo
+            self.b,        // b-factor
+            &self.elem,    // element
+            formal_charge, // charge: todo: is this the right charge?
         );
         atom.unwrap()
     }
@@ -459,7 +460,7 @@ impl PyObjectMolecule {
         let serial_number = atom_info.id as usize;
 
         let atom = pdbtbx::Atom::new(
-            atom_info.is_hetero(),  // hetero
+            atom_info.hetatm,       // hetero
             serial_number,          // serial_number: Note: I am not sure this is correct just yet.
             atom_info.name.clone(), // atom_name
             x_coord.into(),         // x
@@ -1625,6 +1626,18 @@ pub struct Settings {
     pub setting: SettingsEnum,
     pub label: i32,
     pub value: CustomValue,
+}
+
+fn int_to_bool<'de, D>(deserializer: D) -> Result<bool, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    use serde::de::Error;
+    match u8::deserialize(deserializer)? {
+        0 => Ok(false),
+        1 => Ok(true),
+        other => Err(Error::custom(format!("Invalid boolean value: {}", other))),
+    }
 }
 
 // Todo:
