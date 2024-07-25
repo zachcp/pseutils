@@ -9,7 +9,7 @@
 //! # Examples
 //!
 //! ```
-//! use crate::RepBitmask;
+//! use pseutils::pymolparsing::representation::RepBitmask;
 //!
 //! let mut reps = RepBitmask::new();
 //! reps.insert(RepBitmask::CYL | RepBitmask::SPHERE);
@@ -47,7 +47,7 @@ pub enum RepType {
 }
 
 bitflags! {
-    struct RepBitmask: u32 {
+    pub struct RepBitmask: u32 {
         const CYL             = 1 << 0;
         const SPHERE          = 1 << 1;
         const SURFACE         = 1 << 2;
