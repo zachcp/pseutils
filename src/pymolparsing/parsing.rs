@@ -352,9 +352,13 @@ pub struct PyObject {
     // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/PyMOLObject.h#L39
     pub object_type: ObjectType, // cObject_t
     pub name: String,
-    //
     pub color: i32, // represents a pointer into an array of colors.
-    pub vis_rep: i32,
+    //
+    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/Rep.h
+    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/modules/pymol/constants.py#L155-L177
+    // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/modules/pymol/viewing.py#L51C1-L53C71
+    pub vis_rep: i32, //
+
     pub extent_min: [f32; 3],
     pub extent_max: [f32; 3],
     pub extent_flag: i32,
