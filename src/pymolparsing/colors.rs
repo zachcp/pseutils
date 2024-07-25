@@ -1,3 +1,27 @@
+/// Represents a color with red, green, and blue components.
+///
+/// Each component is represented as a 32-bit floating point number
+/// between 0.0 and 1.0 inclusive.
+///
+/// # Fields
+///
+/// * `name` - The name of the color as a static string slice.
+/// * `r` - The red component of the color (0.0 to 1.0).
+/// * `g` - The green component of the color (0.0 to 1.0).
+/// * `b` - The blue component of the color (0.0 to 1.0).
+///
+/// # Examples
+///
+/// ```
+/// use pseutils::pymolparsing::colors::COLOR_SET;
+///
+/// // white is the first color
+/// // pymol uses indexes which is why this is stored as a vector.
+/// // could eventually be refactored to enums + methods.
+///
+/// let white = COLOR_SET.get(0).unwrap();
+///
+/// ```
 use once_cell::sync::Lazy;
 
 #[derive(Clone)]
