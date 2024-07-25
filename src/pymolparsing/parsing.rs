@@ -47,6 +47,7 @@
 //!  m_tmpids[m_iter.getAtm()] = m_id;
 use crate::molviewspec::nodes::{ComponentExpression, ComponentSelector};
 use crate::pymolparsing::colors::{Color, COLOR_SET};
+use crate::pymolparsing::representation::RepType;
 
 use itertools::Itertools;
 use pdbtbx::{self, Residue, PDB};
@@ -295,6 +296,9 @@ pub enum ObjectType {
 }
 
 /// Named colors.
+///
+/// See also [`crate::pymolparsing::colors::COLOR_SET`].
+///
 #[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
 #[repr(i32)]
 pub enum AutoColor {
