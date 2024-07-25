@@ -66,7 +66,6 @@ pub struct PSEData {
     unique_settings: Vec<i32>,
     selector_secrets: Vec<i32>,
     editor: Vec<i32>,
-    // pub view: [f32; 25],
     pub view: SceneView,
     view_dict: HashMap<String, String>,
     #[serde(with = "serde_bytes")]
