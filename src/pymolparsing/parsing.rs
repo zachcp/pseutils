@@ -47,7 +47,7 @@
 //!  m_tmpids[m_iter.getAtm()] = m_id;
 use crate::molviewspec::nodes::{ComponentExpression, ComponentSelector};
 use crate::pymolparsing::colors::{Color, COLOR_SET};
-use crate::pymolparsing::representation::RepType;
+use crate::pymolparsing::representation::{RepBitmask, RepType};
 
 use itertools::Itertools;
 use pdbtbx::{self, Residue, PDB};
@@ -137,7 +137,8 @@ pub struct AtomInfo {
     pub formal_charge: i32,
     #[serde(deserialize_with = "int_to_bool")]
     pub is_hetatm: bool,
-    pub vis_rep: i32,
+
+    pub vis_rep: RepBitmask,
     pub color: i32,
     pub id: i32,
     // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.h#L292C33-L292C77
@@ -187,7 +188,7 @@ impl AtomInfo {
     pub fn is_visible() {
         unimplemented!()
     }
-    pub fn atomInfoBrackResidue() {
+    pub fn atom_info_brack_residue() {
         // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp#L1256C6-L1256C28
         //inefficient but reliable way to find where residue atoms are located in an object
         // for purpose of residue-based operations
@@ -612,30 +613,14 @@ impl<'de> Deserialize<'de> for PymolSessionObjectData {
         D: Deserializer<'de>,
     {
         let value = Value::deserialize(deserializer)?;
-
-        // Debug print
-        // println!("Deserialized value: {:?}", value);
-
-        // Try to deserialize as PyObjectMolecule
         match from_value::<PyObjectMolecule>(value.clone()) {
             Ok(molecule) => return Ok(PymolSessionObjectData::PyObjectMolecule(molecule)),
             Err(_) => {} // If it fails, we'll try the next option
         }
-
-        // println!(
-        //     "Did not serialize as a molecule. Not trying as a session: {:?}",
-        //     value
-        // );
-
-        // If that fails, try to deserialize as SessionSelector
-        match from_value::<SessionSelectorList>(value.clone()) {
-            Ok(selection) => return Ok(PymolSessionObjectData::SessionSelectorList(selection)),
-            Err(_) => {} // If it fails, we'll return an error
+        if let Ok(selection) = from_value::<SessionSelectorList>(value.clone()) {
+            return Ok(PymolSessionObjectData::SessionSelectorList(selection));
         }
-
-        // If both fail, return a generic error
-        // Err(String::from("We are unable to serialize this Value"));
-        Err(panic!("Problem opening the file"))
+        Err(serde::de::Error::custom("Failed to deserialize value"))
     }
 }
 

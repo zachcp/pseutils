@@ -1,4 +1,3 @@
-use pseutils::pymolparsing::colors::Color;
 use pseutils::pymolparsing::parsing::{CustomValue, SettingsEnum};
 use pseutils::PSEData;
 const TEST_OUTPUT_DIR: &str = "./test_temporary";
@@ -158,11 +157,10 @@ fn test_colors() {
         [0.0, 1.0, 1.0], // cyan - 999
     ];
 
-    let mut name = String::from("c000");
     for a in 0..1000 {
         let set1 = (a as f32 / A_DIV) as usize;
         // sprintf(color->Name,"c%03d",a);
-        name = format!("c{:03}", a);
+        let name = format!("c{:03}", a);
         let f = 1.0 - (a as f32 - (set1 as f32 * A_DIV)) / A_DIV;
         let r = f * spectrum_c[set1][0] + (1.0 - f) * spectrum_c[set1 + 1][0];
         let g = f * spectrum_c[set1][1] + (1.0 - f) * spectrum_c[set1 + 1][1];
@@ -205,10 +203,9 @@ fn test_colors() {
 
     // complementary spectra separated by white (w000-w999)
 
-    let mut name = String::from("w000");
     for a in 0..1000 {
         let set1 = (a as f32 / W_DIV) as usize;
-        name = format!("w{:03}", a);
+        let name = format!("w{:03}", a);
         let f = 1.0 - (a as f32 - (set1 as f32 * W_DIV)) / W_DIV;
         let r = f * spectrum_w[set1][0] + (1.0 - f) * spectrum_w[set1 + 1][0];
         let g = f * spectrum_w[set1][1] + (1.0 - f) * spectrum_w[set1 + 1][1];
