@@ -67,7 +67,7 @@ fn test_pdb_00() {
     let vis_rep = &pyobj.vis_rep;
     assert!(vis_rep.contains(RepBitmask::CYL));
     // check the name
-    assert_eq!(&pyobj.name, "1bdb");
+    assert_eq!(&pyobj.name, "1pdb");
 
     // Move on to PDB, baby!
     let pdb = mols[0].to_pdb();
