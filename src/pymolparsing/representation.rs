@@ -47,6 +47,7 @@ pub enum RepType {
 }
 
 bitflags! {
+     #[derive(Debug)]
     pub struct RepBitmask: u32 {
         const CYL             = 1 << 0;
         const SPHERE          = 1 << 1;

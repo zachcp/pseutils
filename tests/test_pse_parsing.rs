@@ -1,5 +1,6 @@
-use pseutils::pymolparsing::colors::Color;
+use pseutils::pymolparsing::colors::{Color, COLOR_SET};
 use pseutils::pymolparsing::parsing::{CustomValue, SettingsEnum};
+use pseutils::pymolparsing::representation::RepBitmask;
 use pseutils::PSEData;
 const TEST_OUTPUT_DIR: &str = "./test_temporary";
 
@@ -30,32 +31,43 @@ fn test_load_pse_data_molecule_selection() {
 #[test]
 fn test_pdb_00() {
     let psedata: PSEData = PSEData::load("tests/data/example.pse").unwrap();
-    let names = psedata.get_session_names();
-    print!("{:?}", names);
     // this has a Molecule and a selection
+    let names = psedata.get_session_names();
     assert_eq!(names.len(), 2);
 
     let mols = psedata.get_molecule_data();
     assert_eq!(mols.len(), 1);
+
     let atom01 = mols[0].get_atom(0);
     assert!(atom01.x() == 50.87300109863281);
     assert!(atom01.y() == 32.97800064086914);
     assert!(atom01.z() == 2.38700008392334);
 
     let chains = mols[0].get_chains();
-    println!("Chains: {:?}", chains);
     let residues = mols[0].get_residues_by_chain(chains[0].clone());
-    println!("Residues: {:?}", residues);
-
     let residue = mols[0].create_residue(chains[0].clone(), residues[0]);
-    println!("Residue: {:?}", residue);
-
     let chain = mols[0].create_chain(chains[0].clone());
-    println!("Chain: {:?}", chain);
 
     // Check symmetry code
     let (unit, sym) = mols[0].get_unit_cell_symmetry();
-    println!("{:?},{:?}", unit, sym);
+
+    // Check the pymol object fields
+    let pyobj = &mols[0].object;
+    let color = &pyobj.get_color();
+    assert_eq!(
+        *color,
+        Color {
+            name: "carbon",
+            r: 0.2,
+            g: 1.0,
+            b: 0.2
+        }
+    );
+
+    let vis_rep = &pyobj.vis_rep;
+    assert!(vis_rep.contains(RepBitmask::CYL));
+    // check the name
+    assert_eq!(&pyobj.name, "1pdb");
 
     // Move on to PDB, baby!
     let pdb = mols[0].to_pdb();
@@ -158,11 +170,10 @@ fn test_colors() {
         [0.0, 1.0, 1.0], // cyan - 999
     ];
 
-    let mut name = String::from("c000");
     for a in 0..1000 {
         let set1 = (a as f32 / A_DIV) as usize;
         // sprintf(color->Name,"c%03d",a);
-        name = format!("c{:03}", a);
+        let name = format!("c{:03}", a);
         let f = 1.0 - (a as f32 - (set1 as f32 * A_DIV)) / A_DIV;
         let r = f * spectrum_c[set1][0] + (1.0 - f) * spectrum_c[set1 + 1][0];
         let g = f * spectrum_c[set1][1] + (1.0 - f) * spectrum_c[set1 + 1][1];
@@ -205,10 +216,9 @@ fn test_colors() {
 
     // complementary spectra separated by white (w000-w999)
 
-    let mut name = String::from("w000");
     for a in 0..1000 {
         let set1 = (a as f32 / W_DIV) as usize;
-        name = format!("w{:03}", a);
+        let name = format!("w{:03}", a);
         let f = 1.0 - (a as f32 - (set1 as f32 * W_DIV)) / W_DIV;
         let r = f * spectrum_w[set1][0] + (1.0 - f) * spectrum_w[set1 + 1][0];
         let g = f * spectrum_w[set1][1] + (1.0 - f) * spectrum_w[set1 + 1][1];

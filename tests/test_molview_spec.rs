@@ -206,7 +206,7 @@ fn test_moviewspec_01_common_actions_selectors() {
     };
     // State is the base model
     let mut state = State::new();
-    let mut structure = state
+    let structure = state
         .download("https://files.wwpdb.org/download/1cbs.cif")
         .expect("Create a Download node with a URL")
         .parse(structfile)

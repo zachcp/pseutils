@@ -143,7 +143,7 @@ impl Node {
         println!("In the parse node!");
         println!("{:?}", self.kind);
         if self.kind == KindT::Download {
-            let mut parse_node = Node::new(KindT::Parse, Some(NodeParams::ParseParams(params)));
+            let parse_node = Node::new(KindT::Parse, Some(NodeParams::ParseParams(params)));
             self.children.get_or_insert_with(Vec::new).push(parse_node);
             self.children.as_mut().unwrap().last_mut()
         } else {

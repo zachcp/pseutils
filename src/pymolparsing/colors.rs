@@ -24,12 +24,63 @@
 /// ```
 use once_cell::sync::Lazy;
 
-#[derive(Clone)]
+use serde_repr::{Deserialize_repr, Serialize_repr};
+
+/// Named colors.
+///
+/// See also [`crate::pymolparsing::colors::COLOR_SET`].
+///
+#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
+#[repr(i32)]
+pub enum AutoColor {
+    Aquamarine = 5257,
+    Bluewhite = 5278,
+    Brown = 51,
+    Carbon = 26,
+    Cyan = 5,
+    Darksalmon = 5280,
+    Deepblue = 23,
+    Deepsalmon = 5258,
+    Deepteal = 5262,
+    Dirtyviolet = 5272,
+    Forest = 22,
+    Greencyan = 5275,
+    Grey50 = 104,
+    Grey70 = 124,
+    Hotpink = 12,
+    Hydrogen = 29,
+    Lightmagenta = 154,
+    Lightpink = 5274,
+    Lightteal = 5266,
+    Lime = 10,
+    Limegreen = 15,
+    Limon = 5276,
+    Marine = 17,
+    Olive = 18,
+    Orange = 13,
+    Paleyellow = 5256,
+    Raspberry = 5268,
+    Salmon = 9,
+    Sand = 5269,
+    Skyblue = 5277,
+    Slate = 11,
+    Smudge = 5270,
+    Splitpea = 5267,
+    Teal = 20,
+    Violet = 53,
+    Violetpurple = 5271,
+    Warmpink = 5279,
+    Wheat = 52,
+    Yellow = 6,
+    Yelloworange = 36,
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub struct Color {
-    name: &'static str, // Changed from String to &'static str,
-    r: f32,
-    g: f32,
-    b: f32,
+    pub name: &'static str, // Changed from String to &'static str,
+    pub r: f32,
+    pub g: f32,
+    pub b: f32,
 }
 
 /// Colors from Pymol
