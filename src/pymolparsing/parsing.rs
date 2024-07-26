@@ -126,8 +126,10 @@ pub struct AtomInfo {
     pub elem: String,
     pub text_type: String,
     pub label: String,
+    // todo: make enum
     pub ss_type: String,
-    pub is_hydrogen: i8,
+    #[serde(deserialize_with = "int_to_bool")]
+    pub is_hydrogen: bool,
     pub custom_type: i32,
     pub priority: i32,
     pub b: f64,
@@ -137,14 +139,16 @@ pub struct AtomInfo {
     pub formal_charge: i32,
     #[serde(deserialize_with = "int_to_bool")]
     pub is_hetatm: bool,
-
     pub vis_rep: RepBitmask,
+    // color is an index into the color vec
     pub color: i32,
     pub id: i32,
     // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.h#L292C33-L292C77
     pub cartoon: i32, //  /* 0 = default which is auto (use ssType) */
     pub flags: i64,
-    pub is_bonded: i8,
+    #[serde(deserialize_with = "int_to_bool")]
+    pub is_bonded: bool,
+    // not sure what this is
     pub chem_flag: i32,
     // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp#L44
     pub geom: i32, // cAtomInfo*
@@ -229,10 +233,11 @@ impl AtomInfo {
 pub struct Bond {
     pub index_1: i32,
     pub index_2: i32,
+    // todo: make enum
     pub order: i32,
     pub id: i32,
     pub stereo: i32,
-    pub unique_id: i32,
+    pub unique_id: i8,
     pub has_setting: i32,
     // todo handle arity 7 or arity 8 with specific symmetry info
     // Symmetry operation of the second atom.
@@ -296,55 +301,6 @@ pub enum ObjectType {
     CObjectCurve = 14,
 }
 
-/// Named colors.
-///
-/// See also [`crate::pymolparsing::colors::COLOR_SET`].
-///
-#[derive(Debug, Serialize_repr, Deserialize_repr, PartialEq, Clone)]
-#[repr(i32)]
-pub enum AutoColor {
-    Aquamarine = 5257,
-    Bluewhite = 5278,
-    Brown = 51,
-    Carbon = 26,
-    Cyan = 5,
-    Darksalmon = 5280,
-    Deepblue = 23,
-    Deepsalmon = 5258,
-    Deepteal = 5262,
-    Dirtyviolet = 5272,
-    Forest = 22,
-    Greencyan = 5275,
-    Grey50 = 104,
-    Grey70 = 124,
-    Hotpink = 12,
-    Hydrogen = 29,
-    Lightmagenta = 154,
-    Lightpink = 5274,
-    Lightteal = 5266,
-    Lime = 10,
-    Limegreen = 15,
-    Limon = 5276,
-    Marine = 17,
-    Olive = 18,
-    Orange = 13,
-    Paleyellow = 5256,
-    Raspberry = 5268,
-    Salmon = 9,
-    Sand = 5269,
-    Skyblue = 5277,
-    Slate = 11,
-    Smudge = 5270,
-    Splitpea = 5267,
-    Teal = 20,
-    Violet = 53,
-    Violetpurple = 5271,
-    Warmpink = 5279,
-    Wheat = 52,
-    Yellow = 6,
-    Yelloworange = 36,
-}
-
 /// PyObject
 ///
 /// General Object-Level settings object
@@ -357,12 +313,10 @@ pub struct PyObject {
     pub object_type: ObjectType, // cObject_t
     pub name: String,
     pub color: i32, // represents a pointer into an array of colors.
-    //
     // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/Rep.h
     // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/modules/pymol/constants.py#L155-L177
     // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/modules/pymol/viewing.py#L51C1-L53C71
-    pub vis_rep: i32, //
-
+    pub vis_rep: RepBitmask, //
     pub extent_min: [f32; 3],
     pub extent_max: [f32; 3],
     pub extent_flag: i32,
@@ -377,7 +331,7 @@ pub struct PyObject {
 impl PyObject {
     /// get_color - note this currently works if there are
     /// no custom colors.
-    pub fn get_color(self) -> Color {
+    pub fn get_color(&self) -> Color {
         COLOR_SET
             .get(self.color as usize)
             .expect("Index within bounds")
