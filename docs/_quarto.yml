@@ -1,0 +1,21 @@
+project:
+  type: website
+  resources:
+    - "examples/**"
+    - "doc/**"
+
+website:
+  title: "pseutils"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - about.qmd
+      - href: doc/pseutils/index.html
+        text: RustDoc
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
