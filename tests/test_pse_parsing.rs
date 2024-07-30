@@ -46,7 +46,12 @@ fn test_pdb_00() {
     let chains = mols[0].get_chains();
     let residues = mols[0].get_residues_by_chain(chains[0].clone());
     let residue = mols[0].create_residue(chains[0].clone(), residues[0]);
+    assert!(residue.name() == Some("VAL"));
+
     let chain = mols[0].create_chain(chains[0].clone());
+
+    let view = &psedata.view;
+    println!("{:?}", view);
 
     // Check symmetry code
     let (unit, sym) = mols[0].get_unit_cell_symmetry();

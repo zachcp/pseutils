@@ -478,8 +478,10 @@ impl PyObjectMolecule {
             .collect();
 
         let resv = residue_number as isize;
-        let res_name = atoms[0].name.clone();
+        let res_name = atoms[0].resn.clone();
         let mut residue = pdbtbx::Residue::new(resv, None, None).expect("Couldn't create residue");
+
+        println!("ResidueNames: {}", res_name);
         let mut conformer =
             pdbtbx::Conformer::new(res_name, None, None).expect("Couldn't create Conformer");
 

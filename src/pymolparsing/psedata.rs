@@ -188,8 +188,9 @@ impl PSEData {
 
         // Add Global Data
         let pos = self.view.position;
+        let origin = self.view.origin;
         let camparam = CameraParams {
-            target: (0.0, 0.0, 0.0), // <--- Todo
+            target: (origin[0], origin[1], origin[2]), // <--- Todo
             position: (pos[0], pos[1], pos[2]),
             ..Default::default() // <--- Todo
         };

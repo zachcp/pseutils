@@ -17,6 +17,8 @@ docs: convert
     # quarto
     quarto render docs
 
+serve: docs
+    quarto preview docs
 
 clean:
     cargo clean --doc
