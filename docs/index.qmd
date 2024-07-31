@@ -3,11 +3,26 @@ title: "pseutils"
 ---
 
 
-PSEutils: Conversion of python session files to Molviewspec.
+
+:::: {.columns}
+
+::: {.column width="20%"}
+![](pseutils.png)
+:::
+
+::: {.column width="75%" style="padding-left: 20px;"}
+## PSEutils
+
+Conversion of python session files to Molviewspec.
+:::
+
+::::
 
 
 
 ## Convert PSE
+
+
 
 ```sh
 
