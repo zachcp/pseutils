@@ -1,11 +1,7 @@
-# pymol_session_utils
+# pseutils
 
-**Note: Work In Progress. Feature Incomplete**
+Convert `.pse` [mol-view-spec](https://github.com/molstar/mol-view-spec)/
 
-
-## Goal
-
-Binary serializaton from `.pse` to `X` using RUST. Where I want `X` to be [mol-view-spec](https://github.com/molstar/mol-view-spec)
 
 ## Testing
 
