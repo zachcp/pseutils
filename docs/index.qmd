@@ -4,7 +4,13 @@ title: "pseutils"
 ---
 
 
-PSE utils: Conversion of python sessionfiles to Molveiwspec.
+PSE utils: Conversion of python sessionfiles to Molviewspec.
 
+
+## Example PSE
+
+This is a simple example PSE that has a protein object and a selection object.
+
+![](./examples/images/example_pse.png)
 
 {{< mol-json ./examples/example/state.mvsj >}}

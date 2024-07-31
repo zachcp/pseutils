@@ -20,7 +20,7 @@
 use bitflags::bitflags;
 use serde::{Deserialize, Serialize};
 
-// First, define an enum for all representation types
+/// First, define an enum for all representation types
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RepType {
     Cyl,

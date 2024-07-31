@@ -47,7 +47,7 @@
 //!  m_tmpids[m_iter.getAtm()] = m_id;
 use crate::molviewspec::nodes::{ComponentExpression, ComponentSelector};
 use crate::pymolparsing::colors::{Color, COLOR_SET};
-use crate::pymolparsing::representation::{RepBitmask, RepType};
+use crate::pymolparsing::representation::RepBitmask;
 
 use itertools::Itertools;
 use pdbtbx::{self, Residue, PDB};
@@ -478,8 +478,10 @@ impl PyObjectMolecule {
             .collect();
 
         let resv = residue_number as isize;
-        let res_name = atoms[0].name.clone();
+        let res_name = atoms[0].resn.clone();
         let mut residue = pdbtbx::Residue::new(resv, None, None).expect("Couldn't create residue");
+
+        println!("ResidueNames: {}", res_name);
         let mut conformer =
             pdbtbx::Conformer::new(res_name, None, None).expect("Couldn't create Conformer");
 
@@ -628,7 +630,6 @@ impl SceneView {
             orthoscopic_flag: view[24],
         }
     }
-
     pub fn to_array(&self) -> [f64; 25] {
         let mut array = [0.0; 25];
         for i in 0..4 {
@@ -643,6 +644,43 @@ impl SceneView {
         array[24] = self.orthoscopic_flag;
         array
     }
+    pub fn get_location(&self) -> [f64; 9] {
+        [
+            self.rotation_matrix[0][0],
+            self.rotation_matrix[0][1],
+            self.rotation_matrix[0][2],
+            self.rotation_matrix[1][0],
+            self.rotation_matrix[1][1],
+            self.rotation_matrix[1][2],
+            self.rotation_matrix[2][0],
+            self.rotation_matrix[2][1],
+            self.rotation_matrix[2][2],
+        ]
+    }
+    // pub fn get_translated_position(&self) -> [f64; 3] {
+    //     // this is not right
+    //     // use the 4x4 translation matrix and the position vector
+    //     // to get a translated positions
+    //     let mut translated = [0.0; 3];
+    //     for i in 0..3 {
+    //         translated[i] = self.rotation_matrix[i][0] * self.position[0]
+    //             + self.rotation_matrix[i][1] * self.position[1]
+    //             + self.rotation_matrix[i][2] * self.position[2]
+    //             + self.rotation_matrix[i][3];
+    //     }
+    //     translated
+    // }
+    // pub fn get_translated_origin(&self) -> [f64; 3] {
+    //     // this is not right
+    //     let mut translated = [0.0; 3];
+    //     for i in 0..3 {
+    //         translated[i] = self.rotation_matrix[i][0] * self.origin[0]
+    //             + self.rotation_matrix[i][1] * self.origin[1]
+    //             + self.rotation_matrix[i][2] * self.origin[2]
+    //             + self.rotation_matrix[i][3];
+    //     }
+    //     translated
+    // }
 }
 impl<'de> Deserialize<'de> for SceneView {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>

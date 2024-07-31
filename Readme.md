@@ -10,6 +10,9 @@ Binary serializaton from `.pse` to `X` using RUST. Where I want `X` to be [mol-v
 ## Testing
 
 ```sh
+# build and show docs
+just serve
+
 cargo test
 
 # to get all the print statements that are sprinkled around.
