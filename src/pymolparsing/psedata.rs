@@ -6,7 +6,9 @@
 //! other PSE data types which include the folloing:
 //!
 
-use crate::molviewspec::nodes::{self as mvsnodes, CameraParams, ColorNamesT, State};
+use crate::molviewspec::nodes::{
+    self as mvsnodes, CameraParams, ColorNamesT, State, TransformParams,
+};
 use crate::pymolparsing::parsing::{
     PyObjectMolecule, PymolSessionObjectData, SceneView, SessionName, SessionSelectorList,
     Settings, SettingsEnum,
@@ -154,6 +156,14 @@ impl PSEData {
             .collect()
     }
 
+    pub fn get_location_as_transform(&self) -> mvsnodes::TransformParams {
+        let location = self.view.get_location();
+        mvsnodes::TransformParams {
+            rotation: Some(location.to_vec()),
+            ..Default::default()
+        }
+    }
+
     pub fn create_pdb(&self) -> PDB {
         // todo: extend this to more than one molecuelo and/or to modify the global scene
         let moldata = &self.get_molecule_data();
@@ -187,11 +197,11 @@ impl PSEData {
         let mut state = State::new();
 
         // Add Global Data
-        let pos = self.view.position;
-        let origin = self.view.origin;
+        let [p1, p2, p3] = self.view.position;
+        let [o1, o2, o3] = self.view.origin;
         let camparam = CameraParams {
-            target: (origin[0], origin[1], origin[2]), // <--- Todo
-            position: (pos[0], pos[1], pos[2]),
+            target: (o1, o2, o3), // <--- Todo
+            position: (p1, p2, p3),
             ..Default::default() // <--- Todo
         };
         state.camera(camparam);
@@ -218,6 +228,9 @@ impl PSEData {
                 .component(mvsnodes::ComponentSelector::default())
                 .expect("defined a valid component")
                 .representation(mvsnodes::RepresentationTypeT::Cartoon);
+
+            // let transform = self.get_location_as_transform();
+            // structure.transform(transform);
 
             // selections return MVD ComponentExpression
             let selection_data = self.get_selection_data()[0];

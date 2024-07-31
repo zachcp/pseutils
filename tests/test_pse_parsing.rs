@@ -48,6 +48,14 @@ fn test_pdb_00() {
     let residue = mols[0].create_residue(chains[0].clone(), residues[0]);
     assert!(residue.name() == Some("VAL"));
 
+    // Original
+    // ATOM      1  N   VAL A   1      50.873  32.978   2.387  1.00 27.72      A    N
+    // ATOM  1     N    VAL A1         50.873  32.978   2.387  0.00 27.72          N
+
+    // Original
+    // MASTER      365    0    0    5   18    0    0    6 1519    1    0   15
+    // MASTER    0    0    0    0    0    0    0    6    1519 1    0    0
+
     let chain = mols[0].create_chain(chains[0].clone());
 
     let view = &psedata.view;

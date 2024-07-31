@@ -249,8 +249,17 @@ impl Node {
     pub fn tooltip_from_source() {
         unimplemented!()
     }
-    pub fn transform() {
-        unimplemented!()
+    pub fn transform(&mut self, params: TransformParams) -> Option<&mut Node> {
+        if self.kind == KindT::Structure {
+            let transform_node =
+                Node::new(KindT::Transform, Some(NodeParams::TransformParams(params)));
+            self.children
+                .get_or_insert_with(Vec::new)
+                .push(transform_node);
+            self.children.as_mut().unwrap().last_mut()
+        } else {
+            None
+        }
     }
     pub fn _is_rotation_matrix() {
         unimplemented!()
@@ -843,17 +852,40 @@ pub struct TooltipFromSourceParams {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct FocusInlineParams {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub direction: Option<(f32, f32, f32)>,
+    pub direction: Option<(f64, f64, f64)>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub up: Option<(f32, f32, f32)>,
+    pub up: Option<(f64, f64, f64)>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct TransformParams {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rotation: Option<Vec<f64>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub translation: Option<(f64, f64, f64)>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct TransformParams {
+pub struct SphereParams {
+    pub position: (f64, f64, f64),
+    pub radius: f64,
+    pub color: ColorT,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub rotation: Option<Vec<f32>>,
+    pub label: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub translation: Option<(f32, f32, f32)>,
+    pub tooltip: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct LineParams {
+    pub position1: (f64, f64, f64),
+    pub position2: (f64, f64, f64),
+    pub radius: f64,
+    pub color: ColorT,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tooltip: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
@@ -867,29 +899,6 @@ pub struct CameraParams {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CanvasParams {
     pub background_color: ColorT,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct SphereParams {
-    pub position: (f32, f32, f32),
-    pub radius: f32,
-    pub color: ColorT,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub label: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub tooltip: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct LineParams {
-    pub position1: (f32, f32, f32),
-    pub position2: (f32, f32, f32),
-    pub radius: f32,
-    pub color: ColorT,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub label: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub tooltip: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Validate, Clone)]
