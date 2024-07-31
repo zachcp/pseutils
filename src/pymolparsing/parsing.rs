@@ -630,7 +630,20 @@ impl SceneView {
             orthoscopic_flag: view[24],
         }
     }
-
+    pub fn to_array(&self) -> [f64; 25] {
+        let mut array = [0.0; 25];
+        for i in 0..4 {
+            for j in 0..4 {
+                array[i * 4 + j] = self.rotation_matrix[i][j];
+            }
+        }
+        array[16..19].copy_from_slice(&self.position);
+        array[19..22].copy_from_slice(&self.origin);
+        array[22] = self.front_plane;
+        array[23] = self.rear_plane;
+        array[24] = self.orthoscopic_flag;
+        array
+    }
     pub fn get_location(&self) -> [f64; 9] {
         [
             self.rotation_matrix[0][0],
