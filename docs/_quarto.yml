@@ -10,9 +10,14 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - about.qmd
+      - href: examples.qmd
+        text: Examples
       - href: doc/pseutils/index.html
         text: RustDoc
+    right:
+      - icon: github
+        href: https://github.com/zachcp/pseutils
+        aria-label: GitHub
 
 format:
   html:
