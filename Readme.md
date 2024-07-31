@@ -1,22 +1,8 @@
 # pseutils
 
-
-:::: {.columns}
-
-::: {.column width="20%"}
-![](docs/pseutils.png)
-:::
-
-::: {.column width="75%" style="padding-left: 20px;"}
-## PSEutils
-
 Convert pymol `.pse` files to [mol-view-spec](https://github.com/molstar/mol-view-spec)/
 
-
-:::
-
-::::
-
+![](docs/pseutils.png){width="20%"}
 
 
 ## Testing
