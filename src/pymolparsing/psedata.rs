@@ -7,7 +7,7 @@
 //!
 
 use crate::molviewspec::nodes::{
-    self as mvsnodes, CameraParams, ColorNamesT, State, TransformParams,
+    self as mvsnodes, CameraParams, ColorNamesT, FocusInlineParams, State, TransformParams,
 };
 use crate::pymolparsing::parsing::{
     PyObjectMolecule, PymolSessionObjectData, SceneView, SessionName, SessionSelectorList,
@@ -196,15 +196,23 @@ impl PSEData {
         // write state for loading the PDB files
         let mut state = State::new();
 
-        // Add Global Data
-        let [p1, p2, p3] = self.view.position;
-        let [o1, o2, o3] = self.view.origin;
-        let camparam = CameraParams {
-            target: (o1, o2, o3), // <--- Todo
-            position: (p1, p2, p3),
-            ..Default::default() // <--- Todo
-        };
-        state.camera(camparam);
+        // Add Global Camera Data
+        // let [o1, o2, o3] = self.view.origin;
+        // let [p1, p2, p3] = self.view.position;
+        //
+        // let [o1, o2, o3] = self.view.get_translated_origin();
+        // let [p1, p2, p3] = self.view.get_translated_position();
+        //
+        // let camparam = CameraParams {
+        //     // https://molstar.org/mol-view-spec-docs/camera-settings/
+        //     target: (o1, o2, o3), // <--- Todo
+        //     position: (p1, p2, p3),
+        //     ..Default::default() // <--- Todo
+        // };
+        // state.camera(camparam);
+
+        // It will be easier to set the focus based on all of the components in the PDB then trying to match pymol exactly
+        // let focus = FocusInlineParams {};
 
         // Add Molecule Data
         for molecule in self.get_molecule_data() {
@@ -229,8 +237,9 @@ impl PSEData {
                 .expect("defined a valid component")
                 .representation(mvsnodes::RepresentationTypeT::Cartoon);
 
-            // let transform = self.get_location_as_transform();
-            // structure.transform(transform);
+            // this works great
+            let transform = self.get_location_as_transform();
+            structure.transform(transform);
 
             // selections return MVD ComponentExpression
             let selection_data = self.get_selection_data()[0];

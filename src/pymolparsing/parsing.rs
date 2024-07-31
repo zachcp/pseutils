@@ -644,6 +644,55 @@ impl SceneView {
             self.rotation_matrix[2][2],
         ]
     }
+    pub fn get_translated_position(&self) -> [f64; 3] {
+        // this is not right
+        // use the 4x4 translation matrix and the position vector
+        // to get a translated positions
+        let mut translated = [0.0; 3];
+        for i in 0..3 {
+            translated[i] = self.rotation_matrix[i][0] * self.position[0]
+                + self.rotation_matrix[i][1] * self.position[1]
+                + self.rotation_matrix[i][2] * self.position[2]
+                + self.rotation_matrix[i][3];
+        }
+        translated
+    }
+    pub fn get_translated_origin(&self) -> [f64; 3] {
+        // this is not right
+        let mut translated = [0.0; 3];
+        for i in 0..3 {
+            translated[i] = self.rotation_matrix[i][0] * self.origin[0]
+                + self.rotation_matrix[i][1] * self.origin[1]
+                + self.rotation_matrix[i][2] * self.origin[2]
+                + self.rotation_matrix[i][3];
+        }
+        translated
+    }
+
+    // pub fn get_orthoscopic_camera() {
+    //     // https://molstar.org/mol-view-spec-docs/camera-settings/#focus-node
+    //     // d = dref * (1/ 2sin(alpha/2))
+    //     // for persspective alpha = 60
+    //     unimplemented!()
+    // }
+
+    // pub fn get_perspective_camera(&self) -> [f64; 3] {
+    //     // https://molstar.org/mol-view-spec-docs/camera-settings/#focus-node
+    //     // d = dref * (1/ 2sin(alpha/2))
+    //     // for persspective alpha = 60
+    //     // padj = t + (pref -t)* (1/ 2sin(alpha/2))
+    //     let alpha = 60;
+    //     let p = self.position;
+    //     let o = self.origin;
+    //     // let alpha_rad = alpha.to_radians();
+    //     let dadj = o * (1.0 / (2.0 * (alpha / 2.0).sin()));
+    //     let padj = [
+    //         t[0] + (o[0] - p[0]) * (1.0 / (2.0 * (alpha / 2.0).sin())),
+    //         t[1] + (o[1] - p[1]) * (1.0 / (2.0 * (alpha / 2.0).sin())),
+    //         t[2] + (o[2] - p[2]) * (1.0 / (2.0 * (alpha / 2.0).sin())),
+    //     ];
+    //     padj
+    // }
 }
 impl<'de> Deserialize<'de> for SceneView {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
