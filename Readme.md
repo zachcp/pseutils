@@ -2,7 +2,7 @@
 
 Convert pymol `.pse` files to [mol-view-spec](https://github.com/molstar/mol-view-spec)/
 
-![](docs/pseutils.png){width="20%"}
+![](docs/pseutils.png)
 
 
 ## Testing
