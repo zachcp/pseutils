@@ -3,7 +3,9 @@ title: "pseutils"
 ---
 
 
-PSE utils: Conversion of python session files to Molviewspec.
+PSEutils: Conversion of python session files to Molviewspec.
+
+
 
 ## Convert PSE
 
