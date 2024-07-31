@@ -1,4 +1,4 @@
-use pseutils::pymolparsing::colors::{Color, COLOR_SET};
+use pseutils::pymolparsing::colors::Color;
 use pseutils::pymolparsing::parsing::{CustomValue, SettingsEnum};
 use pseutils::pymolparsing::representation::RepBitmask;
 use pseutils::PSEData;

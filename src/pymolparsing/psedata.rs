@@ -6,9 +6,7 @@
 //! other PSE data types which include the folloing:
 //!
 
-use crate::molviewspec::nodes::{
-    self as mvsnodes, CameraParams, ColorNamesT, FocusInlineParams, State, TransformParams,
-};
+use crate::molviewspec::nodes::{self as mvsnodes, ColorNamesT, State};
 use crate::pymolparsing::parsing::{
     PyObjectMolecule, PymolSessionObjectData, SceneView, SessionName, SessionSelectorList,
     Settings, SettingsEnum,

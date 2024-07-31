@@ -47,7 +47,7 @@
 //!  m_tmpids[m_iter.getAtm()] = m_id;
 use crate::molviewspec::nodes::{ComponentExpression, ComponentSelector};
 use crate::pymolparsing::colors::{Color, COLOR_SET};
-use crate::pymolparsing::representation::{RepBitmask, RepType};
+use crate::pymolparsing::representation::RepBitmask;
 
 use itertools::Itertools;
 use pdbtbx::{self, Residue, PDB};
