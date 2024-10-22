@@ -25,9 +25,11 @@
 pub mod molviewspec;
 pub mod pymolparsing;
 
+pub use self::pymolparsing::parsing::PyObjectMolecule;
 pub use self::pymolparsing::psedata::PSEData;
 
 /// Prelude module for commonly used items
 pub mod prelude {
+    pub use crate::pymolparsing::parsing::PyObjectMolecule;
     pub use crate::pymolparsing::psedata::PSEData;
 }
