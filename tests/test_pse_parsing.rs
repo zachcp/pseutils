@@ -1,5 +1,5 @@
 use pseutils::pymolparsing::colors::Color;
-use pseutils::pymolparsing::parsing::{CustomValue, SettingsEnum};
+use pseutils::pymolparsing::parsing::{CoordSet, CustomValue, SettingsEnum};
 use pseutils::pymolparsing::representation::RepBitmask;
 use pseutils::PSEData;
 const TEST_OUTPUT_DIR: &str = "./test_temporary";
@@ -37,6 +37,13 @@ fn test_pdb_00() {
 
     let mols = psedata.get_molecule_data();
     assert_eq!(mols.len(), 1);
+
+    // check coordinates. theres 1 mon and 1519 atoms
+    let coord_sets: Vec<&CoordSet> = mols.iter().flat_map(|mol| mol.coord_set.iter()).collect();
+    assert_eq!(coord_sets.len(), 1);
+
+    let coords_01 = coord_sets[0].get_coords_as_vec();
+    assert_eq!(coords_01.len(), 1519);
 
     let atom01 = mols[0].get_atom(0);
     assert!(atom01.x() == 50.87300109863281);

@@ -265,6 +265,16 @@ pub struct CoordSet {
     pub symmetry: Option<Vec<(((i32, i32, i32), (i32, i32, i32)), String)>>,
 }
 
+impl CoordSet {
+    /// coords are stored in a 1D vector of x,y,z,x,y,x,z,x,y,z
+    ///returns as a Vec<[x,y,z]>
+    pub fn get_coords_as_vec(&self) -> Vec<[f32; 3]> {
+        self.coord
+            .chunks(3)
+            .map(|chunk| [chunk[0], chunk[1], chunk[2]])
+            .collect()
+    }
+}
 /// Custom Value
 ///
 /// needed for the settings triplet.
@@ -422,6 +432,7 @@ impl PyObjectMolecule {
         );
         atom.unwrap()
     }
+
     /// Get unique chain names
     pub fn get_chains(&self) -> Vec<String> {
         self.atom
