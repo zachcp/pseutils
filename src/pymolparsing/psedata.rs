@@ -113,6 +113,7 @@ impl PSEData {
         // https://github.com/schrodinger/pymol-open-source/blob/master/layer1/Color.cpp#L415
         unimplemented!()
     }
+
     /// session is where all the action happens
     pub fn get_session_names(&self) -> Vec<String> {
         self.names
