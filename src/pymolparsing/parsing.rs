@@ -270,7 +270,7 @@ pub struct CoordSet {
 /// needed for the settings triplet.
 #[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
-enum CustomValue {
+pub enum CustomValue {
     Integer(i64),
     Float(f64),
     String(String),
@@ -404,7 +404,6 @@ impl PyObjectMolecule {
         let z_coord = atom_coords[base_coord + 2];
         // println!("{}", z_coord);
         // println!("{}, {}, {}", x_coord, y_coord, z_coord);
-
         let atom_info = &self.atom.iter().find(|atm| atm.id == atm_idx + 1).unwrap(); // note that the atom in the atom vector seem to be 1-indexed.
         let formal_charge = atom_info.formal_charge as isize;
         let serial_number = atom_info.id as usize;
@@ -440,6 +439,7 @@ impl PyObjectMolecule {
             .unique()
             .collect()
     }
+    /// Unit Cell Symetry.
     pub fn get_unit_cell_symmetry(&self) -> (pdbtbx::UnitCell, pdbtbx::Symmetry) {
         let symmetry = &self.symmetry.clone().expect("Expected a symmetry group.");
         let (([a, b, c], [alpha, beta, gamma]), sym_group) = symmetry;
@@ -483,7 +483,6 @@ impl PyObjectMolecule {
             let atom = &self.get_atom(atom.id - 1);
             conformer.add_atom(atom.clone());
         }
-
         residue.add_conformer(conformer);
         residue
     }
@@ -503,7 +502,8 @@ impl PyObjectMolecule {
 
         new_chain
     }
-    // Create a pdbtbx::PDB
+    /// Create a pdbtbx::PDB
+    /// Note: Only handles the first Model....
     pub fn to_pdb(&self) -> PDB {
         // Create a Model. Need to fix this later if theres multiple models
         let mut model = pdbtbx::Model::new(1);
@@ -530,7 +530,6 @@ impl PyObjectMolecule {
                 pdbtbx::Bond::Covalent,
             );
         }
-
         // Add Name/ Identifier
         let identifier = self.get_name().clone();
         pdb.identifier = Some(identifier);
