@@ -60,17 +60,17 @@ use std::path::Path;
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PSEData {
     pub version: i32,
-    main: Vec<i64>,
-    colors: Vec<i32>,
-    color_ext: Vec<i32>,
-    unique_settings: Vec<i32>,
-    selector_secrets: Vec<i32>,
-    editor: Vec<i32>,
+    pub main: Vec<i64>,
+    pub colors: Vec<i32>,
+    pub color_ext: Vec<i32>,
+    pub unique_settings: Vec<i32>,
+    pub selector_secrets: Vec<i32>,
+    pub editor: Vec<i32>,
     pub view: SceneView,
-    view_dict: HashMap<String, String>,
+    pub view_dict: HashMap<String, String>,
     #[serde(with = "serde_bytes")]
-    wizard: Vec<u8>,
-    moviescenes: Vec<Vec<i32>>,
+    pub wizard: Vec<u8>,
+    pub moviescenes: Vec<Vec<i32>>,
     // High level state settings: we need to prpogate these..
     pub settings: Vec<Settings>,
     pub movie: (
@@ -84,26 +84,25 @@ pub struct PSEData {
     ),
     // not needed?
     // session: HashMap<String, Value>,
-    cache: Vec<usize>,
+    pub cache: Vec<usize>,
     // name is the trickiest bit
     pub names: Vec<Option<SessionName>>,
 }
 
 impl PSEData {
+    /// Load pymole `.pse` binary file to struct.
     pub fn load(file_path: &str) -> Result<Self, Box<dyn std::error::Error>> {
         let mut file = File::open(file_path)?;
         let mut buffer = Vec::new();
         file.read_to_end(&mut buffer)?;
-
         let options = DeOptions::new()
             .replace_unresolved_globals()
             .decode_strings();
-
         let pse_data_vals: serde_pickle::Value = from_reader(&buffer[..], options).unwrap();
         let pse_data: PSEData = serde_pickle::from_value(pse_data_vals).unwrap();
         Ok(pse_data)
     }
-
+    /// Serialize to JSON
     pub fn to_json(&self, file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
         let json = serde_json::to_string_pretty(self)?;
         std::fs::write(file_path, json)?;
@@ -161,14 +160,14 @@ impl PSEData {
             ..Default::default()
         }
     }
-
+    /// Convert Pymol to pdbtbx::PDB
     pub fn create_pdb(&self) -> PDB {
         // todo: extend this to more than one molecuelo and/or to modify the global scene
         let moldata = &self.get_molecule_data();
         let first_mol = moldata[0];
         first_mol.to_pdb()
     }
-
+    /// Pymol --> PDBTBX --> PDB --> file
     pub fn save_pdbs(&self, file_path: &str) -> std::io::Result<()> {
         let path = std::path::Path::new(file_path);
         let pdb_folder = path.join("pdb");
@@ -189,7 +188,8 @@ impl PSEData {
         std::fs::write(path.join("pdb_contents.txt"), contents)?;
         Ok(())
     }
-
+    /// Convert to MSVJ Formay.
+    /// see also: [mol-view-spec](https://github.com/molstar/mol-view-spec)
     pub fn create_molviewspec(&self) -> State {
         // write state for loading the PDB files
         let mut state = State::new();
@@ -262,7 +262,7 @@ impl PSEData {
 
         state
     }
-
+    ///  Pymol --> MSVJ --? disk
     pub fn to_disk(&self, file_path: &str) -> std::io::Result<()> {
         let path = std::path::Path::new(file_path);
         let msvj_file = path.join("state.mvsj");
@@ -290,7 +290,8 @@ impl PSEData {
         let _ = self.to_disk(file_path);
         Ok(())
     }
-
+    /// To loadable MSVJ URL
+    /// See also [msvj URL encoding](https://molstar.org/mol-view-spec-docs/mvs-molstar-extension/)
     pub fn to_mvsj_url(&self) -> String {
         let state = self.create_molviewspec();
         state.to_url()
