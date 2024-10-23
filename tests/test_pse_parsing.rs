@@ -1,3 +1,4 @@
+use itertools::assert_equal;
 use pseutils::pymolparsing::colors::Color;
 use pseutils::pymolparsing::parsing::{CoordSet, CustomValue, SettingsEnum};
 use pseutils::pymolparsing::representation::RepBitmask;
@@ -44,6 +45,10 @@ fn test_pdb_00() {
 
     let coords_01 = coord_sets[0].get_coords_as_vec();
     assert_eq!(coords_01.len(), 1519);
+
+    let coords_01_atom_01 = coords_01;
+    assert_equal(coords_01_atom_01[0], [50.873, 32.978, 2.387]);
+    assert_equal(coords_01_atom_01[1518], [52.372, 15.397, -15.323]);
 
     let atom01 = mols[0].get_atom(0);
     assert!(atom01.x() == 50.87300109863281);
