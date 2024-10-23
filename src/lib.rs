@@ -1,3 +1,4 @@
+#![warn(missing_docs)]
 //! # PyMOL PSE Parser
 //!
 //! A Rust crate for working with PyMOL PSE (PyMOL Session) files.

@@ -48,7 +48,6 @@
 use crate::molviewspec::nodes::{ComponentExpression, ComponentSelector};
 use crate::pymolparsing::colors::{Color, COLOR_SET};
 use crate::pymolparsing::representation::RepBitmask;
-
 use itertools::Itertools;
 use pdbtbx::{self, Residue, PDB};
 use serde::{Deserialize, Deserializer, Serialize};
@@ -67,124 +66,123 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 /// - [AtomInfo.cpp](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp)
 /// - [AtomInforAsPyList](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp#L792)
 /// - [VDW Radius of Elements](https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp#L1752)
-///
-/// ## Fields
-///
-/// * `resv` - Residue sequence number
-/// * `chain` - Chain identifier
-/// * `alt` - Alternate location indicator
-/// * `resi` - Residue identifier
-/// * `segi` - Segment identifier
-/// * `resn` - Residue name
-/// * `name` - Atom name
-/// * `elem` - Element symbol
-/// * `text_type` - Text type
-/// * `label` - Label text
-/// * `ss_type` - Secondary structure type
-/// * `is_hydrogen` - Flag indicating if the atom is hydrogen
-/// * `custom_type` - Custom type identifier
-/// * `priority` - Priority value
-/// * `b` - B-factor (temperature factor)
-/// * `q` - Occupancy
-/// * `vdw` - Van der Waals radius
-/// * `partial_charge` - Partial charge
-/// * `formal_charge` - Formal charge
-/// * `hetatm` - Flag indicating if the atom is a heteroatom
-/// * `vis_rep` - Visualization representation
-/// * `color` - Color index
-/// * `id` - Atom ID
-/// * `cartoon` - Cartoon representation type
-/// * `flags` - Various flags
-/// * `is_bonded` - Flag indicating if the atom is bonded
-/// * `chem_flag` - Chemical flag
-/// * `geom` - Geometry type
-/// * `valence` - Valence
-/// * `is_masked` - Flag indicating if the atom is masked
-/// * `is_protected` - Flag indicating if the atom is protected
-/// * `protons` - Number of protons
-/// * `unique_id` - Unique identifier
-/// * `stereo` - Stereochemistry indicator
-/// * `discrete_state` - Discrete state
-/// * `elec_radius` - Electronic radius
-/// * `rank` - Rank
-/// * `hb_donor` - Hydrogen bond donor flag
-/// * `hb_acceptor` - Hydrogen bond acceptor flag
-/// * `atomic_color` - Atomic color
-/// * `has_setting` - Flag indicating if the atom has custom settings
-/// * `anisou_1` to `anisou_6` - Anisotropic temperature factors
-/// * `custom` - Custom data string
-///
+///w
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AtomInfo {
+    /// Residue sequence number
     pub resv: i32,
+    /// Chain identifier
     pub chain: String,
+    /// Alternate location indicator
     pub alt: String,
+    /// Residue identifier
     pub resi: String,
+    /// Segment identifier
     pub segi: String,
+    /// Residue name
     pub resn: String,
+    /// Atom name
     pub name: String,
+    /// Element symbol
     pub elem: String,
+    /// Text type
     pub text_type: String,
+    /// Label text
     pub label: String,
+    /// Secondary structure type
     // todo: make enum
     pub ss_type: String,
+    /// Flag indicating if the atom is hydrogen
     #[serde(deserialize_with = "int_to_bool")]
     pub is_hydrogen: bool,
+    /// Custom type identifier
     pub custom_type: i32,
+    /// Priority value
     pub priority: i32,
+    /// B-factor (temperature factor)
     pub b: f64,
+    /// Occupancy
     pub q: f64,
+    /// Van der Waals radius
     pub vdw: f64,
+    /// Partial charge
     pub partial_charge: f64,
+    /// Formal charge
     pub formal_charge: i32,
+    /// Flag indicating if the atom is a heteroatom
     #[serde(deserialize_with = "int_to_bool")]
     pub is_hetatm: bool,
+    /// Visualization representation
     pub vis_rep: RepBitmask,
-    // color is an index into the color vec
+    /// Color index (color is an index into the color vec)
     pub color: i32,
+    /// Atom ID
     pub id: i32,
+    /// Cartoon representation type (0 = default which is auto (use ssType))
     // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.h#L292C33-L292C77
-    pub cartoon: i32, //  /* 0 = default which is auto (use ssType) */
+    pub cartoon: i32,
+    /// Various flags
     pub flags: i64,
+    /// Flag indicating if the atom is bonded
     #[serde(deserialize_with = "int_to_bool")]
     pub is_bonded: bool,
-    // not sure what this is
+    /// Chemical flag (not sure what this is)
     pub chem_flag: i32,
+    /// Geometry type (cAtomInfo*)
     // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.cpp#L44
-    pub geom: i32, // cAtomInfo*
+    pub geom: i32,
+    /// Valence (number of explicit and implicit neighbors, independent of bond order)
     // "valence" should be renamed to "degree" (or "total_degree"). It's the
     // number of explicit and implicit neighbors, independent of bond order.
     // Should be equivalent to RDKit::Atom::getTotalDegree() and
     // OBAtom::GetTotalDegree().
-    pub valence: i32, //
+    pub valence: i32,
+    /// Flag indicating if the atom is masked
     #[serde(deserialize_with = "int_to_bool")]
     pub is_masked: bool,
+    /// Flag indicating if the atom is protected
     #[serde(deserialize_with = "int_to_bool")]
     pub is_protected: bool,
-    pub protons: i32, // atomic number
+    /// Number of protons (atomic number)
+    pub protons: i32,
+    /// Unique identifier
     pub unique_id: i64,
+    /// Stereochemistry indicator
     pub stereo: i8,
+    /// Discrete state
     pub discrete_state: i32,
+    /// Electronic radius
     pub elec_radius: f64,
+    /// Rank
     pub rank: i32,
+    /// Hydrogen bond donor flag
     #[serde(deserialize_with = "int_to_bool")]
     pub hb_donor: bool,
+    /// Hydrogen bond acceptor flag
     #[serde(deserialize_with = "int_to_bool")]
     pub hb_acceptor: bool,
-    // color and secondary structure
+    /// Atomic color
     pub atomic_color: i32,
+    /// Flag indicating if the atom has custom settings
     #[serde(deserialize_with = "int_to_bool")]
     pub has_setting: bool,
+    /// Anisotropic temperature factor 1
     pub anisou_1: f32,
+    /// Anisotropic temperature factor 2
     pub anisou_2: f32,
+    /// Anisotropic temperature factor 3
     pub anisou_3: f32,
+    /// Anisotropic temperature factor 4
     pub anisou_4: f32,
+    /// Anisotropic temperature factor 5
     pub anisou_5: f32,
+    /// Anisotropic temperature factor 6
     pub anisou_6: f32,
+    /// Custom data string
     pub custom: String,
 }
-
 impl AtomInfo {
+    /// is the atom a metal?
     // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer2/AtomInfo.h#L319
     pub fn is_metal() {
         unimplemented!()
@@ -198,6 +196,7 @@ impl AtomInfo {
         // for purpose of residue-based operations
         unimplemented!()
     }
+    /// Conversion to PDBTBX
     pub fn to_pdbtbx_atom(&self) -> pdbtbx::Atom {
         let formal_charge = self.formal_charge as isize;
         let atom = pdbtbx::Atom::new(
@@ -220,24 +219,22 @@ impl AtomInfo {
 ///
 /// Represents a chemical bond between two atoms in a molecule.
 ///
-/// # Fields
-///
-/// * `index_1` - Index of the first atom in the bond
-/// * `index_2` - Index of the second atom in the bond
-/// * `order` - Bond order (e.g., single, double, triple)
-/// * `id` - Unique identifier for the bond
-/// * `stereo` - Stereochemistry information for the bond
-/// * `unique_id` - Another unique identifier for the bond
-/// * `has_setting` - Flag indicating if the bond has custom settings
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Bond {
+    /// Index of the first atom in the bond
     pub index_1: i32,
+    /// Index of the second atom in the bond
     pub index_2: i32,
+    /// Bond order (e.g., single, double, triple)
     // todo: make enum
     pub order: i32,
+    /// Unique identifier for the bond
     pub id: i32,
+    /// Stereochemistry information for the bond
     pub stereo: i32,
+    /// Another unique identifier for the bond
     pub unique_id: i8,
+    /// Flag indicating if the bond has custom settings
     pub has_setting: i32,
     // todo handle arity 7 or arity 8 with specific symmetry info
     // Symmetry operation of the second atom.
@@ -271,10 +268,9 @@ pub struct CoordSet {
 /// Custom Value
 ///
 /// needed for the settings triplet.
-///
 #[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
-pub enum CustomValue {
+enum CustomValue {
     Integer(i64),
     Float(f64),
     String(String),
@@ -284,6 +280,7 @@ pub enum CustomValue {
 // https://github.com/schrodinger/pymol-open-source/blob/03d7a7fcf0bd95cd93d710a1268dbace2ed77765/layer1/PyMOLObject.h#L39
 #[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
 #[repr(i32)]
+/// Pymol Object Types
 pub enum ObjectType {
     CObjectMolecule = 1,
     CObjectMap = 2,
@@ -348,43 +345,39 @@ impl PyObject {
 /// - [AtomInfo](https://github.com/schrodinger/pymol-open-source/blob/master/layer2/ObjectMolecule2.cpp#L3248)
 /// - [AtomInfo2](https://github.com/schrodinger/pymol-open-source/blob/master/layer2/AtomInfo.cpp#L792)
 ///
-/// ## Fields
-///
-/// * `object` - The base PyObject information
-/// * `n_cset` - Number of coordinate sets
-/// * `n_bond` - Number of bonds
-/// * `n_atom` - Number of atoms
-/// * `coord_set` - Vector of coordinate sets
-/// * `cs_tmpl` - Optional template coordinate set
-/// * `bond` - Vector of bonds
-/// * `atom` - Vector of atom information
-/// * `discrete_flag` - Flag for discrete representation
-/// * `n_discrete` - Number of discrete objects
-/// * `symmetry` - Optional symmetry information
-/// * `cur_cset` - Current coordinate set index
-/// * `bond_counter` - Counter for bonds
-/// * `atom_counter` - Counter for atoms
-/// * `discrete_atm_to_idx` - Optional mapping of discrete atoms to indices
-/// * `dcs` - Optional discrete coordinate set information
-///
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PyObjectMolecule {
+    /// The base PyObject information
     pub object: PyObject,
+    /// Number of coordinate sets
     pub n_cset: i32,
+    /// Number of bonds
     pub n_bond: i32,
+    /// Number of atoms
     pub n_atom: i32,
-    /// Vector of Coordinates
+    /// Vector of coordinate sets
     pub coord_set: Vec<CoordSet>,
+    /// Optional template coordinate set
     pub cs_tmpl: Option<Vec<CoordSet>>,
+    /// Vector of bonds
     pub bond: Vec<Bond>,
+    /// Vector of atom information
     pub atom: Vec<AtomInfo>,
+    /// Flag for discrete representation
     pub discrete_flag: i32,
+    /// Number of discrete objects
     pub n_discrete: i32,
-    pub symmetry: Option<(([f32; 3], [f32; 3]), String)>, // crystal space group and name
+    /// Optional symmetry information (crystal space group and name)
+    pub symmetry: Option<(([f32; 3], [f32; 3]), String)>,
+    /// Current coordinate set index
     pub cur_cset: i32,
+    /// Counter for bonds
     pub bond_counter: i32,
+    /// Counter for atoms
     pub atom_counter: i32,
+    /// Optional mapping of discrete atoms to indices
     pub discrete_atm_to_idx: Option<Vec<i32>>,
+    /// Optional discrete coordinate set information
     pub dcs: Option<Vec<i32>>,
 }
 impl PyObjectMolecule {
