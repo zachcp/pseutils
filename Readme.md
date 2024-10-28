@@ -1,3 +1,5 @@
+**this is now archived. development can be found in [ferritin](https://github.com/zachcp/ferritin)**
+
 # pseutils
 
 Convert pymol `.pse` files to [mol-view-spec](https://github.com/molstar/mol-view-spec)/
